@@ -1,0 +1,22 @@
+members([bottom,alpha,beta,top]).
+member(top).
+member(bottom).
+member(alpha).
+member(beta).
+
+top(top).
+bot(bottom).
+
+leq(bottom,X).
+leq(X, X).
+leq(X,top).
+
+and_godel(X,Y,Z) :- pri_inf(X,Y,Z).
+pri_inf(bottom,X,bottom):-!.
+pri_inf(alpha,X,alpha):- leq(alpha,X),!.
+pri_inf(beta,X,beta):- leq(beta,X),!.
+pri_inf(top,X,X):-!.
+pri_inf(X,Y,bottom).
+
+and_gines(bottom,X,bottom).
+and_gines(_,_,top).

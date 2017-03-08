@@ -1,0 +1,37 @@
+members([0,1,2,3,4,5,6,7,8,9]).
+
+member(0).
+member(1).
+member(2).
+member(3).
+member(4).
+member(5).
+member(6).
+member(7).
+member(8).
+member(9).
+
+bot(0).
+top(9).
+
+leq(X,Y):-X =< Y.
+
+and_prod(X,Y,Z) :- pri_prod(X,Y,Z).
+and_godel(X,Y,Z) :- pri_min(X,Y,Z).
+and_luka(X,Y,Z) :- pri_add(X,Y,U1), pri_sub(U1,1,U2), pri_max(U2,0,Z).
+or_prod(X,Y,Z) :- pri_prod(X,Y,U1), pri_add(X,Y,U2), pri_sub(U2,U1,Z).
+or_godel(X,Y,Z) :- pri_max(X,Y,Z).
+or_luka(X,Y,Z) :- pri_add(X,Y,U1), pri_min(U1,1,Z).
+agr_aver(X,Y,Z) :- pri_add(X,Y,U1), pri_div(U1,2,Z).
+pri_prod(X,Y,Z) :- A is X * Y, aprox(A,Z).
+pri_div(X,Y,Z) :- A is X / Y, aprox(A,Z).
+pri_sub(X,Y,Z) :- A is X-Y, aprox(A,Z).
+pri_add(X,Y,Z) :- A is X+Y, aprox(A,Z).
+pri_min(X,Y,Z) :- (X=<Y,Z=X;X>Y,Z=Y).
+pri_max(X,Y,Z) :- (X=<Y,Z=Y;X>Y,Z=X).
+% max(x,y)
+aprox(X,Y) :- members([A|B]), aprox2(A,B,Y,X).
+aprox2(A,[],A,_).
+aprox2(A,[B|C],R,D):- Aux is A-D, abs(Aux, Abs), Aux2 is B-D, abs(Aux2,Abs2), (Abs < Abs2, !, aprox2(A,C,R,D); aprox2(B,C,R,D)).
+abs(X,X):- X > 0,!.
+abs(X,Y):- Y is 0-X.

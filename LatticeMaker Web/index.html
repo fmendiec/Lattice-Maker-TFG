@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)http://dectau.uclm.es/unfold/lattices -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>FLOPER: A Fuzzy LOgic Programming Environment for Research</title>
+		<!--<base href="http://dectau.uclm.es/unfold/" target="_self">--><base href="." target="_self">
+		<meta name="description" content="A Fuzzy LOgic Programming Environment for Research">
+		<meta name="author" content="José Antonio Riaza Valverde">
+		
+		<script type="text/javascript" src="./content/jQuery.js"></script>
+		<script type="text/javascript" src="./content/main.js"></script><style type="text/css">
+:root #content > #right > .dose > .dosesingle,
+:root #content > #center > .dose > .dosesingle,
+:root #header + #content > #left > #rlblock_left
+{ display: none !important; }</style>
+		<script type="text/javascript" src="./content/highlight.js"></script>
+		<script type="text/javascript" src="./content/tree.js"></script>
+		<script type="text/javascript" src="./content/lattices.js"></script>
+        <script type = "text/javascript" src = "./buttons.js"> </script>
+		<script>hljs.initHighlightingOnLoad();</script>
+		<link href="http://dectau.uclm.es/unfold/content/img/favicon.ico?d=30082016" type="image/x-icon" rel="icon">
+		<link href="./content/css" rel="stylesheet" type="text/css">
+		<link href="./content/css2" rel="stylesheet" type="text/css">
+		<link rel="StyleSheet" href="./content/main.css" type="text/css" media="ALL">
+		<link rel="StyleSheet" href="./content/highlight.css" type="text/css" media="ALL">
+	</head>
+	<body>
+		<!-- NAV -->
+		<div id="nav">
+			<div class="match-width">
+				 
+				<a href="http://dectau.uclm.es/unfold/" id="nav-logo"></a>
+								<form id="search" action="http://dectau.uclm.es/unfold/search" method="get">
+					<input type="text" name="search" placeholder="Search..." title="Search">
+				</form>
+				<ul>
+					<li><a href="http://dectau.uclm.es/unfold/try" title="Try FLOPER online">Try it online</a></li>
+					<li><a href="http://dectau.uclm.es/unfold/downloads" title="Downloads">Downloads</a></li>
+					<li><a href="http://dectau.uclm.es/unfold/documentation" title="Documentation">Documentation</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="result" style="left: 207.438px;">
+			<div></div>
+		</div>
+
+		<!-- HEADER -->
+		<div class="match-width triangles triangles-empty"></div>
+		<!-- CONTENT -->
+		<div id="content">		<!-- LATTICES -->
+		<div id="lattices" class="container">
+			<div class="match-width">
+				<h1>Lattice Maker</h1>
+				<div class="twocols">
+					<div><div>
+						<h2>Code</h2>
+					</div></div>
+					<div><div>
+						<h2>Graph</h2>
+					</div></div>
+				</div>
+				<div class="twocols">
+					<div><div>
+						<textarea id="textarea-lattice" name="lat" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 500px;">% Elements
+member(alpha).
+member(beta).
+member(bottom).
+member(delta).
+member(epsilon).
+member(gamma).
+member(lambda).
+member(tau).
+member(top).
+members([bottom,alpha,beta,top,delta,gamma,epsilon,tau,lambda]).
+
+% Supremum and infimum
+top(top).
+bot(bottom).
+
+% Arcs
+arc(alpha, tau).
+arc(beta, delta).
+arc(bottom, alpha).
+arc(bottom, beta).
+arc(bottom, gamma).
+arc(delta, top).
+arc(lambda, top).
+arc(tau, top).
+
+% Ordering relation
+leq(X, X).
+leq(X, Y) :- arc(X, Z), leq(Z, Y).
+
+% Binary operations
+and_godel(X,Y,Z) :- pri_inf(X,Y,Z).
+
+% Auxiliar operations
+pri_inf(bottom,X,bottom) :- !.
+pri_inf(alpha,X,alpha) :- leq(alpha,X), !.
+pri_inf(beta,X,beta) :- leq(beta,X), !.
+pri_inf(top,X,X) :- !.
+pri_inf(X,Y,bottom).</textarea>
+					</div></div>
+					<div><div>
+						<canvas id="canvas-lattice" width="587" height="500" style="width: 587px; height: 500px; cursor: default;"></canvas>
+					</div></div>
+				</div>
+				<div id="lattices-control">
+					<input type="button" class="button-lattice" value="Add member" onclick=addMember("textarea-lattice")>
+					<input type="button" class="button-lattice" value="Remove member" onclick=removeMember("canvas-lattice","textarea-lattice")>
+					<input type="button" class="button-lattice" value="Add connection" onclick=createArc("canvas-lattice","textarea-lattice")>
+					<input type="button" class="button-lattice" value="Remove connection">
+				</div>
+				<h2>Properties</h2>
+				<h2>Export lattice</h2>
+			</div>
+		</div>
+		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" );</script>
+</div>
+
+		<!-- FOOTER -->
+		<div id="footer">
+			<div class="match-width">University of Castilla-La Mancha, <a href="http://dectau.uclm.es/" target="_blank">DEC-Tau</a></div>
+		</div>
+	
+
+</body></html>
