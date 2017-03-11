@@ -66,7 +66,7 @@ var removeMember = function(idCanvas,idTextArea)
     $("#"+idCanvas).css("cursor", "crosshair");
 
     // When user click on canvas
-    $("#"+idCanvas).one("click",function(){    
+    $("#"+idCanvas).one("click",function(event){    
         
         // Get selected member
         selected = detectSelectedMember(canvas,event);    
@@ -91,11 +91,11 @@ var removeMember = function(idCanvas,idTextArea)
         
         // Delete member predicates
         var regex_member = new RegExp("member\\s*\\(\\s*"+member+"\\s*\\)\\s*\\.","g");
-        code = code.replace(regex_member,"\b");
+        code = code.replace(regex_member,'\r');
         
         // Delete arcs, top and bottom predicates
         var regex_arc = new RegExp("arc\\s*\\(\\s*("+member+",.+)|(.+"+member+")\\s*\\)\\s*\\.","g");
-        code = code.replace(regex_arc,"\b");
+        code = code.replace(regex_arc,'\r');
         
         // Delete from members list
         // Get member list
@@ -146,13 +146,13 @@ var createArc = function(idCanvas,idTextArea)
     var select1 = null, select2 = null;
 
     // When user click on canvas
-    $("#"+idCanvas).one("click",function(){    
+    $("#"+idCanvas).one("click",function(event){    
   
         // Get the first selected member
         select1 = detectSelectedMember(canvas,event); 
         
             // When user click on canvas
-            $("#"+idCanvas).one("click",function(){    
+            $("#"+idCanvas).one("click",function(event){    
 
                 // Get the second selected member
                 select2 = detectSelectedMember(canvas,event);
