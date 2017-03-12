@@ -1,8 +1,8 @@
 frontier_top(Aggr) :-
-    test_top(Aggr).
+    writeln('Frontier Top\n'),lat:top(T),test_refl(Aggr,T),write('Success').
     
 frontier_bot(Aggr) :-
-    test_bot(Aggr).
+    writeln('Frontier Bot\n'),lat:bot(B),test_refl(Aggr,B),write('Success').
     
 increasing(Aggr) :-
     writeln('Increasing\n'),parameter_tests(Aggr,test_in1,test_in2).
@@ -28,20 +28,6 @@ adjointness(Aggr) :-
 reflexivity(Aggr) :-
     writeln('Reflexivity\n'),test_refl_all(Aggr).
     
-% TESTS
-    
-% FRONTIER
-
-%Frontier Top Test: @(T,T) == T
-test_top(Aggr) :- 
-                    lat:top(T),call(lat:Aggr,T,T,T),write('Frontier Top: Success') 
-                    ; write('Frontier Top: Failure').
-
-%Frontier Bottom Test: @(B,B) == B
-test_bot(Aggr) :- 
-                    lat:bot(B),call(lat:Aggr,B,B,B),write('Frontier Bot: Success') 
-                    ; write('Frontier Bot: Failure').
-
 
 % TEST PREDICATES
 
