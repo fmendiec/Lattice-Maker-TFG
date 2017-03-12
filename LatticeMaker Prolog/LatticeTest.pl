@@ -20,10 +20,13 @@ switchness(Aggr1,Aggr2) :-
     writeln('Switchness\n'),test_sw(Aggr1,Aggr2).
     
 monotone(Aggr) :-
-	writeln('Monotome').
+	writeln('Monotome\n').
     
 adjointness(Aggr) :-
-	writeln('Adjointness').
+	writeln('Adjointness\n').
+
+reflexivity(Aggr) :-
+    writeln('Reflexivity\n'),test_refl_all(Aggr).
     
 % TESTS
     
@@ -133,3 +136,10 @@ test_sw(Aggr1,Aggr2) :-
 
 calc_sw(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 not_equal(Aggr1,Aggr2,X,Y,Z,V1,V2) :- writef('%w(%w(%w,%w),%w) \\= %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+
+
+% REFLEXIVITY
+
+test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)),writeln('Success').
+
+test_refl(Aggr,X) :- call(lat:Aggr,X,X,V),X==V ; writef('%w(%w,%w) not equal to %w\nFailure',[Aggr,X,X,X]),fail.
