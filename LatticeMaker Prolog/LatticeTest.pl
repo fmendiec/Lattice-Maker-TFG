@@ -27,6 +27,9 @@ adjointness(Aggr) :-
 
 reflexivity(Aggr) :-
     writeln('Reflexivity\n'),test_refl_all(Aggr).
+
+commutativity(Aggr) :-
+    writeln('Commutativity\n'),test_com(Aggr).
     
 
 % TEST PREDICATES
@@ -37,8 +40,6 @@ extract([_|T],X):- extract(T,X).
 
 % Get all the pairs (X,Y) where X < Y and X != Y
 getCombinations(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z),lat:leq(X,Y),X\=Y),L).
-
-getAllPairs(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L).
 
 % Do two parameter tests (the first and the second)
 parameter_tests(Aggr,Test1,Test2):- 
@@ -116,12 +117,15 @@ test_nin2(X,Y,Z,Aggr) :-
 % $1($2(X,Y),Z) == $2(X,$1(Y,Z))
 
 test_sw(Aggr1,Aggr2) :- 
-                    getAllPairs(L),forall(member((X,Y,Z),L),(calc_sw(Aggr1,Aggr2,X,Y,Z,V1),calc_sw(Aggr2,Aggr1,Y,Z,X,V2),V1==V2
-                    ;   not_equal(Aggr1,Aggr2,X,Y,Z,V1,V2)))
-                    ,writeln('Success').
+                    findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),
+                    forall(member((X,Y,Z),L),
+                    (calc_sw(Aggr1,Aggr2,X,Y,Z,V1),calc_sw(Aggr2,Aggr1,Y,Z,X,V2),V1==V2
+                    ;   not_equal_sw(Aggr1,Aggr2,X,Y,Z))
+                    ),
+                    writeln('Success').
 
 calc_sw(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
-not_equal(Aggr1,Aggr2,X,Y,Z,V1,V2) :- writef('%w(%w(%w,%w),%w) \\= %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+not_equal_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
 % REFLEXIVITY
@@ -129,3 +133,15 @@ not_equal(Aggr1,Aggr2,X,Y,Z,V1,V2) :- writef('%w(%w(%w,%w),%w) \\= %w(%w,%w(%w,%
 test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)),writeln('Success').
 
 test_refl(Aggr,X) :- call(lat:Aggr,X,X,V),X==V ; writef('%w(%w,%w) not equal to %w\nFailure',[Aggr,X,X,X]),fail.
+
+
+% COMMUTATIVITY
+
+test_com(Aggr) :- 
+                  findall((X,Y),(lat:members(L),extract(L,X),extract(L,Y)),L),
+                  forall(member((X,Y),L),(call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,X,V2),V1==V2
+                  ;  not_equal_com(Aggr,X,Y))
+                  ),
+                  writeln('Success').
+                  
+not_equal_com(Aggr,X,Y) :- writeln('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
