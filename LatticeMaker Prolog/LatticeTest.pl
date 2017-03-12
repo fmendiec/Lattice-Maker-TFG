@@ -17,7 +17,7 @@ non_decreasing(Aggr) :-
 	writeln('Non decreassing\n'),parameter_tests(Aggr,test_nde1,test_nde2).
     
 switchness(Aggr1,Aggr2) :-
-    writeln('Switchness\n'),writef('%w, %w',[Aggr1,Aggr2]).
+    writeln('Switchness\n'),test_sw(Aggr1,Aggr2).
     
 monotone(Aggr) :-
 	writeln('Monotome').
@@ -48,6 +48,8 @@ extract([_|T],X):- extract(T,X).
 
 % Get all the pairs (X,Y) where X < Y and X != Y
 getCombinations(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z),lat:leq(X,Y),X\=Y),L).
+
+getAllPairs(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L).
 
 % Do two parameter tests (the first and the second)
 parameter_tests(Aggr,Test1,Test2):- 
@@ -119,3 +121,15 @@ test_nin1(X,Y,Z,Aggr) :-
 test_nin2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1)) 
                         ; (writef('Second parameter: Failure\nExample: %w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        
+                        
+% SWITCHNESS
+% $1($2(X,Y),Z) == $2(X,$1(Y,Z))
+
+test_sw(Aggr1,Aggr2) :- 
+                    getAllPairs(L),forall(member((X,Y,Z),L),(calc_sw(Aggr1,Aggr2,X,Y,Z,V1),calc_sw(Aggr2,Aggr1,Y,Z,X,V2),V1==V2
+                    ;   not_equal(Aggr1,Aggr2,X,Y,Z,V1,V2)))
+                    ,writeln('Success').
+
+calc_sw(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
+not_equal(Aggr1,Aggr2,X,Y,Z,V1,V2) :- writef('%w(%w(%w,%w),%w) \\= %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
