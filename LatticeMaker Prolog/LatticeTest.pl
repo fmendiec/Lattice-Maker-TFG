@@ -16,6 +16,9 @@ decreasing(Aggr) :-
 non_decreasing(Aggr) :-
 	writeln('Non decreassing\n'),parameter_tests(Aggr,test_nde1,test_nde2).
     
+switchness(Aggr1,Aggr2) :-
+    writeln('Switchness\n'),writef('%w, %w',[Aggr1,Aggr2]).
+    
 monotone(Aggr) :-
 	writeln('Monotome').
     
