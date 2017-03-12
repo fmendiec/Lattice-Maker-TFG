@@ -1155,7 +1155,10 @@ test_selected_aggregator(F) :->
 		get(M, selection, S),  
 		S \= empty, 
         call(S,Name)
-	;   call(Prop,Name)
+	;   (   Prop == switchness
+        -> get_aggregator(F,D,second,Name2,_),call(Prop,Name,Name2)
+        ; call(Prop,Name)
+        )
 	),
 	close(Fd),
 	set_output(Old),
