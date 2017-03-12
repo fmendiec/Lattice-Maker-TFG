@@ -291,11 +291,12 @@ fill_operators_dialog(D) :-
     % Aggregator Control
 	send(D, append, new(B, menu(aggregators, cycle, message(D, fill_terms)))),
 	send_list(B, append, [empty]),
-	send(B, alignment, center),
+	send(B, alignment, left),
     % Second Aggregator Control
-	send(D, append, new(S, menu(second, cycle, message(D, fill_terms)))),
+	send(D, append, new(S, menu(second, cycle, message(D, fill_terms))),right),
 	send_list(S, append, [empty]),
-	send(S, alignment, right),
+	send(S, alignment, center),
+    send(S, show_label, @off),
 	send(S, active, @off),
 
 	send(D, append, new(W1, dialog_group(group1, group))),
