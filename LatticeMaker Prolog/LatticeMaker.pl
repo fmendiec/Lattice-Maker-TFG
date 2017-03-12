@@ -288,9 +288,15 @@ fill_edit_toolbar(TB) :-
 
 fill_operators_dialog(D) :-
 	add_label(D, aggrhelp, 'Select an Aggregator to EVAL or TEST', normal, blue, 12),
+    % Aggregator Control
 	send(D, append, new(B, menu(aggregators, cycle, message(D, fill_terms)))),
 	send_list(B, append, [empty]),
 	send(B, alignment, center),
+    % Second Aggregator Control
+	send(D, append, new(S, menu(second, cycle, message(D, fill_terms)))),
+	send_list(S, append, [empty]),
+	send(S, alignment, right),
+	send(S, active, @off),
 
 	send(D, append, new(W1, dialog_group(group1, group))),
 	send(W1, alignment, center),
@@ -306,13 +312,13 @@ fill_operators_dialog(D) :-
 	send(W3, append, new(E, menu(evaluation, marked, message(D, options, @arg1)))),
 	send(E, show_label, @off),
 	send_list(E, append, [frontier_top, frontier_bot, increasing, non_increasing]),
-	send_list(E, append, [decreasing, non_decreasing, monotone, adjointness, more]),
+	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, more]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
 
 	send(W3, gap, size(1, 1)),
 	send(W3, append, new(More, menu(more_options, cycle))),
-	send_list(More, append, [empty]),
+    send_list(More,append,[empty,monotone,reflexivity,commutativity]),
 	send(More, alignment, right),
 	send(More, active, @off),
 
@@ -344,12 +350,19 @@ fill_operators_dialog(D) :-
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
 	get_container_optgroup(D, C),
+    % Unlock More Options combobox
 	get(C, member, more_options, Ctrl),
 	(       Opt == more
 	->      send(Ctrl, active, @on)
 	;       send(Ctrl, active, @off)
-	).
-
+	),
+    % Unlock the Second Aggregator Combobox
+	get(D, member, second, SC),
+    (       Opt == switchness
+    ->      send(SC, active, @on)
+    ;       send(SC, active, @off)
+    ).
+    
 fill_terms(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_combo(D, C),
@@ -933,10 +946,20 @@ node(F, Name, Layer, Color, NNodes, Indx, Node:lattice_node) :<-
 
 fill_from_lattice(F) :-
 	get(F, member(dialog_eval), Oper),
-	get(Oper, member, aggregators, Aggr),
-	send(Aggr, clear),
+	
+    create_predicates(Oper,aggregators),
+    create_predicates(Oper,second),
+	
+	lat_graph:members(L),
+	maplist(atom_string, L, L1),
+	get_container_combo(Oper, Container),
+	fill_dragmenu(Container, 1, 6, L1).
 
-	% creates a list of prolog_predicate
+% Fill the Aggregator Combobox given
+create_predicates(Oper,Combo_name) :- 
+    get(Oper, member, Combo_name, Aggr),
+	send(Aggr, clear),
+    % creates a list of prolog_predicate
 	findall(NewPred, operator(_, NewPred), ListPP),
 	(	ListPP == []
 	->  send_list(Aggr, append, [empty])
@@ -944,12 +967,8 @@ fill_from_lattice(F) :-
 		maplist(fill_combo_aggr(Aggr), ListPP),
 		send(Aggr, sort),
 		send(Aggr, selection, noselection)
-	),
-	lat_graph:members(L),
-	maplist(atom_string, L, L1),
-	get_container_combo(Oper, Container),
-	fill_dragmenu(Container, 1, 6, L1).
-
+	).
+    
 get_name_for_file(F, Extension, Path) :-	
 		atomic_concat('.', Extension, Ext),
     (	get_filename(F, FileName)
@@ -1072,6 +1091,19 @@ append_in_view(V, Aggr) :-
 	Aggr == agr_aver,
 	send(V, append, 'agr_aver(X,Y,Z) :- pri_add(X,Y,U1), pri_div(U1,2,Z).\n').
 
+% Get the Aggregator selected in the combobox
+get_aggregator(F,D,Combo_name,Name,NumA) :-
+    get(D, member, Combo_name, Aggr),
+    get(Aggr, selection, A),
+    (   A == noselection
+    ->  send(F, report, error, 'Please, select an aggregator.')
+    ;   name(A, AA),
+        change_item(Pred, AA),
+        name(NA, Pred),
+        atomic_list_concat([Name, Arity], '/', NA),
+        atom_number(Arity, NumA)
+    ).
+
 eval_selected_aggregator(F) :->
 	get(F, member(dialog_eval), D),
 	get(D, member, view, V),
@@ -1080,22 +1112,13 @@ eval_selected_aggregator(F) :->
 	pce_open(V, write, Fd),
 	set_output(Fd),
 
-	get(D, member, aggregators, Aggr),
-	get(Aggr, selection, A),
-	(   A == noselection
-	->  send(F, report, error, 'Please, select an aggregator.')
-	;   name(A, AA),
-		change_item(Pred, AA),
-		name(NA, Pred),
-		atomic_list_concat([Name, Arity], '/', NA),
-		atom_number(Arity, NumA),
+    get_aggregator(F,D,aggregators,Name,NumA),
 		append_param(D, NumA, [], LParams),
 		(	call_aggregator(Name, LParams, L)
 		->  maplist(show_result(LParams), L)
 		;   write(false)
 		),
-		send(F, report, status, '%s aggregator evaluated.', Name)
-	),
+		send(F, report, status, '%s aggregator evaluated.', Name),
 	close(Fd),
 	set_output(Old),
     send(V, editable, @off).
@@ -1125,22 +1148,13 @@ test_selected_aggregator(F) :->
     
 	set_output(Fd),
     
-    get(D, member, aggregators, Aggr),
-    get(Aggr, selection, A),
-    (   A == noselection
-    ->  send(F, report, error, 'Please, select an aggregator.')
-    ;   name(A, AA),
-        change_item(Pred, AA),
-        name(NA, Pred),
-        atomic_list_concat([Name, Arity], '/', NA),
-        atom_number(Arity, _)
-    ),
+    get_aggregator(F,D,aggregators,Name,_),
     
 	(   Prop == more
 	->  get(COpt, member, more_options, M),
-		get(M, selection, S),        
-		S \= empty,
-		S
+		get(M, selection, S),  
+		S \= empty, 
+        call(S,Name)
 	;   call(Prop,Name)
 	),
 	close(Fd),
