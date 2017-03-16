@@ -296,8 +296,12 @@ fill_operators_dialog(D) :-
 	send(D, append, new(S, menu(second, cycle, message(D, fill_terms))),right),
 	send_list(S, append, [empty]),
 	send(S, alignment, center),
-    send(S, show_label, @off),
+    send(S, show_label, @on),
 	send(S, active, @off),
+    
+    % Properties definition box
+    send(D,append,new(PD,text_item(definition))),
+    send(PD,editable,@off),
 
 	send(D, append, new(W1, dialog_group(group1, group))),
 	send(W1, alignment, center),
@@ -354,7 +358,7 @@ options(F, Opt) :->
     % Unlock More Options combobox
 	get(C, member, more_options, Ctrl),
 	(       Opt == more
-	->      send(Ctrl, active, @on)
+	->      Opt=Reflexivity,send(Ctrl, active, @on)
 	;       send(Ctrl, active, @off)
 	),
     % Unlock the Second Aggregator Combobox
@@ -362,8 +366,28 @@ options(F, Opt) :->
     (       Opt == switchness
     ->      send(SC, active, @on)
     ;       send(SC, active, @off)
-    ).
+    ),
     
+    get(D,member,definition,TP),
+    send(TP,clear),
+    get_aggregator(F,D,aggregators,Name,_),
+    (   Name == '' ->
+                     (Opt == switchness ->  get_math_def(Opt,'$1','$2',Exp)  ;  get_math_def(Opt,'$',Exp))
+                     ; (Opt == switchness -> get_aggregator(F,D,second,Name2,_),get_math_def(Opt,Name,Name2,Exp) ; get_math_def(Opt,Name,Exp))
+    ),
+    send(TP,append,Exp).
+    
+get_math_def(frontier_top,X,Z) :- format(atom(Z),"~w( T, T ) = T",[X]).
+get_math_def(frontier_bot,X,Z) :- format(atom(Z),"~w( B, B ) = B",[X]).
+get_math_def(increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Y )  <  ~w ( Y, Z )",[X,X]).
+get_math_def(non_decreasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  =<  ~w ( Y, Z )",[X,X]).
+get_math_def(decreasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  >  ~w ( Y, Z )",[X,X]).
+get_math_def(non_increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  >=  ~w ( Y, Z )",[X,X]).
+get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w ( ~w ( X, Y ), Z ) == ~w ( X, ~w ( Y, Z ) )",[X,Y,Y,X]).
+get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w( X, X ) = X",[X]).
+get_math_def(commutativity,X,Z) :- format(atom(Z),"~w ( X, Y ) == ~w ( Y, X )",[X,X]).
+
+
 fill_terms(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_combo(D, C),
@@ -1096,8 +1120,8 @@ append_in_view(V, Aggr) :-
 get_aggregator(F,D,Combo_name,Name,NumA) :-
     get(D, member, Combo_name, Aggr),
     get(Aggr, selection, A),
-    (   A == noselection
-    ->  send(F, report, error, 'Please, select an aggregator.')
+    (   (A == noselection ; A == empty)
+    ->  send(F, report, error, 'Please, select an aggregator.'),Name = ''
     ;   name(A, AA),
         change_item(Pred, AA),
         name(NA, Pred),
