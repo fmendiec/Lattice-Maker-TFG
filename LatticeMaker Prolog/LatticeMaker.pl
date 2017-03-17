@@ -358,7 +358,7 @@ options(F, Opt) :->
     % Unlock More Options combobox
 	get(C, member, more_options, Ctrl),
 	(       Opt == more
-	->      Opt=Reflexivity,send(Ctrl, active, @on)
+	->      send(Ctrl, active, @on)
 	;       send(Ctrl, active, @off)
 	),
     % Unlock the Second Aggregator Combobox
