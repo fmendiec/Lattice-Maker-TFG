@@ -313,19 +313,12 @@ fill_operators_dialog(D) :-
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
-	add_label(W3, infor2, '("more" to see other posibilities)', normal, blue, 12),
-	send(W3, append, new(E, menu(evaluation, marked, message(D, options, @arg1)))),
+	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
 	send_list(E, append, [frontier_top, frontier_bot, increasing, non_increasing]),
-	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, more]),
+	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, monotone,reflexivity,commutativity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
-
-	send(W3, gap, size(1, 1)),
-	send(W3, append, new(More, menu(more_options, cycle))),
-    send_list(More,append,[empty,monotone,reflexivity,commutativity]),
-	send(More, alignment, right),
-	send(More, active, @off),
 
 	send(D, gap, size(20, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
@@ -354,13 +347,6 @@ fill_operators_dialog(D) :-
 
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
-	get_container_optgroup(D, C),
-    % Unlock More Options combobox
-	get(C, member, more_options, Ctrl),
-	(       Opt == more
-	->      send(Ctrl, active, @on)
-	;       send(Ctrl, active, @off)
-	),
     % Unlock the Second Aggregator Combobox
 	get(D, member, second, SC),
     (       Opt == switchness
@@ -1175,16 +1161,10 @@ test_selected_aggregator(F) :->
     
     get_aggregator(F,D,aggregators,Name,_),
     
-	(   Prop == more
-	->  get(COpt, member, more_options, M),
-		get(M, selection, S),  
-		S \= empty, 
-        call(S,Name)
-	;   (   Prop == switchness
+    (   Prop == switchness
         -> get_aggregator(F,D,second,Name2,_),call(Prop,Name,Name2)
         ; call(Prop,Name)
-        )
-	),
+    ),
 	close(Fd),
 	set_output(Old),
     send(V, editable, @off),
