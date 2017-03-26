@@ -309,20 +309,26 @@ fill_operators_dialog(D) :-
 	send(W1, alignment, center),
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
+    send(new(W4, dialog_group(group13, group)), right, W3),
 
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
+    add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
 	send_list(E, append, [no_selection,frontier_top, frontier_bot, increasing, non_increasing]),
 	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, monotone,reflexivity,commutativity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
-
-	send(D, gap, size(20, 10)),
+    
+    add_label(W4, infor1, 'Distance checker', normal, blue, 12),
+    add_label(W4, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
+    add_dragmenu(W4,1,2),
+    
+	send(D, gap, size(50, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
 	send(D, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
@@ -340,8 +346,13 @@ fill_operators_dialog(D) :-
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
+    send(D, append, new(BDist, button(distance, message(D, test_selected_aggregator))), right),
+	send(BDist, font, font(arial, bold, 12)),
+	send(BDist, colour, blue),
+    send(BDist, help_message, tag, 'Check the distances'),
+    
 	send(D, append, Output, next_row),
-	send(Output, size, size(40, 8)),
+	send(Output, size, size(60, 8)),
 	send(Output, alignment, center),
 	send(Output, editable, @off),
 
@@ -988,7 +999,9 @@ fill_from_lattice(F) :-
 	lat_graph:members(L),
 	maplist(atom_string, L, L1),
 	get_container_combo(Oper, Container),
-	fill_dragmenu(Container, 1, 6, L1).
+	fill_dragmenu(Container, 1, 6, L1),
+	get_distance_combo(Oper,Dist_combo),
+    fill_dragmenu(Dist_combo, 1, 2, L1).
 
 % Fill the Aggregator Combobox given
 create_predicates(Oper,Combo_name) :- 
@@ -1349,5 +1362,8 @@ get_container_combo(D, G11):-
 get_container_optgroup(D, G12):-
 	get(D, member, group1, G1),
 	get(G1, member, group12, G12).
+get_distance_combo(D,G13):-
+    get(D,member,group1,G1),
+    get(G1,member,group13,G13).
 
 :- pce_end_class.
