@@ -64,7 +64,7 @@
 :- dynamic lat_graph:arc/2.
 :- dynamic lat_graph:leq/2.
 :- dynamic lat_graph:level/2.
-:- dynamic lat_graph:distance/2.
+:- dynamic lat_graph:distance/3.
 :- dynamic lat_graph:fromNode/1.
 
 :- pce_image_directory('.\\bitmaps').
@@ -238,7 +238,9 @@ fill_menu(MB) :-
 									condition := message(FrameMB, lattice_noempty))),
 	send(A, append, menu_item(test_aggregator, message(FrameMB, test_selected_aggregator),
 									condition := message(FrameMB, lattice_noempty))),
-
+    send(A, append, menu_item(distance, message(FrameMB, eval_distance),
+									condition := message(FrameMB, lattice_noempty))),
+    
 	send_list(H, append, [ menu_item(user_manual, message(@helper, give_help, latticehelp, 'latticehelp')),
 						   menu_item(about, message(FrameMB, about_dialog))
 						   ]).
@@ -319,7 +321,7 @@ fill_operators_dialog(D) :-
     add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
-	send_list(E, append, [no_selection,frontier_top, frontier_bot, increasing, non_increasing]),
+	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing]),
 	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, monotone,reflexivity,commutativity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
@@ -346,7 +348,7 @@ fill_operators_dialog(D) :-
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
-    send(D, append, new(BDist, button(distance, message(D, test_selected_aggregator))), right),
+    send(D, append, new(BDist, button(distance, message(D, eval_distance))), right),
 	send(BDist, font, font(arial, bold, 12)),
 	send(BDist, colour, blue),
     send(BDist, help_message, tag, 'Check the distances'),
@@ -830,7 +832,7 @@ compose_buffer(F, B) :->
     layering(LBottom, L, MaxLayer, _),
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
-    write_in_buffer(B,'distance(X,Y):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
+    write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
     
 	%% "What I have in view"
 	get(F, member, view, V),
@@ -857,7 +859,7 @@ filtered(bot, 1).
 filtered(arc, 2).
 filtered(leq, 2).
 filtered(level,2).
-filtered(distance,2).
+filtered(distance,3).
 
 analize_predicate(Atom, (Name, Arity, Head, Body)):-
 	atomic_list_concat([Head, Body|_], ':-', Atom), !,
@@ -1207,6 +1209,34 @@ test_selected_aggregator(F) :->
     send(V, editable, @off),
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
+eval_distance(F) :-> 
+    get(F, member(dialog_eval), D),
+	get(D, member, view, V),
+    
+    send(V, clear),
+	current_output(Old),
+	pce_open(V, write, Fd),
+    set_output(Fd),
+    
+    get_dist_terms(D,E1,E2),
+    lat_graph:distance(E1,E2,Z),
+    write(Z),
+    
+    close(Fd),
+	set_output(Old),
+    send(V, editable, @off).
+    
+    
+get_dist_terms(D,E1,E2) :-
+	get_term_name(1, StrTerm1),
+    get_term_name(2, StrTerm2),
+    get_distance_combo(D, C),
+    get(C, member, StrTerm1, T1),
+    get(C, member, StrTerm2, T2),
+    get_var_name(1, X1),
+    get_var_name(2, X2),
+    get_selection(T1, E1, X1),
+    get_selection(T2, E2, X2).
     
 get_node_member(Name, NName):-
 	lat_graph:members(L), 
@@ -1233,7 +1263,7 @@ copy_module(M, N) :-
 	N:assertz(N:leq(X, X)),
 	N:assertz(':-'(N:leq(X, Y), (arc(X, Z), leq(Z, Y)))),
     forall(M:level(X, L), N:assertz(N:level(X, L))),
-    N:assertz(':-'(N:distance(X, Y), (level(X, L1), level(Y, L2), Z is abs(L1-L2)))).
+    N:assertz(':-'(N:distance(X, Y, Z), (level(X, L1), level(Y, L2), Z is abs(L1-L2)))).
     
 retract_abolish(Module:Name/Arity) :-
 	(   functor(Head, Name, Arity),
