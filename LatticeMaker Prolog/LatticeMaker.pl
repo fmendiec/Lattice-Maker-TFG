@@ -315,7 +315,7 @@ fill_operators_dialog(D) :-
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
-	send_list(E, append, [frontier_top, frontier_bot, increasing, non_increasing]),
+	send_list(E, append, [no_selection,frontier_top, frontier_bot, increasing, non_increasing]),
 	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, monotone,reflexivity,commutativity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
@@ -369,9 +369,9 @@ get_math_def(increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Y )  < 
 get_math_def(non_decreasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  =<  ~w ( Y, Z )",[X,X]).
 get_math_def(decreasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  >  ~w ( Y, Z )",[X,X]).
 get_math_def(non_increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  >=  ~w ( Y, Z )",[X,X]).
-get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w ( ~w ( X, Y ), Z ) == ~w ( X, ~w ( Y, Z ) )",[X,Y,Y,X]).
 get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w( X, X ) = X",[X]).
 get_math_def(commutativity,X,Z) :- format(atom(Z),"~w ( X, Y ) == ~w ( Y, X )",[X,X]).
+get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w ( ~w ( X, Y ), Z ) == ~w ( X, ~w ( Y, Z ) )",[X,Y,Y,X]).
 
 
 fill_terms(F) :->
@@ -810,7 +810,13 @@ compose_buffer(F, B) :->
 	%% "FROM prepare_for_drawing"
 	write_in_buffer(B, 'leq(X, X).\n'),
 	write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
-
+    
+    lat_graph:bot(Bot),
+    LBottom = [(Bot, 1)],
+    layering(LBottom, L, MaxLayer, _),
+    maplist(write_level_in_buffer(B,L,MaxLayer), L1),
+    write_in_buffer(B,'distance(X,Y):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
+    
 	%% "What I have in view"
 	get(F, member, view, V),
 	pce_open(V, read, File),
@@ -860,6 +866,18 @@ write_in_buffer(Buffer, Text):-
 write_arc_in_buffer(Buffer, (N1,N2)):-
 	atomic_list_concat(['arc(', N1, ', ', N2, ').\n'], Text),
 	send(Buffer, append, Text).
+
+write_level_in_buffer(Buffer,L,MaxLayer,Node) :-
+    get_node_layer(L, Node, Layer),
+	term_to_atom(Layer, AtomLy),
+	atom_number(AtomLy, NLy),
+	(	NLy == 0
+	->  NLayer is MaxLayer + 2
+	;   NLayer is NLy - 1
+	),
+    atomic_list_concat(['level(', Node, ', ', NLayer,').\n'], Text),
+	send(Buffer, append, Text).
+
 
 replace_in_lattice(F, Old, New):-
 	get(F, member, view, V),
