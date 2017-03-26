@@ -63,6 +63,8 @@
 :- dynamic lat_graph:bot/1.
 :- dynamic lat_graph:arc/2.
 :- dynamic lat_graph:leq/2.
+:- dynamic lat_graph:level/2.
+:- dynamic lat_graph:distance/2.
 :- dynamic lat_graph:fromNode/1.
 
 :- pce_image_directory('.\\bitmaps').
@@ -811,9 +813,11 @@ compose_buffer(F, B) :->
 	write_in_buffer(B, 'leq(X, X).\n'),
 	write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
     
+    % Get layer list
     lat_graph:bot(Bot),
     LBottom = [(Bot, 1)],
     layering(LBottom, L, MaxLayer, _),
+    % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
     write_in_buffer(B,'distance(X,Y):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
     
@@ -841,6 +845,8 @@ filtered(top, 1).
 filtered(bot, 1).
 filtered(arc, 2).
 filtered(leq, 2).
+filtered(level,2).
+filtered(distance,2).
 
 analize_predicate(Atom, (Name, Arity, Head, Body)):-
 	atomic_list_concat([Head, Body|_], ':-', Atom), !,
@@ -866,8 +872,8 @@ write_in_buffer(Buffer, Text):-
 write_arc_in_buffer(Buffer, (N1,N2)):-
 	atomic_list_concat(['arc(', N1, ', ', N2, ').\n'], Text),
 	send(Buffer, append, Text).
-
 write_level_in_buffer(Buffer,L,MaxLayer,Node) :-
+    % Get node's layer number
     get_node_layer(L, Node, Layer),
 	term_to_atom(Layer, AtomLy),
 	atom_number(AtomLy, NLy),
@@ -1212,8 +1218,10 @@ copy_module(M, N) :-
 	forall(M:bot(Node), N:assertz(N:bot(Node))),
 	forall(M:arc(From, To), N:assertz(N:arc(From, To))),
 	N:assertz(N:leq(X, X)),
-	N:assertz(':-'(N:leq(X, Y), (arc(X, Z), leq(Z, Y)))).
-
+	N:assertz(':-'(N:leq(X, Y), (arc(X, Z), leq(Z, Y)))),
+    forall(M:level(X, L), N:assertz(N:level(X, L))),
+    N:assertz(':-'(N:distance(X, Y), (level(X, L1), level(Y, L2), Z is abs(L1-L2)))).
+    
 retract_abolish(Module:Name/Arity) :-
 	(   functor(Head, Name, Arity),
 		predicate_property(Module:Head, dynamic)
