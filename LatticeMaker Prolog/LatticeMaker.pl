@@ -311,7 +311,6 @@ fill_operators_dialog(D) :-
 	send(W1, alignment, center),
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
-    send(new(W4, dialog_group(group13, group)), right, W3),
 
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
@@ -326,11 +325,11 @@ fill_operators_dialog(D) :-
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
-    add_label(W4, infor1, 'Distance checker', normal, blue, 12),
-    add_label(W4, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
-    add_dragmenu(W4,1,2),
+    add_label(W3, infor1, '\nDistance checker', normal, blue, 12),
+    add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
+    add_dragmenu(W3,1,2),
     
-	send(D, gap, size(50, 10)),
+	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
 	send(D, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
@@ -354,7 +353,7 @@ fill_operators_dialog(D) :-
     send(BDist, help_message, tag, 'Check the distances'),
     
 	send(D, append, Output, next_row),
-	send(Output, size, size(60, 8)),
+	send(Output, size, size(50, 8)),
 	send(Output, alignment, center),
 	send(Output, editable, @off),
 
@@ -1004,7 +1003,7 @@ fill_from_lattice(F) :-
 	maplist(atom_string, L, L1),
 	get_container_combo(Oper, Container),
 	fill_dragmenu(Container, 1, 6, L1),
-	get_distance_combo(Oper,Dist_combo),
+	get_container_optgroup(Oper,Dist_combo),
     fill_dragmenu(Dist_combo, 1, 2, L1).
 
 % Fill the Aggregator Combobox given
@@ -1232,7 +1231,7 @@ eval_distance(F) :->
 get_dist_terms(D,E1,E2) :-
 	get_term_name(1, StrTerm1),
     get_term_name(2, StrTerm2),
-    get_distance_combo(D, C),
+    get_container_optgroup(D, C),
     get(C, member, StrTerm1, T1),
     get(C, member, StrTerm2, T2),
     get_var_name(1, X1),
@@ -1394,8 +1393,5 @@ get_container_combo(D, G11):-
 get_container_optgroup(D, G12):-
 	get(D, member, group1, G1),
 	get(G1, member, group12, G12).
-get_distance_combo(D,G13):-
-    get(D,member,group1,G1),
-    get(G1,member,group13,G13).
 
 :- pce_end_class.
