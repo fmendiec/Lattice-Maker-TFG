@@ -823,8 +823,8 @@ compose_buffer(F, B) :->
 	maplist(write_arc_in_buffer(B), L4),
 
 	%% "FROM prepare_for_drawing"
-	write_in_buffer(B, 'leq(X, X).\n'),
-	write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
+	%write_in_buffer(B, 'leq(X, X).\n'),
+	%write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
     
     % Get layer list
     lat_graph:bot(Bot),
@@ -832,7 +832,7 @@ compose_buffer(F, B) :->
     layering(LBottom, L, MaxLayer, _),
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
-    write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
+    %write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
     
 	%% "What I have in view"
 	get(F, member, view, V),
@@ -857,9 +857,9 @@ filtered(member, 1).
 filtered(top, 1).
 filtered(bot, 1).
 filtered(arc, 2).
-filtered(leq, 2).
 filtered(level,2).
-filtered(distance,3).
+%filtered(leq, 2).
+%filtered(distance,3).
 
 analize_predicate(Atom, (Name, Arity, Head, Body)):-
 	atomic_list_concat([Head, Body|_], ':-', Atom), !,
@@ -895,6 +895,8 @@ write_level_in_buffer(Buffer,L,MaxLayer,Node) :-
 	;   NLayer is NLy - 1
 	),
     atomic_list_concat(['level(', Node, ', ', NLayer,').\n'], Text),
+    % Assert the new predicate
+    assertz(lat_graph:level(Node,NLayer)),
 	send(Buffer, append, Text).
 
 
@@ -1220,7 +1222,7 @@ eval_distance(F) :->
     
     get_dist_terms(D,E1,E2),
     lat_graph:distance(E1,E2,Z),
-    write(Z),
+    writef('The distance between %w and %w is %w',[E1,E2,Z]),
     
     close(Fd),
 	set_output(Old),
