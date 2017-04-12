@@ -107,23 +107,51 @@ var latticeMaker = function( id_textarea, id_canvas ) {
 		var to = lookupMember( arc.to );
 		if( from !== false && to !== false ) {
 			var tmp_radius = radius;
-			if( from.member == hover ) { tmp_radius = radius_hover; }
+            // Arrow lenght and angle
+            var arrowLen = 35;
+            var arrowAng = 10;
+            
+			if( from.member == hover ) { arrowLen = 40; arrowAng = 15; }
 			var alpha = Math.atan( Math.abs( from.y - to.y ) / Math.abs( from.x - to.x ) );
 			var x = tmp_radius * Math.cos(alpha);
 			var y = tmp_radius * Math.sin(alpha);
-			if( from.x > to.x ) { x = -x; }
-			if( from.y > to.y ) { y = -y; }
+            
+            // Arrow head is down or top
+            var downx = -1,downy = -1;
+            
+			if( from.x > to.x ) { x = -x; downx = -downx; }
+			if( from.y > to.y ) { y = -y; downy = -downy; }
 			ctx.lineWidth = 2;
 			ctx.fillStyle = "#000000";
 			ctx.strokeStyle = "#000000";
 			ctx.beginPath();
-			ctx.arc( from.x + x, from.y + y, 5, 0, 2 * Math.PI );
+            
+            // Extremes of the arrow in radians
+            var end1 = alpha + (180+arrowAng) * Math.PI/180
+            var end2 = alpha + (180-arrowAng) * Math.PI/180
+            
+            // Arrow Head points
+            var x1 = to.x - downx * (arrowLen * Math.cos(end1))
+            var y1 = to.y - downy * (arrowLen * Math.sin(end1))
+            var x2 = to.x - downx * (arrowLen * Math.cos(end2))
+            var y2 = to.y - downy * (arrowLen * Math.sin(end2))            
+            
+            // Draw the arrow
+            ctx.moveTo(to.x-x, to.y-y);
+            ctx.lineTo(x1,y1);
+            ctx.moveTo(to.x-x, to.y-y);
+            ctx.lineTo(x2,y2);
+            
+            ctx.arcTo(x1,y1,x2,y2,35);
 			ctx.fill();
 			ctx.stroke();
+            
 			ctx.beginPath();
 			ctx.moveTo( from.x, from.y );
 			ctx.lineTo( to.x, to.y );
 			ctx.stroke();
+            
+            
 		}
 	};
 
@@ -421,11 +449,10 @@ var latticeMaker = function( id_textarea, id_canvas ) {
 		getBotByTextarea();
 		updateMemberColors();
 		sort();
-		update( false );		
+		update( false );	
 	};
 
 	// Elementos
-	var members = [];
 	var arcs = [];
 	var top = false;
 	var bottom = false;
@@ -467,14 +494,13 @@ var latticeMaker = function( id_textarea, id_canvas ) {
 	// Agregar eventos
 	jtextarea.bind( "mouseup", resize );
 	jQuery( window ).bind( "resize", resize );
-	jtextarea.bind( "change", updateByText );
+	jtextarea.bind( "change inpuntText input", updateByText );
 	jcanvas.bind( "mousemove", function( event ){ update( event ); } );
 	jcanvas.bind( "mousedown", drag_start );
 	jcanvas.bind( "mouseup", drag_stop );
 
 	// Estado inicial
 	updateByText();
-
 };
 
 var latticeMember = function( member, x, y ) {
@@ -488,3 +514,5 @@ var latticeArc = function( from, to ) {
 	this.from = from;
 	this.to = to;
 };
+
+var members = [];
