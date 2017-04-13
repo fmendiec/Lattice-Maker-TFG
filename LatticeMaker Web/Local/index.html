@@ -15,7 +15,7 @@
 		<script type="text/javascript" src="./content/highlight.js"></script>
 		<script type="text/javascript" src="./content/tree.js"></script>
 		<script type="text/javascript" src="./content/lattices.js"></script>
-        <script type = "text/javascript" src = "./buttons.js"> </script>
+        <script type = "text/javascript" src = "buttons.js"> </script>
 		<script>hljs.initHighlightingOnLoad();</script>
 		<link href="http://dectau.uclm.es/unfold/content/img/favicon.ico?d=30082016" type="image/x-icon" rel="icon">
 		<link href="./content/css" rel="stylesheet" type="text/css">
@@ -105,7 +105,8 @@ pri_inf(X,Y,bottom).</textarea>
 					</div></div>
 				</div>
 				<div id="lattices-control">
-					<input type="button" class="button-lattice" value="Add member" onclick=addMember("textarea-lattice")>
+                    <input type="button" class="button-lattice" value="Normalize" onclick=normalize_from_text("textarea-lattice")>
+ 					<input type="button" class="button-lattice" value="Add member" onclick=addMember("textarea-lattice")>
 					<input type="button" class="button-lattice" value="Remove member" onclick=removeMember("canvas-lattice","textarea-lattice")>
 					<input type="button" class="button-lattice" value="Add connection" onclick=createArc("canvas-lattice","textarea-lattice")>
 					<input type="button" class="button-lattice" value="Remove connection" onclick=removeArc("canvas-lattice","textarea-lattice")>

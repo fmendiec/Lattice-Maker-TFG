@@ -81,10 +81,7 @@ var removeMember = function(idCanvas,idTextArea)
         
         // Member selected
         if (selected != null)
-        {
             deleteMember(idTextArea,selected.member);
-            //alert('Selected: ' + selected);
-        }
         
         else
             alert('Member not selected') 
@@ -221,4 +218,9 @@ var selectTwo = function(idCanvas, func)
                     
             });
     });
+}
+
+var normalize_from_text = function(idTextArea)
+{
+    $("#"+idTextArea).trigger('change');
 }
