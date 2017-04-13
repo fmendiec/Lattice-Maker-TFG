@@ -268,3 +268,29 @@ var save_lattice = function(idTextArea)
         document.body.removeChild(event.target);
     }   
 }
+
+var load_lattice = function(idTextArea)
+{
+    var dropZone = document.getElementById(idTextArea); 
+    
+    dropZone.addEventListener('dragover', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    });
+
+    // Get file data on drop
+    dropZone.addEventListener('drop', function(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var files = evt.dataTransfer.files; // FileList object.
+        var reader = new FileReader();  
+        
+        reader.onload = function(event) {            
+             document.getElementById(idTextArea).value = event.target.result;
+             $("#"+idTextArea).trigger('change');
+        }        
+        reader.readAsText(files[0],"UTF-8"); 
+    });
+}
