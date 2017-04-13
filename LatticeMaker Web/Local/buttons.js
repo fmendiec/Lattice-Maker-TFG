@@ -145,7 +145,7 @@ var detectSelectedMember = function(canvas,event)
     return chosen;
 }
 
-var createArc = function(idCanvas,idTextArea)
+var manageArc = function(act,idCanvas,idTextArea)
 {
     // Load Canvas
     var canvas = document.getElementById(idCanvas);
@@ -164,11 +164,14 @@ var createArc = function(idCanvas,idTextArea)
 
                 // Get the second selected member
                 select2 = detectSelectedMember(canvas,event);
-                console.log(select1,select2)
+                
                 // Member selected
                 if (select1 != null && select2 != null)
                 {
-                    addArc(select1.member,select2.member,idTextArea);
+                    if (act == 0)
+                        addArc(select1.member,select2.member,idTextArea);
+                    if (act == 1)
+                        deleteArc(select1.member,select2.member,idTextArea);
                 }
 
                 if (select1 == null)
@@ -190,12 +193,28 @@ var createArc = function(idCanvas,idTextArea)
         var regex_arc = /arc\s*\(\s*([^,()]+\s*,\s*[^,()]+)\s*\)\s*\./g;
         var match = true;
         var index = 0;
-        while(match = regex_arc.exec(code)){console.log(match); index = match.index + match[0].length};
+        while(match = regex_arc.exec(code)){index = match.index + match[0].length};
     
         // Append the new member to TextArea
         textarea.value = [textarea.value.slice(0,index), 'arc('+member1+','+member2+').', textarea.value.slice(index+1)].join('\n');
         
         // Updating TextArea by triggering the event "change"
+        $("#"+idTextArea).trigger('change');
+    }
+    
+    var deleteArc = function(member1,member2,idTextArea)
+    {
+        // Load TextArea
+        var textarea = document.getElementById(idTextArea);
+        
+        // Delete arcs, top and bottom predicates
+        var code = $("#"+idTextArea).val();
+        var regex_arc = new RegExp("arc\\s*\\(\\s*("+member1+"\\s*,\\s*"+member2+")\|("+member2+"\\s*,\\s*"+member1+")\\s*\\)\\s*\\.","g");
+        console.log(code.match(regex_arc));
+        code = code.replace(regex_arc,'\r');
+        
+        // Update Text and Graph
+        textarea.value = code;
         $("#"+idTextArea).trigger('change');
     }
 }

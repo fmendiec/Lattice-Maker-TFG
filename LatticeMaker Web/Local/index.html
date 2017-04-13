@@ -107,8 +107,8 @@ pri_inf(X,Y,bottom).</textarea>
 				<div id="lattices-control">
 					<input type="button" class="button-lattice" value="Add member" onclick=addMember("textarea-lattice")>
 					<input type="button" class="button-lattice" value="Remove member" onclick=removeMember("canvas-lattice","textarea-lattice")>
-					<input type="button" class="button-lattice" value="Add connection" onclick=createArc("canvas-lattice","textarea-lattice")>
-					<input type="button" class="button-lattice" value="Remove connection">
+					<input type="button" class="button-lattice" value="Add connection" onclick=manageArc(0,"canvas-lattice","textarea-lattice")>
+					<input type="button" class="button-lattice" value="Remove connection" onclick=manageArc(1,"canvas-lattice","textarea-lattice")>
 				</div>
 				<h2>Properties</h2>
 				<h2>Export lattice</h2>
