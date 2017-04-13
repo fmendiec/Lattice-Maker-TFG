@@ -18,6 +18,14 @@ var addMember = function(idTextArea)
         return;
     }
     
+    // Not valid characters
+    if (newMember.indexOf(',') != -1 || newMember.indexOf('(') != -1 || newMember.indexOf(')') != -1)
+    {
+        alert('ERROR: Member cannot contain \',\', \'(\' or \')\'')
+        return;
+    }
+        
+    
     // Get the index of the last member
     var code = $("#"+idTextArea).val();
     var regex_member = /member\s*\(\s*(.+)\s*\)\s*\./g;
@@ -179,10 +187,10 @@ var createArc = function(idCanvas,idTextArea)
         
         // Get the index of the last member
         var code = $("#"+idTextArea).val();
-        var regex_arc = /arc\s*\(\s*(.+,.+)\s*\)\s*\./g;
+        var regex_arc = /arc\s*\(\s*([^,()]+\s*,\s*[^,()]+)\s*\)\s*\./g;
         var match = true;
         var index = 0;
-        while(match = regex_arc.exec(code)){index = match.index + match[0].length};
+        while(match = regex_arc.exec(code)){console.log(match); index = match.index + match[0].length};
     
         // Append the new member to TextArea
         textarea.value = [textarea.value.slice(0,index), 'arc('+member1+','+member2+').', textarea.value.slice(index+1)].join('\n');
