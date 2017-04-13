@@ -224,3 +224,47 @@ var normalize_from_text = function(idTextArea)
 {
     $("#"+idTextArea).trigger('change');
 }
+
+var save_lattice = function(idTextArea)
+{     
+    // Get the text from TextArea and create a Blob object (file of plain data)
+    var textToWrite = document.getElementById(idTextArea).value;
+    var textBlob = new Blob([textToWrite], {type:'text/plain'});
+
+    // Get name
+    var fileName = prompt("Filename to save as");
+    
+    // No filename, use default name
+    if (fileName == '')
+        fileName = "alfabeta.lat";
+    // Add extension
+    else
+        fileName = fileName.concat(".lat");
+    
+    // Cancel
+    if (fileName == null)
+        return;
+
+    // Create download link in DOM
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileName;
+    
+    // Allow save file in webkit and Gecko based browsers
+    window.URL = window.URL || window.webkitURL;
+
+    // Create the link Object
+    downloadLink.href = window.URL.createObjectURL(textBlob);
+    
+    // Remove the link after the download using a function
+    downloadLink.onclick = destroyClickedElement;
+    document.body.appendChild(downloadLink);
+
+    // click the new link
+    downloadLink.click();
+
+    var destroyClickedElement = function(event)
+    {
+        // Remove the link from the DOM
+        document.body.removeChild(event.target);
+    }   
+}
