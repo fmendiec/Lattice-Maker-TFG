@@ -63,6 +63,8 @@
 :- dynamic lat_graph:bot/1.
 :- dynamic lat_graph:arc/2.
 :- dynamic lat_graph:leq/2.
+:- dynamic lat_graph:level/2.
+:- dynamic lat_graph:distance/3.
 :- dynamic lat_graph:fromNode/1.
 
 :- pce_image_directory('.\\bitmaps').
@@ -236,7 +238,9 @@ fill_menu(MB) :-
 									condition := message(FrameMB, lattice_noempty))),
 	send(A, append, menu_item(test_aggregator, message(FrameMB, test_selected_aggregator),
 									condition := message(FrameMB, lattice_noempty))),
-
+    send(A, append, menu_item(distance, message(FrameMB, eval_distance),
+									condition := message(FrameMB, lattice_noempty))),
+    
 	send_list(H, append, [ menu_item(user_manual, message(@helper, give_help, latticehelp, 'latticehelp')),
 						   menu_item(about, message(FrameMB, about_dialog))
 						   ]).
@@ -296,8 +300,12 @@ fill_operators_dialog(D) :-
 	send(D, append, new(S, menu(second, cycle, message(D, fill_terms))),right),
 	send_list(S, append, [empty]),
 	send(S, alignment, center),
-    send(S, show_label, @off),
+    send(S, show_label, @on),
 	send(S, active, @off),
+    
+    % Properties definition box
+    send(D,append,new(PD,text_item(definition))),
+    send(PD,editable,@off),
 
 	send(D, append, new(W1, dialog_group(group1, group))),
 	send(W1, alignment, center),
@@ -309,21 +317,19 @@ fill_operators_dialog(D) :-
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
-	add_label(W3, infor2, '("more" to see other posibilities)', normal, blue, 12),
-	send(W3, append, new(E, menu(evaluation, marked, message(D, options, @arg1)))),
+    add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
+	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
-	send_list(E, append, [frontier_top, frontier_bot, increasing, non_increasing]),
-	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, more]),
+	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing]),
+	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, monotone,reflexivity,commutativity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
-
-	send(W3, gap, size(1, 1)),
-	send(W3, append, new(More, menu(more_options, cycle))),
-    send_list(More,append,[empty,monotone,reflexivity,commutativity]),
-	send(More, alignment, right),
-	send(More, active, @off),
-
-	send(D, gap, size(20, 10)),
+    
+    add_label(W3, infor1, '\nDistance checker', normal, blue, 12),
+    add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
+    add_dragmenu(W3,1,2),
+    
+	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
 	send(D, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
@@ -341,8 +347,13 @@ fill_operators_dialog(D) :-
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
+    send(D, append, new(BDist, button(distance, message(D, eval_distance))), right),
+	send(BDist, font, font(arial, bold, 12)),
+	send(BDist, colour, blue),
+    send(BDist, help_message, tag, 'Check the distances'),
+    
 	send(D, append, Output, next_row),
-	send(Output, size, size(40, 8)),
+	send(Output, size, size(50, 8)),
 	send(Output, alignment, center),
 	send(Output, editable, @off),
 
@@ -350,20 +361,33 @@ fill_operators_dialog(D) :-
 
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
-	get_container_optgroup(D, C),
-    % Unlock More Options combobox
-	get(C, member, more_options, Ctrl),
-	(       Opt == more
-	->      send(Ctrl, active, @on)
-	;       send(Ctrl, active, @off)
-	),
     % Unlock the Second Aggregator Combobox
 	get(D, member, second, SC),
     (       Opt == switchness
     ->      send(SC, active, @on)
     ;       send(SC, active, @off)
-    ).
+    ),
     
+    get(D,member,definition,TP),
+    send(TP,clear),
+    get_aggregator(F,D,aggregators,Name,_),
+    (   Name == '' ->
+                     (Opt == switchness ->  get_math_def(Opt,'$1','$2',Exp)  ;  get_math_def(Opt,'$',Exp))
+                     ; (Opt == switchness -> get_aggregator(F,D,second,Name2,_),get_math_def(Opt,Name,Name2,Exp) ; get_math_def(Opt,Name,Exp))
+    ),
+    send(TP,append,Exp).
+    
+get_math_def(frontier_top,X,Z) :- format(atom(Z),"~w( T, T ) = T",[X]).
+get_math_def(frontier_bot,X,Z) :- format(atom(Z),"~w( B, B ) = B",[X]).
+get_math_def(increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Y )  <  ~w ( Y, Z )",[X,X]).
+get_math_def(non_decreasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  =<  ~w ( Y, Z )",[X,X]).
+get_math_def(decreasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  >  ~w ( Y, Z )",[X,X]).
+get_math_def(non_increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )  >=  ~w ( Y, Z )",[X,X]).
+get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w( X, X ) = X",[X]).
+get_math_def(commutativity,X,Z) :- format(atom(Z),"~w ( X, Y ) == ~w ( Y, X )",[X,X]).
+get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w ( ~w ( X, Y ), Z ) == ~w ( X, ~w ( Y, Z ) )",[X,Y,Y,X]).
+
+
 fill_terms(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_combo(D, C),
@@ -798,9 +822,17 @@ compose_buffer(F, B) :->
 	maplist(write_arc_in_buffer(B), L4),
 
 	%% "FROM prepare_for_drawing"
-	write_in_buffer(B, 'leq(X, X).\n'),
-	write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
-
+	%write_in_buffer(B, 'leq(X, X).\n'),
+	%write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
+    
+    % Get layer list
+    lat_graph:bot(Bot),
+    LBottom = [(Bot, 1)],
+    layering(LBottom, L, MaxLayer, _),
+    % Write levels and distance in buffer
+    maplist(write_level_in_buffer(B,L,MaxLayer), L1),
+    %write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
+    
 	%% "What I have in view"
 	get(F, member, view, V),
 	pce_open(V, read, File),
@@ -824,7 +856,9 @@ filtered(member, 1).
 filtered(top, 1).
 filtered(bot, 1).
 filtered(arc, 2).
-filtered(leq, 2).
+filtered(level,2).
+%filtered(leq, 2).
+%filtered(distance,3).
 
 analize_predicate(Atom, (Name, Arity, Head, Body)):-
 	atomic_list_concat([Head, Body|_], ':-', Atom), !,
@@ -850,6 +884,20 @@ write_in_buffer(Buffer, Text):-
 write_arc_in_buffer(Buffer, (N1,N2)):-
 	atomic_list_concat(['arc(', N1, ', ', N2, ').\n'], Text),
 	send(Buffer, append, Text).
+write_level_in_buffer(Buffer,L,MaxLayer,Node) :-
+    % Get node's layer number
+    get_node_layer(L, Node, Layer),
+	term_to_atom(Layer, AtomLy),
+	atom_number(AtomLy, NLy),
+	(	NLy == 0
+	->  NLayer is MaxLayer + 2
+	;   NLayer is NLy - 1
+	),
+    atomic_list_concat(['level(', Node, ', ', NLayer,').\n'], Text),
+    % Assert the new predicate
+    assertz(lat_graph:level(Node,NLayer)),
+	send(Buffer, append, Text).
+
 
 replace_in_lattice(F, Old, New):-
 	get(F, member, view, V),
@@ -954,7 +1002,9 @@ fill_from_lattice(F) :-
 	lat_graph:members(L),
 	maplist(atom_string, L, L1),
 	get_container_combo(Oper, Container),
-	fill_dragmenu(Container, 1, 6, L1).
+	fill_dragmenu(Container, 1, 6, L1),
+	get_container_optgroup(Oper,Dist_combo),
+    fill_dragmenu(Dist_combo, 1, 2, L1).
 
 % Fill the Aggregator Combobox given
 create_predicates(Oper,Combo_name) :- 
@@ -1096,8 +1146,8 @@ append_in_view(V, Aggr) :-
 get_aggregator(F,D,Combo_name,Name,NumA) :-
     get(D, member, Combo_name, Aggr),
     get(Aggr, selection, A),
-    (   A == noselection
-    ->  send(F, report, error, 'Please, select an aggregator.')
+    (   (A == noselection ; A == empty)
+    ->  send(F, report, error, 'Please, select an aggregator.'),Name = ''
     ;   name(A, AA),
         change_item(Pred, AA),
         name(NA, Pred),
@@ -1151,21 +1201,43 @@ test_selected_aggregator(F) :->
     
     get_aggregator(F,D,aggregators,Name,_),
     
-	(   Prop == more
-	->  get(COpt, member, more_options, M),
-		get(M, selection, S),  
-		S \= empty, 
-        call(S,Name)
-	;   (   Prop == switchness
+    (   Prop == switchness
         -> get_aggregator(F,D,second,Name2,_),call(Prop,Name,Name2)
         ; call(Prop,Name)
-        )
-	),
+    ),
 	close(Fd),
 	set_output(Old),
     send(V, editable, @off),
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
+eval_distance(F) :-> 
+    get(F, member(dialog_eval), D),
+	get(D, member, view, V),
+    
+    send(V, clear),
+	current_output(Old),
+	pce_open(V, write, Fd),
+    set_output(Fd),
+    
+    get_dist_terms(D,E1,E2),
+    lat_graph:distance(E1,E2,Z),
+    writef('The distance between %w and %w is %w',[E1,E2,Z]),
+    
+    close(Fd),
+	set_output(Old),
+    send(V, editable, @off).
+    
+    
+get_dist_terms(D,E1,E2) :-
+	get_term_name(1, StrTerm1),
+    get_term_name(2, StrTerm2),
+    get_container_optgroup(D, C),
+    get(C, member, StrTerm1, T1),
+    get(C, member, StrTerm2, T2),
+    get_var_name(1, X1),
+    get_var_name(2, X2),
+    get_selection(T1, E1, X1),
+    get_selection(T2, E2, X2).
     
 get_node_member(Name, NName):-
 	lat_graph:members(L), 
@@ -1190,8 +1262,10 @@ copy_module(M, N) :-
 	forall(M:bot(Node), N:assertz(N:bot(Node))),
 	forall(M:arc(From, To), N:assertz(N:arc(From, To))),
 	N:assertz(N:leq(X, X)),
-	N:assertz(':-'(N:leq(X, Y), (arc(X, Z), leq(Z, Y)))).
-
+	N:assertz(':-'(N:leq(X, Y), (arc(X, Z), leq(Z, Y)))),
+    forall(M:level(X, L), N:assertz(N:level(X, L))),
+    N:assertz(':-'(N:distance(X, Y, Z), (level(X, L1), level(Y, L2), Z is abs(L1-L2)))).
+    
 retract_abolish(Module:Name/Arity) :-
 	(   functor(Head, Name, Arity),
 		predicate_property(Module:Head, dynamic)
