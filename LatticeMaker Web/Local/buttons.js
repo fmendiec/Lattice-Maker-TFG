@@ -225,26 +225,21 @@ var normalize_from_text = function(idTextArea)
     $("#"+idTextArea).trigger('change');
 }
 
-var save_lattice = function(idTextArea)
+var save_lattice = function(idTextArea, idTextBox)
 {     
     // Get the text from TextArea and create a Blob object (file of plain data)
     var textToWrite = document.getElementById(idTextArea).value;
     var textBlob = new Blob([textToWrite], {type:'text/plain'});
 
     // Get name
-    var fileName = prompt("Filename to save as");
+    var fileName = document.getElementById(idTextBox).value;
     
-    // No filename, use default name
-    if (fileName == '')
-        fileName = "alfabeta.lat";
-    // Add extension
-    else
-        fileName = fileName.concat(".lat");
-    
-    // Cancel
-    if (fileName == null)
+    if (fileName == "")
+    {
+        alert("ERROR: The file must have a name");
         return;
-
+    }
+    
     // Create download link in DOM
     var downloadLink = document.createElement("a");
     downloadLink.download = fileName;
@@ -259,7 +254,7 @@ var save_lattice = function(idTextArea)
     downloadLink.onclick = destroyClickedElement;
     document.body.appendChild(downloadLink);
 
-    // click the new link
+    // Click the new link
     downloadLink.click();
 
     var destroyClickedElement = function(event)
@@ -269,7 +264,7 @@ var save_lattice = function(idTextArea)
     }   
 }
 
-var load_lattice = function(idTextArea)
+var load_lattice = function(idTextArea,idTextBox)
 {
     var dropZone = document.getElementById(idTextArea); 
     
@@ -290,7 +285,10 @@ var load_lattice = function(idTextArea)
         reader.onload = function(event) {            
              document.getElementById(idTextArea).value = event.target.result;
              $("#"+idTextArea).trigger('change');
-        }        
+        }     
+        
+        console.log(files);
+        document.getElementById(idTextBox).value = files[0].name;
         reader.readAsText(files[0],"UTF-8"); 
     });
 }

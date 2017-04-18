@@ -21,6 +21,7 @@
 		<link href="./content/css" rel="stylesheet" type="text/css">
 		<link href="./content/css2" rel="stylesheet" type="text/css">
 		<link rel="StyleSheet" href="./content/main.css" type="text/css" media="ALL">
+        <link rel="StyleSheet" href="./content/lattices.css" type="text/css" media="ALL">
 		<link rel="StyleSheet" href="./content/highlight.css" type="text/css" media="ALL">
 	</head>
 	<body>
@@ -105,18 +106,27 @@ pri_inf(X,Y,bottom).</textarea>
 					</div></div>
 				</div>
 				<div id="lattices-control">
-                    <input type="button" class="button-lattice" value="Save" onclick=save_lattice("textarea-lattice")>
-                    <input type="button" class="button-lattice" value="Normalize" onclick=normalize_from_text("textarea-lattice")>
- 					<input type="button" class="button-lattice" value="Add member" onclick=addMember("textarea-lattice")>
-					<input type="button" class="button-lattice" value="Remove member" onclick=removeMember("canvas-lattice","textarea-lattice")>
-					<input type="button" class="button-lattice" value="Add connection" onclick=createArc("canvas-lattice","textarea-lattice")>
-					<input type="button" class="button-lattice" value="Remove connection" onclick=removeArc("canvas-lattice","textarea-lattice")>
+                    File: <input type = "text" id = "lattice-name" class = "file-name" value = "alfabeta.lat">
+                    <input type = "file" id="latfile">
+                    <input type = "button" class = "button-lattice" value = "Upload" onclick = "latfile.click()">
+                    <input type = "button" class = "button-lattice" value = "Save" onclick = save_lattice("textarea-lattice","lattice-name")>
+                    <input type = "button" class = "button-lattice" value = "Normalize" onclick = normalize_from_text("textarea-lattice")>
+ 					<input type = "button" class = "button-lattice" value = "Add member" onclick = addMember("textarea-lattice")>
+					<input type = "button" class = "button-lattice" value = "Remove member" onclick = removeMember("canvas-lattice","textarea-lattice")>
+					<input type = "button" class = "button-lattice" value = "Add connection" onclick = createArc("canvas-lattice","textarea-lattice")>
+					<input type = "button" class = "button-lattice" value = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")>
 				</div>
 				<h2>Properties</h2>
-				<h2>Export lattice</h2>
+				<div id = "properties-form">
+                    <form>
+                        <input type = "range" id = "term1">
+                        <input type = "range" id = "term2">
+                        <input type = "submit" id = "prop-submit">
+                    </form>
+                </div>
 			</div>
 		</div>
-		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" ); load_lattice("textarea-lattice");
+		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" ); load_lattice("textarea-lattice","lattice-name");
             </script>
 </div>
 
