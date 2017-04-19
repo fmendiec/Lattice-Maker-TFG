@@ -456,6 +456,7 @@ new(F) :->
 	send(F, clearspace),
 	lat_graph:assert(lat_graph:leq(X, X)),
 	lat_graph:assert(':-'(lat_graph:leq(X, Y), (lat_graph:arc(X, Z), lat_graph:leq(Z, Y)))),
+    lat_graph:assert(':-'(lat_graph:distance(X, Y, Z), (lat_graph:level(X, L1), lat_graph:level(Y, L2), Z is abs(L1-L2)))),
 	send(F, set_new_state),
 	send(F, set_filename, ''),
 	send(F, set_selected_node).
@@ -823,17 +824,23 @@ compose_buffer(F, B) :->
 	maplist(write_arc_in_buffer(B), L4),
 
 	%% "FROM prepare_for_drawing"
-	%write_in_buffer(B, 'leq(X, X).\n'),
-	%write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
-    
+    ( get(F, new, @on)
+    ->  write_in_buffer(B, 'leq(X, X).\n'),write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n')
+    ; true
+    ),
+
     % Get layer list
     lat_graph:bot(Bot),
     LBottom = [(Bot, 1)],
     layering(LBottom, L, MaxLayer, _),
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
-    %write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
     
+    ( get(F,new,@on)
+    -> write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n')
+    ; true
+    ),
+
 	%% "What I have in view"
 	get(F, member, view, V),
 	pce_open(V, read, File),
