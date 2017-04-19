@@ -31,6 +31,9 @@ reflexivity(Aggr) :-
 commutativity(Aggr) :-
     writeln('Commutativity\n'),test_com(Aggr).
     
+distributivity(Aggr1,Aggr2) :-
+    writeln('Distributivity\n'),test_distr(Aggr1,Aggr2).
+    
 
 % TEST PREDICATES
 
@@ -119,12 +122,13 @@ test_nin2(X,Y,Z,Aggr) :-
 test_sw(Aggr1,Aggr2) :- 
                     findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),
                     forall(member((X,Y,Z),L),
-                    (calc_sw(Aggr1,Aggr2,X,Y,Z,V1),calc_sw(Aggr2,Aggr1,Y,Z,X,V2),V1==V2
+                    (calc_sw1(Aggr1,Aggr2,X,Y,Z,V1),calc_sw2(Aggr1,Aggr2,X,Y,Z,V2),V1==V2
                     ;   not_equal_sw(Aggr1,Aggr2,X,Y,Z))
                     ),
                     writeln('Success').
 
-calc_sw(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
+calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
+calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
 not_equal_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
@@ -144,4 +148,29 @@ test_com(Aggr) :-
                   ),
                   writeln('Success').
                   
-not_equal_com(Aggr,X,Y) :- writeln('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
+not_equal_com(Aggr,X,Y) :- writef('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
+
+
+% DISTRIBUTIVITY
+
+test_distr1(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,X,Y,V),call(lat:Aggr2,V,Z,V1),call(lat:Aggr2,X,Z,U1),call(lat:Aggr2,Y,Z,U2),
+                                  call(lat:Aggr1,U1,U2,V2),V1==V2 
+                                  ; not_equal_distr1(Aggr1,Aggr2,X,Y,Z).
+                                  
+not_equal_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
+
+test_distr2(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,V1),call(lat:Aggr2,X,Y,U1),call(lat:Aggr2,X,Z,U2),
+                                  call(lat:Aggr1,U1,U2,V2),V1==V2 
+                                  ; not_equal_distr2(Aggr1,Aggr2,X,Y,Z).
+                                  
+not_equal_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
+
+test_distr(Aggr1,Aggr2) :-
+                            (
+                                findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),
+                                forall(member((X,Y,Z),L),test_distr1(Aggr1,Aggr2,X,Y,Z))
+                            ->
+                                writeln('First parameter: Success\n'), forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
+                            ;
+                                findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
+                            ).

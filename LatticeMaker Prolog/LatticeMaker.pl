@@ -320,8 +320,8 @@ fill_operators_dialog(D) :-
     add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
-	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing]),
-	send_list(E, append, [decreasing, non_decreasing, switchness, adjointness, monotone,reflexivity,commutativity]),
+	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing]),
+	send_list(E, append, [switchness, adjointness, monotone,reflexivity,commutativity, distributivity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
@@ -363,7 +363,7 @@ options(F, Opt) :->
 	get(F, member(dialog_eval), D),
     % Unlock the Second Aggregator Combobox
 	get(D, member, second, SC),
-    (       Opt == switchness
+    (       (Opt == switchness ; Opt == distributivity)
     ->      send(SC, active, @on)
     ;       send(SC, active, @off)
     ),
@@ -372,8 +372,8 @@ options(F, Opt) :->
     send(TP,clear),
     get_aggregator(F,D,aggregators,Name,_),
     (   Name == '' ->
-                     (Opt == switchness ->  get_math_def(Opt,'$1','$2',Exp)  ;  get_math_def(Opt,'$',Exp))
-                     ; (Opt == switchness -> get_aggregator(F,D,second,Name2,_),get_math_def(Opt,Name,Name2,Exp) ; get_math_def(Opt,Name,Exp))
+                     ((Opt == switchness ; Opt == distributivity) ->  get_math_def(Opt,'$1','$2',Exp)  ;  get_math_def(Opt,'$',Exp))
+                     ; ((Opt == switchness ; Opt == distributivity) -> get_aggregator(F,D,second,Name2,_),get_math_def(Opt,Name,Name2,Exp) ; get_math_def(Opt,Name,Exp))
     ),
     send(TP,append,Exp).
     
@@ -386,6 +386,7 @@ get_math_def(non_increasing,X,Z) :- format(atom(Z),"If  X  <  Y  =>  ~w ( X, Z )
 get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w( X, X ) = X",[X]).
 get_math_def(commutativity,X,Z) :- format(atom(Z),"~w ( X, Y ) == ~w ( Y, X )",[X,X]).
 get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w ( ~w ( X, Y ), Z ) == ~w ( X, ~w ( Y, Z ) )",[X,Y,Y,X]).
+get_math_def(distributivity,X,Y,Z) :- format(atom(Z), "~w ( ~w ( X, Y ) , Z ) == ~w ( ~w ( X, Z) , ~w ( Y, Z ) )",[Y,X,X,Y,Y]).
 
 
 fill_terms(F) :->
@@ -1201,7 +1202,7 @@ test_selected_aggregator(F) :->
     
     get_aggregator(F,D,aggregators,Name,_),
     
-    (   Prop == switchness
+    (   (Prop == switchness ; Prop == distributivity)
         -> get_aggregator(F,D,second,Name2,_),call(Prop,Name,Name2)
         ; call(Prop,Name)
     ),
