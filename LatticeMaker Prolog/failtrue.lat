@@ -1,0 +1,8 @@
+members([fail,true]).
+member(fail).
+member(true).
+top(true).
+bot(fail).
+arc(fail, true).
+leq(X, X).
+leq(X, Y):- arc(X, Z), leq(Z, Y).

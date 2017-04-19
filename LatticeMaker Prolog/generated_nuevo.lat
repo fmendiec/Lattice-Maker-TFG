@@ -1,0 +1,106 @@
+members([a,b,c,d,e,f,g,h,i,j,k,l,m,n,ñ,o,p,q,r,s,t,u,v,w,x,aa,bb,cc,dd,ee,mm,ss,ll,jj,oo,pp,gg,tt,yy,uu,ii,rr]).
+member(a).
+member(aa).
+member(b).
+member(bb).
+member(c).
+member(cc).
+member(d).
+member(dd).
+member(e).
+member(ee).
+member(f).
+member(g).
+member(gg).
+member(h).
+member(i).
+member(ii).
+member(j).
+member(jj).
+member(k).
+member(l).
+member(ll).
+member(m).
+member(mm).
+member(n).
+member(o).
+member(oo).
+member(p).
+member(pp).
+member(q).
+member(r).
+member(rr).
+member(s).
+member(ss).
+member(t).
+member(tt).
+member(u).
+member(uu).
+member(v).
+member(w).
+member(x).
+member(yy).
+member(ñ).
+top(c).
+bot(a).
+arc(a, b).
+arc(a, cc).
+arc(a, h).
+arc(a, l).
+arc(a, n).
+arc(a, s).
+arc(a, x).
+arc(aa, bb).
+arc(b, d).
+arc(b, f).
+arc(bb, ee).
+arc(cc, aa).
+arc(cc, dd).
+arc(d, e).
+arc(d, k).
+arc(dd, bb).
+arc(e, i).
+arc(ee, c).
+arc(f, e).
+arc(g, e).
+arc(g, j).
+arc(h, f).
+arc(h, g).
+arc(i, c).
+arc(j, i).
+arc(k, i).
+arc(l, m).
+arc(l, p).
+arc(m, o).
+arc(n, m).
+arc(n, ñ).
+arc(o, c).
+arc(p, o).
+arc(q, r).
+arc(r, ee).
+arc(s, q).
+arc(s, t).
+arc(t, r).
+arc(t, u).
+arc(u, ee).
+arc(v, u).
+arc(w, bb).
+arc(w, u).
+arc(x, gg).
+arc(x, ii).
+arc(x, jj).
+arc(x, ll).
+arc(x, mm).
+arc(x, oo).
+arc(x, pp).
+arc(x, rr).
+arc(x, ss).
+arc(x, tt).
+arc(x, uu).
+arc(x, v).
+arc(x, w).
+arc(x, yy).
+arc(ñ, o).
+arc(ñ, r).
+leq(X, X).
+leq(X, Y):- arc(X, Z), leq(Z, Y).

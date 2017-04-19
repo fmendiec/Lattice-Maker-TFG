@@ -1,0 +1,28 @@
+members([bottom,alpha,beta,top,delta,gamma,epsilon,tau,lambda]).
+member(alpha).
+member(beta).
+member(bottom).
+member(delta).
+member(epsilon).
+member(gamma).
+member(lambda).
+member(tau).
+member(top).
+top(top).
+bot(bottom).
+arc(alpha, tau).
+arc(beta, delta).
+arc(bottom, alpha).
+arc(bottom, beta).
+arc(bottom, gamma).
+arc(delta, top).
+arc(lambda, top).
+arc(tau, top).
+leq(X, X).
+leq(X, Y):- arc(X, Z), leq(Z, Y).
+and_godel(X,Y,Z):-pri_inf(X,Y,Z).
+pri_inf(bottom,X,bottom):-!.
+pri_inf(alpha,X,alpha):-leq(alpha,X),!.
+pri_inf(beta,X,beta):-leq(beta,X),!.
+pri_inf(top,X,X):-!.
+pri_inf(X,Y,bottom).
