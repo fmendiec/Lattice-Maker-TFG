@@ -105,23 +105,30 @@ pri_inf(X,Y,bottom).</textarea>
 						<canvas id="canvas-lattice" width="587" height="500" style="width: 587px; height: 500px; cursor: default;"></canvas>
 					</div></div>
 				</div>
-				<div id="lattices-control">
-                    File: <input type = "text" id = "lattice-name" class = "file-name" value = "alfabeta.lat">
-                    <input type = "file" id="latfile">
-                    <input type = "button" class = "button-lattice" value = "Upload" onclick = "latfile.click()">
-                    <input type = "button" class = "button-lattice" value = "Save" onclick = save_lattice("textarea-lattice","lattice-name")>
-                    <input type = "button" class = "button-lattice" value = "Normalize" onclick = normalize_from_text("textarea-lattice")>
- 					<input type = "button" class = "button-lattice" value = "Add member" onclick = addMember("textarea-lattice")>
-					<input type = "button" class = "button-lattice" value = "Remove member" onclick = removeMember("canvas-lattice","textarea-lattice")>
-					<input type = "button" class = "button-lattice" value = "Add connection" onclick = createArc("canvas-lattice","textarea-lattice")>
-					<input type = "button" class = "button-lattice" value = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")>
+				<div class = "twocols" id = "controls">
+                    <div class = "file-controls">
+                        File:
+                        <input type = "text" id = "lattice-name" class = "file-name" value = "alfabeta.lat">
+                        <input type = "file" id="latfile">
+                        <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "./media/upload.png"></button>
+                        
+                        <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "media/download.png"> </button>
+                    </div>
+                    <div class = "lattice-controls">
+                        <button type = "button" class = "button-lattice" title = "Normalize" onclick = normalize_from_text("textarea-lattice")> <img src = "media/normalize.png"> </button>
+                        <button type = "button" class = "button-lattice" title = "Add new member" onclick = addMember("textarea-lattice")> <img src = "media/add_member.png"> </button>
+                        <button type = "button" class = "button-lattice" title = "Remove member" onclick = removeMember("canvas-lattice","textarea-lattice")> <img src = "media/remove_member.png"> </button>
+                        <button type = "button" class = "button-lattice" title = "Add connection" onclick = createArc("canvas-lattice","textarea-lattice")> <img src = "media/add_arrow.png"> </button>
+                        <button type = "button" class = "button-lattice" title = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")> <img src = "media/remove_arrow.png"> </button>
+                    </div>
 				</div>
 				<h2>Properties</h2>
 				<div id = "properties-form">
-                    <form>
-                        <input type = "range" id = "term1">
-                        <input type = "range" id = "term2">
-                        <input type = "submit" id = "prop-submit">
+                    <form id = "properties-form">
+                        Aggregator 1: <select><option>sdjafñkl </option> </select>
+                        Aggregator 2: <select> </select>
+                        <input type = "submit">
+                        <br>Result<textarea id="property-result" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
                     </form>
                 </div>
 			</div>
