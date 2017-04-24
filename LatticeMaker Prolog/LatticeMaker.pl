@@ -1116,6 +1116,7 @@ operator(P, P/Arity) :-
 	(	append("and_", _, PN)
 	;   append("or_", _, PN)
 	;   append("agr_", _, PN)
+    ;   append("distance",_,PN)
 	).
 
 fill_combo_aggr(CB, N/A) :-
@@ -1136,6 +1137,9 @@ change_item(Oper, NewOper) :-
 change_item(Oper, NewOper) :-
 	append("agr_", SN, Oper),
 	append("@_", SN, NewOper).
+change_item(Oper, NewOper) :-
+	append("distance", SN, Oper),
+	append("distance", SN, NewOper).
 
 add_connective(F) :->
 	send(F, get_edit_mode)
@@ -1148,7 +1152,7 @@ add_connective(F) :->
 							normal, blue, 12),
 		send(ND, append, new(CBO, menu(aggregators, cycle))),
 		send_list(CBO, append, ['&_godel', '|_godel', '&_luka', '|_luka']),
-		send_list(CBO, append, ['&_prod', '|_prod', '@_aver']),
+		send_list(CBO, append, ['&_prod', '|_prod', '@_aver', 'distance']),
 		send(CBO, alignment, center),
 		send(ND, append, button(add, message(ND, return, CBO?selection))),
 		send(ND, append, button(cancel, message(ND, return, @nil))),
