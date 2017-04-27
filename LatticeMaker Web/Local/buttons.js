@@ -281,7 +281,7 @@ var save_lattice = function(idTextArea, idTextBox)
     }   
 }
 
-var load_lattice = function(idTextArea,idTextBox)
+var upload_lattice_drop = function(idTextArea,idTextBox)
 {
     var dropZone = document.getElementById(idTextArea); 
     
@@ -304,8 +304,21 @@ var load_lattice = function(idTextArea,idTextBox)
              $("#"+idTextArea).trigger('change');
         }     
         
-        console.log(files);
         document.getElementById(idTextBox).value = files[0].name;
         reader.readAsText(files[0],"UTF-8"); 
     });
+}
+
+var upload_lattice_button = function(idTextArea,idTextBox,idUploadButton)
+{
+    var files = document.getElementById(idUploadButton).files;
+    var reader = new FileReader();  
+        
+    reader.onload = function(event) {            
+         document.getElementById(idTextArea).value = event.target.result;
+         $("#"+idTextArea).trigger('change');
+    }     
+        
+    document.getElementById(idTextBox).value = files[0].name;
+    reader.readAsText(files[0],"UTF-8"); 
 }
