@@ -104,6 +104,8 @@ variable(editable, bool, both, "Editor editable").
 variable(filename, name, both, "File loaded").
 variable(redrawn, bool, both, "Graph redrawn").
 variable(max_nodes_layer, int, both, "Nodes in widest layer").
+variable(normalize_pressed,bool,both,"Normalize lattice button is pressed").
+variable(loaded_lattice,bool,both,"The lattice is being loaded").
 
 % Local configuration
 locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''), grouping([repeat(3)])]).
@@ -521,7 +523,10 @@ load(F) :->
 	ok_changes(F),
 	get(F, member, view, V),
 	get(@finder, file, @on, '.lat', FileName),
-
+    
+    % The lattice is being loaded for the first time
+    send(F,set_load_state),
+    
 	send(F, clearspace),
 	(	wipe_module(lat_graph),
 		lat_graph:consult(FileName)
@@ -532,7 +537,10 @@ load(F) :->
 			% "Show file content"
 			send(F, set_filename, FileName),
 			send(F, set_nonew_state),
-			send(F, normalize)
+			send(F, normalize),
+            
+            % The lattice is already loaded
+            send(F,set_noload_state)
 		;	send(F, report, error, 'File %s hasn\'t a lattice format', FileName)
 		)
 	;	send(F, report, error, 'File %s has errors', FileName)
@@ -755,9 +763,14 @@ connect_list_bot(F, Bottom, [H|L]):-
 normalize(F) :->
 	"Normalize the graph"::
 	send(F, draw_graph),
+    
+    % If the graph is being loaded, then it's not being normalized
+    (get_load_state(F) -> true ; send(F,set_normalize_state)),
 	send(F, lattice),
 	fill_from_lattice(F),
 	send(F, set_edit_mode_off),
+    % The lattice is already normalized
+    send(F,set_nonormalize_state),
 	send(F, report, status, 'Graph has been normalized').
 
 draw_graph(F) :->
@@ -855,7 +868,7 @@ lattice(F) :->
 	(	lat:consult(File)
 	;	send(F, report, error, 'Consult result: lattice in use has predicate errors')
 	),
-	get(F, member, view, V),
+    get(F, member, view, V),
 	send(V, clear),
 	send(V, text_buffer, B).
 
@@ -888,8 +901,12 @@ compose_buffer(F, B) :->
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
     
-    write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n'),
-
+    % If the distance does not exist (in the file) or the lattice is being normalized, then write the default distance
+    ( compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3),not(get_normalize_state(F)) 
+    -> true
+    ; retractall(distance(_,_,_)),write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n')
+    ),
+    
 	%% "What I have in view"
 	get(F, member, view, V),
 	pce_open(V, read, File),
@@ -899,7 +916,7 @@ compose_buffer(F, B) :->
 	->  with_output_to(atom(Atom), 
 				write_term(Term, [variable_names(LVars), quoted(true)])),
 		analize_predicate(Atom, (Name, Arity, _, _)),
-		(	filtered(Name, Arity)
+		(	vary_pred(Name,Arity,F,B,Atom),filtered(Name, Arity)
 		->  fail
 		;   write_in_buffer(B, '%s.\n', Atom)
 		),
@@ -915,7 +932,11 @@ filtered(bot, 1).
 filtered(arc, 2).
 filtered(level,2).
 filtered(leq, 2).
-filtered(distance,3).
+filtered(distance,3). 
+
+% Variable predicates, if the lattice is being normalized then write the default predicate
+vary_pred(distance,3,F,B,Atom) :- (get_normalize_state(F) -> true; write_in_buffer(B, '%s.\n', Atom)).
+vary_pred(_,_,_,_,_).
 
 analize_predicate(Atom, (Name, Arity, Head, Body)):-
 	atomic_list_concat([Head, Body|_], ':-', Atom), !,
@@ -1407,6 +1428,18 @@ set_modified_state(F) :->
 	send(F, slot, modified, @on).
 set_nomodified_state(F) :->
 	send(F, slot, modified, @off).
+set_normalize_state(F) :->
+    send(F, slot, normalize_pressed,@on).
+set_nonormalize_state(F) :->
+    send(F, slot, normalize_pressed,@off).
+set_load_state(F) :->
+    send(F,slot,loaded_lattice,@on).
+set_noload_state(F) :->
+    send(F,slot,loaded_lattice,@off).
+get_normalize_state(F) :-
+    get(F,normalize_pressed,@on).
+get_load_state(F) :-
+    get(F,loaded_lattice,@on).
 get_modified_state(F) :-
 	get(F, modified, @on); get_modified_text_lattice(F).
 get_new_state(F) :-
