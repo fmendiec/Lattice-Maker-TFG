@@ -87,6 +87,7 @@ resource(imgarrow, image, image('arrow.xpm')).
 resource(imgnormalize, image, image('normalize.xpm')).
 resource(imgsendup, image, image('sendup.xpm')).
 resource(imgundo, image, image('undo.xpm')).
+resource(imgdist, image, image('restore_distance.xpm')).
 resource(imgeditfind, image, image('find_replace.xpm')).
 resource(imghelp, image, image('help.xpm')).
 
@@ -221,8 +222,12 @@ fill_menu(MB) :-
 	send(E, append, menu_item(redraw_graph_from_lattice, message(FrameMB, lattice_to_graph),
 									condition := message(FrameMB, lattice_noempty))),
 	send(E, append, menu_item(undo_redraw_graph, message(FrameMB, undo_send_graph),
-									condition := message(FrameMB, lattice_noempty))),
+									condition := message(FrameMB, lattice_noempty), 
+                                    end_group := @on)),
 
+    send(E, append, menu_item(restore_distance, message(FrameMB, restore_view_distance),
+									condition := message(FrameMB, lattice_noempty))),
+    
 	send(G, append, menu_item(clear_graph_editor, message(FrameMB, clear_graph),
 									condition := message(FrameMB, graph_noempty, P),
 									end_group := @on)),
@@ -290,7 +295,9 @@ fill_edit_toolbar(TB) :-
 	send(TB, append, tool_button(message(FrameTB, find_in), resource(imgeditfind), find_and_replace)),
 	send(TB, append, gap),
 	send(TB, append, tool_button(message(FrameTB, lattice_to_graph), resource(imgsendup), redraw_graph_from_lattice)),
-	send(TB, append, tool_button(message(FrameTB, undo_send_graph), resource(imgundo), undo_redraw_graph)).
+	send(TB, append, tool_button(message(FrameTB, undo_send_graph), resource(imgundo), undo_redraw_graph)),
+    send(TB, append, gap),
+    send(TB, append, tool_button(message(FrameTB, restore_view_distance), resource(imgdist), restore_distance)).
 
 fill_operators_dialog(D) :-
 	add_label(D, aggrhelp, 'Select an Aggregator to EVAL or TEST', normal, blue, 12),
