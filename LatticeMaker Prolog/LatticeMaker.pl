@@ -107,6 +107,7 @@ variable(redrawn, bool, both, "Graph redrawn").
 variable(max_nodes_layer, int, both, "Nodes in widest layer").
 variable(normalize_pressed,bool,both,"Normalize lattice button is pressed").
 variable(loaded_lattice,bool,both,"The lattice is being loaded").
+variable(default_distance,bool,both,"Restore the default distance").
 
 % Local configuration
 locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''), grouping([repeat(3)])]).
@@ -908,8 +909,9 @@ compose_buffer(F, B) :->
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
     
-    % If the distance does not exist (in the file) or the lattice is being normalized, then write the default distance
-    ( compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3),not(get_normalize_state(F)) 
+    % If the distance does not exist (in the file), the lattice is being normalized or the restore default distance is pressed,
+    %then write the default distance
+    ( (not(get_normalize_state(F)),compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3) ; not(get_default_dist_status(F)))
     -> true
     ; retractall(distance(_,_,_)),write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n')
     ),
@@ -1440,13 +1442,13 @@ set_normalize_state(F) :->
 set_nonormalize_state(F) :->
     send(F, slot, normalize_pressed,@off).
 set_load_state(F) :->
-    send(F,slot,loaded_lattice,@on).
+    send(F, slot, loaded_lattice, @on).
 set_noload_state(F) :->
-    send(F,slot,loaded_lattice,@off).
+    send(F, slot, loaded_lattice, @off).
 get_normalize_state(F) :-
-    get(F,normalize_pressed,@on).
+    get(F, normalize_pressed, @on).
 get_load_state(F) :-
-    get(F,loaded_lattice,@on).
+    get(F, loaded_lattice, @on).
 get_modified_state(F) :-
 	get(F, modified, @on); get_modified_text_lattice(F).
 get_new_state(F) :-
@@ -1455,6 +1457,13 @@ get_modified_text_lattice(F) :-
 	get(F, member, view, V),
 	get(V, text_buffer, B),
 	get(B, modified, @on).
+get_default_dist_status(F) :-
+    get(F, default_distance, @on).
+    
+restore_view_distance(F) :->
+    send(F, slot, default_distance, @on),
+    send(F, normalize),
+    send(F, slot, default_distance, @off).
 
 toggle_edit_mode(F) :->
 	get(F, member, view, V),
