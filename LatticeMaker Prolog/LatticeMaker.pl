@@ -546,7 +546,7 @@ load(F) :->
 			send(F, set_filename, FileName),
 			send(F, set_nonew_state),
 			send(F, normalize),
-            
+          
             % The lattice is already loaded
             send(F,set_noload_state)
 		;	send(F, report, error, 'File %s hasn\'t a lattice format', FileName)
@@ -909,11 +909,11 @@ compose_buffer(F, B) :->
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
     
-    % If the distance does not exist (in the file), the lattice is being normalized or the restore default distance is pressed,
-    %then write the default distance
-    ( (not(get_normalize_state(F)),compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3) ; not(get_default_dist_status(F)))
-    -> true
-    ; retractall(distance(_,_,_)),write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n')
+    % If the lattice is being normalized, the restore default distance button is pressed or the distance does not exist, then write the default distance
+    % Dont write it if the lattice is being loaded or the leq is being restored
+    ( (not((compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3))) ; get_normalize_state(F) ; get_default_dist_status(F))
+    -> retractall(distance(_,_,_)),write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n')
+    ; true
     ),
     
 	%% "What I have in view"
