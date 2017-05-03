@@ -963,6 +963,8 @@ format_and_write(B, Name):-
 	
 write_in_buffer(Buffer, Text, Name):-
 	send(Buffer, append,  string(Text, Name)).
+write_in_buffer_index(Buffer, Text, Index) :-
+    send(Buffer, insert, Index, Text).
 write_in_buffer(Buffer, Text):-
 	send(Buffer, append,  Text).
 write_arc_in_buffer(Buffer, (N1,N2)):-
@@ -1449,7 +1451,21 @@ get_modified_text_lattice(F) :-
 	get(V, text_buffer, B),
 	get(B, modified, @on).
     
-restore_view_distance(F) :-> true.
+restore_view_distance(F) :-> 
+        delete_pred(F,'distance',Index),get(F, member, view, V),get(V, text_buffer, B),
+        write_in_buffer_index(B, 'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n' ,Index).
+
+delete_pred(F,Pred,Index):-
+    get(F, member, view, V),
+	get(V, editor, E),
+	send(E, exact_case, @on),
+	get(V, text_buffer, B),
+	get(B, length, Length),
+	get(B, find, 0, Pred, 1, start, @on, @on, Index),
+    get(B,line_number,Index,Line),
+    % Get all the indices that are in the same line that the target predicate, then calculate the length of the line where is it. 
+    findall(N,(between(Index,Length,N),get(B,line_number,N,Line2),Line==Line2),S), length(S,Count),
+    send(B,delete,Index,Count).
 
 toggle_edit_mode(F) :->
 	get(F, member, view, V),
