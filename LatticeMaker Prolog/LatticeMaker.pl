@@ -105,9 +105,7 @@ variable(editable, bool, both, "Editor editable").
 variable(filename, name, both, "File loaded").
 variable(redrawn, bool, both, "Graph redrawn").
 variable(max_nodes_layer, int, both, "Nodes in widest layer").
-variable(normalize_pressed,bool,both,"Normalize lattice button is pressed").
 variable(loaded_lattice,bool,both,"The lattice is being loaded").
-variable(default_distance,bool,both,"Restore the default distance").
 
 % Local configuration
 locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''), grouping([repeat(3)])]).
@@ -771,14 +769,10 @@ connect_list_bot(F, Bottom, [H|L]):-
 normalize(F) :->
 	"Normalize the graph"::
 	send(F, draw_graph),
-    
-    % If the graph is being loaded, then it's not being normalized
-    (get_load_state(F) -> true ; send(F,set_normalize_state)),
 	send(F, lattice),
 	fill_from_lattice(F),
 	send(F, set_edit_mode_off),
     % The lattice is already normalized
-    send(F,set_nonormalize_state),
 	send(F, report, status, 'Graph has been normalized').
 
 draw_graph(F) :->
@@ -900,7 +894,10 @@ compose_buffer(F, B) :->
 	maplist(write_arc_in_buffer(B), L4),
 
 	%% "FROM prepare_for_drawing"
-    write_in_buffer(B, 'leq(X, X).\n'),write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n'),
+    ( not(get_load_state(F))
+    -> write_in_buffer(B, 'leq(X, X).\n'),write_in_buffer(B, 'leq(X, Y):- arc(X, Z), leq(Z, Y).\n')
+    ; true
+    ),
 
     % Get layer list
     lat_graph:bot(Bot),
@@ -909,9 +906,8 @@ compose_buffer(F, B) :->
     % Write levels and distance in buffer
     maplist(write_level_in_buffer(B,L,MaxLayer), L1),
     
-    % If the lattice is being normalized, the restore default distance button is pressed or the distance does not exist, then write the default distance
-    % Dont write it if the lattice is being loaded or the leq is being restored
-    ( (not((compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3))) ; get_normalize_state(F) ; get_default_dist_status(F))
+    % If the lattice is being normalized or the distance does not exist, then write the default distance
+    ( ( not((compile_predicates([lat_graph:distance/3]),current_predicate(lat_graph:distance/3))) ; not(get_load_state(F)) )
     -> retractall(distance(_,_,_)),write_in_buffer(B,'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n')
     ; true
     ),
@@ -944,7 +940,8 @@ filtered(leq, 2).
 filtered(distance,3). 
 
 % Variable predicates, if the lattice is being normalized then write the default predicate
-vary_pred(distance,3,F,B,Atom) :- (get_normalize_state(F) -> true; write_in_buffer(B, '%s.\n', Atom)).
+vary_pred(distance,3,F,B,Atom) :- get_load_state(F),write_in_buffer(B, '%s.\n', Atom).
+vary_pred(leq,2,F,B,Atom) :- get_load_state(F),write_in_buffer(B, '%s.\n', Atom).
 vary_pred(_,_,_,_,_).
 
 analize_predicate(Atom, (Name, Arity, Head, Body)):-
@@ -1437,16 +1434,10 @@ set_modified_state(F) :->
 	send(F, slot, modified, @on).
 set_nomodified_state(F) :->
 	send(F, slot, modified, @off).
-set_normalize_state(F) :->
-    send(F, slot, normalize_pressed,@on).
-set_nonormalize_state(F) :->
-    send(F, slot, normalize_pressed,@off).
 set_load_state(F) :->
     send(F, slot, loaded_lattice, @on).
 set_noload_state(F) :->
     send(F, slot, loaded_lattice, @off).
-get_normalize_state(F) :-
-    get(F, normalize_pressed, @on).
 get_load_state(F) :-
     get(F, loaded_lattice, @on).
 get_modified_state(F) :-
@@ -1457,13 +1448,8 @@ get_modified_text_lattice(F) :-
 	get(F, member, view, V),
 	get(V, text_buffer, B),
 	get(B, modified, @on).
-get_default_dist_status(F) :-
-    get(F, default_distance, @on).
     
-restore_view_distance(F) :->
-    send(F, slot, default_distance, @on),
-    send(F, normalize),
-    send(F, slot, default_distance, @off).
+restore_view_distance(F) :-> true.
 
 toggle_edit_mode(F) :->
 	get(F, member, view, V),
