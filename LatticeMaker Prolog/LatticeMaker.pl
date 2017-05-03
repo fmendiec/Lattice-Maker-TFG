@@ -1457,11 +1457,15 @@ get_modified_text_lattice(F) :-
 	get(B, modified, @on).
 
 restore_view_leq(F) :-> 
-        delete_all_pred(F,'leq',Index),get(F, member, view, V),get(V, text_buffer, B),
-        write_in_buffer_index(B, 'leq(X, X).\nleq(X, Y):- arc(X, Z), leq(Z, Y).\n' ,Index).    
+        get(F, member, view, V),
+        get(V, text_buffer, B),
+        ( delete_all_pred(F,'leq',Index) ;  get(B,length,Length),Index = Length),
+        write_in_buffer_index(B,'leq(X, Y):- arc(X, Z), leq(Z, Y).\n',Index),write_in_buffer_index(B, 'leq(X, X).\n' ,Index).    
 
 restore_view_distance(F) :-> 
-        delete_all_pred(F,'distance',Index),get(F, member, view, V),get(V, text_buffer, B),
+        get(F, member, view, V),
+        get(V, text_buffer, B),
+        ( delete_all_pred(F,'distance',Index) ; get(B,length,Length),Index = Length),
         write_in_buffer_index(B, 'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n' ,Index).
 
 % Delete all the occurrences of the predicate in the view and return the index for insert the new predicate
