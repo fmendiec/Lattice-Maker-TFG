@@ -87,7 +87,7 @@ resource(imgarrow, image, image('arrow.xpm')).
 resource(imgnormalize, image, image('normalize.xpm')).
 resource(imgsendup, image, image('sendup.xpm')).
 resource(imgundo, image, image('undo.xpm')).
-resource(imgdist, image, image('restore_distance.xpm')).
+resource(imgleq, image, image('restore_leq.xpm')).
 resource(imgdist, image, image('restore_distance.xpm')).
 resource(imgeditfind, image, image('find_replace.xpm')).
 resource(imghelp, image, image('help.xpm')).
@@ -300,7 +300,7 @@ fill_edit_toolbar(TB) :-
 	send(TB, append, tool_button(message(FrameTB, lattice_to_graph), resource(imgsendup), redraw_graph_from_lattice)),
 	send(TB, append, tool_button(message(FrameTB, undo_send_graph), resource(imgundo), undo_redraw_graph)),
     send(TB, append, gap),
-    send(TB, append, tool_button(message(FrameTB, restore_view_leq), resource(imgdist), restore_leq)),
+    send(TB, append, tool_button(message(FrameTB, restore_view_leq), resource(imgleq), restore_leq)),
     send(TB, append, tool_button(message(FrameTB, restore_view_distance), resource(imgdist), restore_distance)).
 
 fill_operators_dialog(D) :-
