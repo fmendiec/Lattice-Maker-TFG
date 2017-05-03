@@ -88,6 +88,7 @@ resource(imgnormalize, image, image('normalize.xpm')).
 resource(imgsendup, image, image('sendup.xpm')).
 resource(imgundo, image, image('undo.xpm')).
 resource(imgdist, image, image('restore_distance.xpm')).
+resource(imgdist, image, image('restore_distance.xpm')).
 resource(imgeditfind, image, image('find_replace.xpm')).
 resource(imghelp, image, image('help.xpm')).
 
@@ -224,6 +225,9 @@ fill_menu(MB) :-
 									condition := message(FrameMB, lattice_noempty), 
                                     end_group := @on)),
 
+    send(E, append, menu_item(restore_leq, message(FrameMB, restore_view_leq),
+									condition := message(FrameMB, lattice_noempty))),
+                                    
     send(E, append, menu_item(restore_distance, message(FrameMB, restore_view_distance),
 									condition := message(FrameMB, lattice_noempty))),
     
@@ -296,6 +300,7 @@ fill_edit_toolbar(TB) :-
 	send(TB, append, tool_button(message(FrameTB, lattice_to_graph), resource(imgsendup), redraw_graph_from_lattice)),
 	send(TB, append, tool_button(message(FrameTB, undo_send_graph), resource(imgundo), undo_redraw_graph)),
     send(TB, append, gap),
+    send(TB, append, tool_button(message(FrameTB, restore_view_leq), resource(imgdist), restore_leq)),
     send(TB, append, tool_button(message(FrameTB, restore_view_distance), resource(imgdist), restore_distance)).
 
 fill_operators_dialog(D) :-
@@ -1450,22 +1455,41 @@ get_modified_text_lattice(F) :-
 	get(F, member, view, V),
 	get(V, text_buffer, B),
 	get(B, modified, @on).
-    
+
+restore_view_leq(F) :-> 
+        delete_all_pred(F,'leq',Index),get(F, member, view, V),get(V, text_buffer, B),
+        write_in_buffer_index(B, 'leq(X, X).\nleq(X, Y):- arc(X, Z), leq(Z, Y).\n' ,Index).    
+
 restore_view_distance(F) :-> 
-        delete_pred(F,'distance',Index),get(F, member, view, V),get(V, text_buffer, B),
+        delete_all_pred(F,'distance',Index),get(F, member, view, V),get(V, text_buffer, B),
         write_in_buffer_index(B, 'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n' ,Index).
 
-delete_pred(F,Pred,Index):-
+% Delete all the occurrences of the predicate in the view and return the index for insert the new predicate
+delete_all_pred(F,Pred,Index) :-
     get(F, member, view, V),
 	get(V, editor, E),
 	send(E, exact_case, @on),
 	get(V, text_buffer, B),
-	get(B, length, Length),
-	get(B, find, 0, Pred, 1, start, @on, @on, Index),
+    Init = 0,
+    find_and_delete_all(B,Pred,Init,Index).
+
+    
+find_and_delete_all(B,Pred,Init,Index) :-
+    % Search the first occurence
+    get(B, find, Init, Pred, 1, start, @on, @on, Index),
     get(B,line_number,Index,Line),
-    % Get all the indices that are in the same line that the target predicate, then calculate the length of the line where is it. 
-    findall(N,(between(Index,Length,N),get(B,line_number,N,Line2),Line==Line2),S), length(S,Count),
-    send(B,delete,Index,Count).
+    
+    % Get the line of the previous index
+    Prev is (Index-1),get(B,line_number,Prev,Line2),
+    
+    % If the previous and the current index are in the same line, it forms part of another predicate
+    (Line =\= Line2
+    
+    % Delete the occurence from the current index to the end of the line and continue searching from the current index
+    -> get(B, length, Length),findall(N,(between(Index,Length,N),get(B,line_number,N,L2),Line==L2),S), length(S,Count),send(B,delete,Index,Count), not(find_and_delete_all(B,Pred,Index,Index2))
+    
+    % Search the next occurence from the Index 
+    ;  (Init2 is (Index+1),not(find_and_delete_all(B,Pred,Init2,Index2)))).
 
 toggle_edit_mode(F) :->
 	get(F, member, view, V),
