@@ -339,7 +339,7 @@ fill_operators_dialog(D) :-
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
 	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing]),
-	send_list(E, append, [switchness, adjointness, monotone,reflexivity,commutativity, distributivity]),
+	send_list(E, append, [switchness, monotone,reflexivity,commutativity, distributivity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
@@ -1460,7 +1460,8 @@ restore_view_leq(F) :->
         get(F, member, view, V),
         get(V, text_buffer, B),
         ( delete_all_pred(F,'leq',Index) ;  get(B,length,Length),Index = Length),
-        write_in_buffer_index(B,'leq(X, Y):- arc(X, Z), leq(Z, Y).\n',Index),write_in_buffer_index(B, 'leq(X, X).\n' ,Index).    
+        write_in_buffer_index(B,'leq(X, Y):- arc(X, Z), leq(Z, Y).\n',Index),
+	write_in_buffer_index(B, 'leq(X, X).\n' ,Index).    
 
 restore_view_distance(F) :-> 
         get(F, member, view, V),
@@ -1490,7 +1491,11 @@ find_and_delete_all(B,Pred,Init,Index) :-
     (Line =\= Line2
     
     % Delete the occurence from the current index to the end of the line and continue searching from the current index
-    -> get(B, length, Length),findall(N,(between(Index,Length,N),get(B,line_number,N,L2),Line==L2),S), length(S,Count),send(B,delete,Index,Count), not(find_and_delete_all(B,Pred,Index,Index2))
+    -> get(B, length, Length),
+	findall(N,(between(Index,Length,N),get(B,line_number,N,L2),Line==L2),S), 
+	length(S,Count),
+	send(B,delete,Index,Count), 
+	not(find_and_delete_all(B,Pred,Index,Index2))
     
     % Search the next occurence from the Index 
     ;  (Init2 is (Index+1),not(find_and_delete_all(B,Pred,Init2,Index2)))).

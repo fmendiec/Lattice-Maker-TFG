@@ -21,9 +21,6 @@ switchness(Aggr1,Aggr2) :-
     
 monotone(Aggr) :-
 	writeln('Monotome\n').
-    
-adjointness(Aggr) :-
-	writeln('Adjointness\n').
 
 reflexivity(Aggr) :-
     writeln('Reflexivity\n'),test_refl_all(Aggr).
