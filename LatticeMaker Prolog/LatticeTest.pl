@@ -25,8 +25,8 @@ associativity(Aggr) :-
 monotone(Aggr) :-
 	writeln('Monotome\n').
     
-adjointness(Aggr) :-
-	writeln('Adjointness\n').
+adjointness(Aggr1,Aggr2) :-
+	writeln('Adjointness\n'),test_adj(Aggr1,Aggr2),writeln('Success').
 
 reflexivity(Aggr) :-
     writeln('Reflexivity\n'),test_refl_all(Aggr),writeln('Success').
@@ -46,6 +46,9 @@ extract([_|T],X):- extract(T,X).
 
 % Get all the pairs (X,Y) where X < Y and X != Y
 getCombinations(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z),lat:leq(X,Y),X\=Y),L).
+
+% Get all the pairs of three elements
+getAllTriplet(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L).
 
 % Do two parameter tests (the first and the second)
 parameter_tests(Aggr,Test1,Test2):- 
@@ -123,10 +126,10 @@ test_nin2(X,Y,Z,Aggr) :-
 % $1($2(X,Y),Z) == $2(X,$1(Y,Z))
 
 test_sw(Aggr1,Aggr2) :- 
-                    findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),
+                    getAllTriplet(L),
                     forall(member((X,Y,Z),L),
-                    (calc_sw1(Aggr1,Aggr2,X,Y,Z,V1),calc_sw2(Aggr1,Aggr2,X,Y,Z,V2),V1==V2
-                    ;   not_equal_sw(Aggr1,Aggr2,X,Y,Z))
+                        (calc_sw1(Aggr1,Aggr2,X,Y,Z,V1),calc_sw2(Aggr1,Aggr2,X,Y,Z,V2),V1==V2
+                        ;   not_equal_sw(Aggr1,Aggr2,X,Y,Z))
                     ).
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
@@ -168,10 +171,24 @@ not_equal_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExampl
 
 test_distr(Aggr1,Aggr2) :-
                             (
-                                findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),
+                                getAllTriplet(L),
                                 forall(member((X,Y,Z),L),test_distr1(Aggr1,Aggr2,X,Y,Z))
                             ->
                                 writeln('First parameter: Success\n'), forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
                             ;
-                                findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L),forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
+                                getAllTriplet(L),forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
                             ).
+                            
+% ADJOINTNESS
+
+test_adj(Aggr1,Aggr2) :-    
+                              getAllTriplet(L), 
+                              forall(member((X,Y,Z),L),
+                                (
+                                    call(lat:Aggr2,Y,Z,V1),call(lat:Aggr1,X,Z,V2),adj(Aggr1,Aggr2,X,Y,V1,V2)
+                                    ; fail_adj(Aggr1,Aggr2,X,Y,Z)
+                                )                             
+                              ).
+adj(Aggr1,Aggr2,X,Y,V1,V2) :- (lat:leq(X,V1), lat:leq(V2,Y),!) ; (not(lat:leq(X,V1)),not(lat:leq(V2,Y))). 
+fail_adj(Aggr1,Aggr2,X,Y,Z) :- writef('%w <= %w(%w,%w) <=/=> %w(%w,%w) <= %w',[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail.
+
