@@ -17,7 +17,7 @@ non_decreasing(Aggr) :-
 	writeln('Non decreassing\n'),parameter_tests(Aggr,test_nde1,test_nde2).
     
 switchness(Aggr1,Aggr2) :-
-    writeln('Switchness\n'),test_sw(Aggr1,Aggr2).
+    writeln('Switchness\n'),test_sw(Aggr1,Aggr2),writeln('Success').
     
 monotone(Aggr) :-
 	writeln('Monotome\n').
@@ -26,10 +26,10 @@ adjointness(Aggr) :-
 	writeln('Adjointness\n').
 
 reflexivity(Aggr) :-
-    writeln('Reflexivity\n'),test_refl_all(Aggr).
+    writeln('Reflexivity\n'),test_refl_all(Aggr),writeln('Success').
 
 commutativity(Aggr) :-
-    writeln('Commutativity\n'),test_com(Aggr).
+    writeln('Commutativity\n'),test_com(Aggr),writeln('Success').
     
 distributivity(Aggr1,Aggr2) :-
     writeln('Distributivity\n'),test_distr(Aggr1,Aggr2).
@@ -59,13 +59,13 @@ do_test(Aggr,Test) :- getCombinations(L),forall(member((X,Y,Z),L),call(Test,X,Y,
 % INCREASING
 
 % Increasing on the first parameter
-% If X < Y => @(X,Y) < @(Y,Z)
+% If X < Y => $(X,Z) < $(Y,Z)
 test_in1(X,Y,Z,Aggr ):-
-                      (call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2),V1\=V2) 
+                      (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2),V1\=V2) 
                       ; (writef('First parameter: Failure\nExample: %w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Increasing on the second parameter
-% If X < Y => @(Z,X) < @(Z,Y)
+% If X < Y => $(Z,X) < $(Z,Y)
 test_in2(X,Y,Z,Aggr) :-
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2),V1\=V2) 
                         ; (writef('Second parameter: Failure\nExample: %w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
@@ -74,13 +74,13 @@ test_in2(X,Y,Z,Aggr) :-
 % NON-DECREASING
 
 % Non-Decreasing on the first parameter
-% If X < Y => @(X,Z) =< @(Y,Z)
+% If X < Y => $(X,Z) =< $(Y,Z)
 test_nde1(X,Y,Z,Aggr) :- 
-                            (call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2)) 
+                            (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2)) 
                             ; (writef('First parameter: Failure\nExample: %w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Non-Decreasing on the second parameter
-% If X < Y => @(Z,X) =< @(Z,Y)
+% If X < Y => $(Z,X) =< $(Z,Y)
 test_nde2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2)) 
                         ; (writef('Second parameter: Failure\nExample: %w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
@@ -89,13 +89,13 @@ test_nde2(X,Y,Z,Aggr) :-
 % DECREASING
 
 % Decreasing on the first parameter 
-% If X < Y => @(X,Z) > @(Y,Z)
+% If X < Y => $(X,Z) > $(Y,Z)
 test_de1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1),V1\=V2) 
                         ; (writef('First parameter: Failure\nExample: %w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Decreasing on the second parameter 
-% If X < Y => @(Z,X) > @(Z,Y)
+% If X < Y => $(Z,X) > $(Z,Y)
 test_de2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1),V1\=V2) 
                         ; (writef('Second parameter: Failure\nExample: %w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
@@ -104,13 +104,13 @@ test_de2(X,Y,Z,Aggr) :-
 % NON INCREASING
 
 % Non-Increasing on the first parameter 
-% If X < Y => @(X,Z) >= @(Y,Z)
+% If X < Y => $(X,Z) >= $(Y,Z)
 test_nin1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1)) 
                         ; (writef('First parameter: Failure\nExample: %w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Non-Increasing on the second parameter 
-% If X < Y => @(Z,X) >= @(Z,Y)
+% If X < Y => $(Z,X) >= $(Z,Y)
 test_nin2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1)) 
                         ; (writef('Second parameter: Failure\nExample: %w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
@@ -124,8 +124,7 @@ test_sw(Aggr1,Aggr2) :-
                     forall(member((X,Y,Z),L),
                     (calc_sw1(Aggr1,Aggr2,X,Y,Z,V1),calc_sw2(Aggr1,Aggr2,X,Y,Z,V2),V1==V2
                     ;   not_equal_sw(Aggr1,Aggr2,X,Y,Z))
-                    ),
-                    writeln('Success').
+                    ).
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
@@ -134,7 +133,7 @@ not_equal_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%
 
 % REFLEXIVITY
 
-test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)),writeln('Success').
+test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)).
 
 test_refl(Aggr,X) :- call(lat:Aggr,X,X,V),X==V ; writef('%w(%w,%w) not equal to %w\nFailure',[Aggr,X,X,X]),fail.
 
@@ -145,8 +144,7 @@ test_com(Aggr) :-
                   findall((X,Y),(lat:members(L),extract(L,X),extract(L,Y)),L),
                   forall(member((X,Y),L),(call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,X,V2),V1==V2
                   ;  not_equal_com(Aggr,X,Y))
-                  ),
-                  writeln('Success').
+                  ).
                   
 not_equal_com(Aggr,X,Y) :- writef('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
 

@@ -317,7 +317,7 @@ fill_operators_dialog(D) :-
 	send(S, active, @off),
     
     % Properties definition box
-    send(D,append,new(PD1,text_item(param1))),
+    send(D,append,new(PD1,text_item(definition))),
     send(PD1,width,70),
     send(PD1,editable,@off),
     send(D,append,new(PD2,text_item(param2))),
@@ -445,7 +445,7 @@ get_math_def(frontier_bot,X,Z) :- format(atom(Z),"~w(B, B) = B",[X]).
 get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w(X, X) = X",[X]).
 get_math_def(commutativity,X,Z) :- format(atom(Z),"~w(X, Y) == ~w(Y, X)",[X,X]).
 get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[X,Y,Y,X]).
-get_math_def(increasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Y) < ~w(Y, Z)",[X,X,X,X]).
+get_math_def(increasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) < ~w(Y, Z)",[X,X,X,X]).
 get_math_def(increasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) < ~w(Z, Y)",[X,X,X,X]).
 get_math_def(non_decreasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) =< ~w(Y, Z)",[X,X]).
 get_math_def(non_decreasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) =< ~w(Z, Y)",[X,X]).
