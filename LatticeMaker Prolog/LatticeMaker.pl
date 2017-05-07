@@ -339,7 +339,7 @@ fill_operators_dialog(D) :-
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
 	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing]),
-	send_list(E, append, [switchness, adjointness, monotone,reflexivity,commutativity, distributivity]),
+	send_list(E, append, [switchness,associativity, adjointness, monotone,reflexivity,commutativity, distributivity]),
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
@@ -386,7 +386,7 @@ options(F, Opt) :->
     ;       send(SC, active, @off)
     ),
     
-    get(D,member,param1,PD1),
+    get(D,member,definition,PD1),
     get(D,member,param2,PD2),
     send(PD1,clear),
     send(PD2,clear),
@@ -399,18 +399,18 @@ options(F, Opt) :->
         % The property needs two aggregators, write them in the text_item depending on wich one is selected
         -> (   two_aggregators(Opt)
            ->  ( (Name == '', Name2 == '') 
-              ->  get_math_def(Opt,'$1','$2',Exp1,p1), get_math_def(Opt,'$1','$2',Exp2,p2)
+              ->  get_math_def(Opt,'$1','$2',Exp1,param1), get_math_def(Opt,'$1','$2',Exp2,param2)
               ; ( (Name == '', Name2 \= '')
-                 -> get_math_def(Opt,'$1',Name2,Exp1,p1), get_math_def(Opt,'$1',Name2,Exp2,p2)
+                 -> get_math_def(Opt,'$1',Name2,Exp1,param1), get_math_def(Opt,'$1',Name2,Exp2,param2)
                  ; ( (Name \= '', Name2 == '')
-                    -> get_math_def(Opt,Name,'$2',Exp1,p1), get_math_def(Opt,Name,'$2',Exp2,p2)
-                    ;  get_math_def(Opt,Name, Name2,Exp1,p1),get_math_def(Opt,Name, Name2,Exp2,p2)
+                    -> get_math_def(Opt,Name,'$2',Exp1,param1), get_math_def(Opt,Name,'$2',Exp2,param2)
+                    ;  get_math_def(Opt,Name, Name2,Exp1,param1),get_math_def(Opt,Name, Name2,Exp2,param2)
                    ) 
                 )
              )
            
           % Only needs one aggregator
-          ;   (Name == '' -> get_math_def(Opt,'$',Exp1,p1),get_math_def(Opt,'$',Exp2,p2) ; get_math_def(Opt,Name,Exp1,p1), get_math_def(Opt,Name,Exp2,p2))
+          ;   (Name == '' -> get_math_def(Opt,'$',Exp1,param1),get_math_def(Opt,'$',Exp2,param2) ; get_math_def(Opt,Name,Exp1,param1), get_math_def(Opt,Name,Exp2,param2))
           ), send(PD1,append,Exp1),send(PD2,append,Exp2)
         
         % The aggregator only uses one parameter
@@ -439,23 +439,24 @@ two_params(non_decreasing).
 two_params(decreasing).
 two_params(non_increasing).
 two_params(distributivity).
-    
-get_math_def(frontier_top,X,Z) :- format(atom(Z),"~w(T, T) = T",[X]).
-get_math_def(frontier_bot,X,Z) :- format(atom(Z),"~w(B, B) = B",[X]).
-get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w(X, X) = X",[X]).
-get_math_def(commutativity,X,Z) :- format(atom(Z),"~w(X, Y) == ~w(Y, X)",[X,X]).
-get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[X,Y,Y,X]).
-get_math_def(increasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) < ~w(Y, Z)",[X,X,X,X]).
-get_math_def(increasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) < ~w(Z, Y)",[X,X,X,X]).
-get_math_def(non_decreasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) =< ~w(Y, Z)",[X,X]).
-get_math_def(non_decreasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) =< ~w(Z, Y)",[X,X]).
-get_math_def(decreasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) > ~w(Y, Z)",[X,X]).
-get_math_def(decreasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) > ~w(Z, Y)",[X,X]).
-get_math_def(non_increasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) >= ~w(Y, Z)",[X,X]).
-get_math_def(non_increasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) >= ~w(Z, Y)",[X,X]).
-get_math_def(distributivity,X,Y,Z,p1) :- format(atom(Z), "~w(~w(X, Y), Z) == ~w(~w(X, Z), ~w(Y, Z))",[Y,X,X,Y,Y]).
-get_math_def(distributivity,X,Y,Z,p2) :- format(atom(Z), "~w(X,~w(Y, Z)) == ~w(~w(X, Y), ~w(X, Z))",[Y,X,X,Y,Y]).
 
+% Return the atom with the mathematical expression of the property
+get_math_def(frontier_top,Ag1,S) :- format(atom(S),"~w(T, T) = T",[Ag1]).
+get_math_def(frontier_bot,Ag1,S) :- format(atom(S),"~w(B, B) = B",[Ag1]).
+get_math_def(reflexivity,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
+get_math_def(commutativity,Ag1,S) :- format(atom(S),"~w(X, Y) == ~w(Y, X)",[Ag1,Ag1]).
+get_math_def(associativity,Ag1,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag1,Ag1,Ag1]).
+get_math_def(switchness,Ag1,Ag2,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag2,Ag2,Ag1]).
+get_math_def(increasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) < ~w(Y, Z)",[Ag1,Ag1,Ag1,Ag1]).
+get_math_def(increasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) < ~w(Z, Y)",[Ag1,Ag1,Ag1,Ag1]).
+get_math_def(non_decreasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) =< ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(non_decreasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) =< ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(decreasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) > ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(decreasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) > ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(non_increasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) >= ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(non_increasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) >= ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(distributivity,Ag1,Ag2,S,param1) :- format(atom(S), "~w(~w(X, Y), Z) == ~w(~w(X, Z), ~w(Y, Z))",[Ag2,Ag1,Ag1,Ag2,Ag2]).
+get_math_def(distributivity,Ag1,Ag2,S,param2) :- format(atom(S), "~w(X,~w(Y, Z)) == ~w(~w(X, Y), ~w(X, Z))",[Ag2,Ag1,Ag1,Ag2,Ag2]).
 
 fill_terms(F) :->
 	get(F, member(dialog_eval), D),

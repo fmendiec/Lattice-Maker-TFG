@@ -19,6 +19,9 @@ non_decreasing(Aggr) :-
 switchness(Aggr1,Aggr2) :-
     writeln('Switchness\n'),test_sw(Aggr1,Aggr2),writeln('Success').
     
+associativity(Aggr) :-
+    writeln('Associativity\n'),test_sw(Aggr,Aggr),writeln('Success').
+    
 monotone(Aggr) :-
 	writeln('Monotome\n').
     
