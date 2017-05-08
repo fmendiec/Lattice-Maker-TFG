@@ -338,8 +338,9 @@ fill_operators_dialog(D) :-
     add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
-	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing]),
-	send_list(E, append, [switchness, associativity, adjointness, monotone,reflexivity,commutativity, distributivity]),
+	send_list(E, append, [noSelection]),
+    send_list(E,append,['BASIC',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotone,reflexivity,commutativity,'- - - - - - - - -']),
+	send_list(E, append, ['MULTIPLE',switchness, adjointness, distributivity,'- - - - - - - - -']),
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
@@ -1261,7 +1262,7 @@ eval_selected_aggregator(F) :->
 	pce_open(V, write, Fd),
 	set_output(Fd),
 
-    get_aggregator(F,D,aggregators,Name,NumA),
+    get_aggregator(F,D,aggregators,Name,NumA),not(empty_aggr(Name)),
 		append_param(D, NumA, [], LParams),
 		(	call_aggregator(Name, LParams, L)
 		->  maplist(show_result(LParams), L)
@@ -1297,10 +1298,14 @@ test_selected_aggregator(F) :->
     
 	set_output(Fd),
     
+    not((empty_prop(Prop),writeln('ERROR: please, select a valid the property.'))),
+    
     get_aggregator(F,D,aggregators,Name,_),
     
+    not(empty_aggr(Name)),
+    
     (   two_aggregators(Prop)
-        -> get_aggregator(F,D,second,Name2,_),call(Prop,Name,Name2)
+        -> get_aggregator(F,D,second,Name2,_),not(aggr_selected(Name2)),call(Prop,Name,Name2)
         ; call(Prop,Name)
     ),
 	close(Fd),
@@ -1308,6 +1313,13 @@ test_selected_aggregator(F) :->
     send(V, editable, @off),
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
+empty_aggr('') :- writeln('ERROR: please, select the aggregator.').
+empty_prop('BASIC').
+empty_prop('MULTIPLE').
+empty_prop('- - - - - - - - -').
+empty_prop(noSelection).
+                        
+    
 eval_distance(F) :-> 
     get(F, member(dialog_eval), D),
 	get(D, member, view, V),

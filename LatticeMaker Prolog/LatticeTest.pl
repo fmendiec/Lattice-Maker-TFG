@@ -129,12 +129,12 @@ test_sw(Aggr1,Aggr2) :-
                     getAllTriplet(L),
                     forall(member((X,Y,Z),L),
                         (calc_sw1(Aggr1,Aggr2,X,Y,Z,V1),calc_sw2(Aggr1,Aggr2,X,Y,Z,V2),V1==V2
-                        ;   not_equal_sw(Aggr1,Aggr2,X,Y,Z))
+                        ;   fail_sw(Aggr1,Aggr2,X,Y,Z))
                     ).
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
-not_equal_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
 % REFLEXIVITY
@@ -149,25 +149,25 @@ test_refl(Aggr,X) :- call(lat:Aggr,X,X,V),X==V ; writef('%w(%w,%w) not equal to 
 test_com(Aggr) :- 
                   findall((X,Y),(lat:members(L),extract(L,X),extract(L,Y)),L),
                   forall(member((X,Y),L),(call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,X,V2),V1==V2
-                  ;  not_equal_com(Aggr,X,Y))
+                  ;  fail_com(Aggr,X,Y))
                   ).
                   
-not_equal_com(Aggr,X,Y) :- writef('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
+fail_com(Aggr,X,Y) :- writef('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
 
 
 % DISTRIBUTIVITY
 
 test_distr1(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,X,Y,V),call(lat:Aggr2,V,Z,V1),call(lat:Aggr2,X,Z,U1),call(lat:Aggr2,Y,Z,U2),
                                   call(lat:Aggr1,U1,U2,V2),V1==V2 
-                                  ; not_equal_distr1(Aggr1,Aggr2,X,Y,Z).
+                                  ; fail_distr1(Aggr1,Aggr2,X,Y,Z).
                                   
-not_equal_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
+fail_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
 
 test_distr2(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,V1),call(lat:Aggr2,X,Y,U1),call(lat:Aggr2,X,Z,U2),
                                   call(lat:Aggr1,U1,U2,V2),V1==V2 
-                                  ; not_equal_distr2(Aggr1,Aggr2,X,Y,Z).
+                                  ; fail_distr2(Aggr1,Aggr2,X,Y,Z).
                                   
-not_equal_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
+fail_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
 
 test_distr(Aggr1,Aggr2) :-
                             (
@@ -181,14 +181,15 @@ test_distr(Aggr1,Aggr2) :-
                             
 % ADJOINTNESS
 
-test_adj(Aggr1,Aggr2) :-    
-                              getAllTriplet(L), 
-                              forall(member((X,Y,Z),L),
-                                (
-                                    call(lat:Aggr2,Y,Z,V1),call(lat:Aggr1,X,Z,V2),adj(Aggr1,Aggr2,X,Y,V1,V2)
-                                    ; fail_adj(Aggr1,Aggr2,X,Y,Z)
-                                )                             
-                              ).
-adj(Aggr1,Aggr2,X,Y,V1,V2) :- (lat:leq(X,V1), lat:leq(V2,Y),!) ; (not(lat:leq(X,V1)),not(lat:leq(V2,Y))). 
 fail_adj(Aggr1,Aggr2,X,Y,Z) :- writef('%w <= %w(%w,%w) <=/=> %w(%w,%w) <= %w',[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail.
+
+test_adj(Aggr1,Aggr2) :-    
+                          getAllTriplet(L), 
+                          forall(member((X,Y,Z),L),
+                            (
+                                call(lat:Aggr2,Y,Z,V1),call(lat:Aggr1,X,Z,V2),lat:leq(X,V1),lat:leq(V2,Y),writeln(V1),writeln(V2),writeln(X),writeln(Y)
+                                ; fail_adj(Aggr1,Aggr2,X,Y,Z)
+                            )                             
+                          ).
+adj(Aggr1,Aggr2,X,Y,V1,V2) :- (lat:leq(X,V1), lat:leq(V2,Y),!) ; (not(lat:leq(X,V1)),not(lat:leq(V2,Y))). 
 
