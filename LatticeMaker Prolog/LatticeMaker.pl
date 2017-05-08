@@ -335,16 +335,15 @@ fill_operators_dialog(D) :-
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
-    add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
 	send_list(E, append, [noSelection]),
-    send_list(E,append,['BASIC',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotone,reflexivity,commutativity,'- - - - - - - - -']),
-	send_list(E, append, ['MULTIPLE',switchness, adjointness, distributivity,'- - - - - - - - -']),
+    send_list(E,append,['< < < BASIC > > >',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotone,reflexivity,commutativity,'- - - - - - - - - - - - - -']),
+	send_list(E, append, ['< < MULTIPLE > >',switchness, adjointness, distributivity,'- - - - - - - - - - - - - -']),
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
-    add_label(W3, infor1, '\nDistance checker', normal, blue, 12),
+    add_label(W3, infor1, '\nDistance measure', normal, blue, 12),
     add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
     add_dragmenu(W3,1,2),
     
@@ -1314,9 +1313,9 @@ test_selected_aggregator(F) :->
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
 empty_aggr('') :- writeln('ERROR: please, select the aggregator.').
-empty_prop('BASIC').
-empty_prop('MULTIPLE').
-empty_prop('- - - - - - - - -').
+empty_prop('< < < BASIC > > >').
+empty_prop('< < MULTIPLE > >').
+empty_prop('- - - - - - - - - - - - - -').
 empty_prop(noSelection).
                         
     
