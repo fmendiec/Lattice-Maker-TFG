@@ -337,6 +337,7 @@ fill_operators_dialog(D) :-
 	send(E, show_label, @off),
 	send_list(E, append, [noSelection]),
     send_list(E,append,['< < < BASIC > > >',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotone,reflexivity,commutativity,'- - - - - - - - - - - - - -']),
+    send_list(E,append,['< < COMBINED > >', t_norma, t_conorma, implication,'- - - - - - - - - - - - - -']),
 	send_list(E, append, ['< < MULTIPLE > >',switchness, adjointness, distributivity,'- - - - - - - - - - - - - -']),
 	send(E, layout, vertical),
 	send(E, alignment, center),
@@ -1339,6 +1340,7 @@ test_selected_aggregator(F) :->
 empty_aggr('') :- writeln('ERROR: please, select the aggregator.').
 empty_prop('< < < BASIC > > >').
 empty_prop('< < MULTIPLE > >').
+empty_prop('< < COMBINED > >').
 empty_prop('- - - - - - - - - - - - - -').
 empty_prop(noSelection).
                         
