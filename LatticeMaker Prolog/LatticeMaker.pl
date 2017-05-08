@@ -345,7 +345,11 @@ fill_operators_dialog(D) :-
     
     add_label(W3, infor1, '\nDistance measure', normal, blue, 12),
     add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
+    send(W3,append,new(DM, menu(action,cycle,message(D,change_dist_button_label,@arg1)))),
+    send_list(DM,append,[generate,eval]),
+    send(DM, alignment, center),
     add_dragmenu(W3,1,2),
+    activate_dragmenu(W3,1,2,@off),
     
 	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
@@ -365,10 +369,11 @@ fill_operators_dialog(D) :-
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
-    send(D, append, new(BDist, button(distance, message(D, eval_distance))), right),
+    send(D, append, new(BDist, button(generate, message(D, distance_action))), right),
 	send(BDist, font, font(arial, bold, 12)),
 	send(BDist, colour, blue),
     send(BDist, help_message, tag, 'Check the distances'),
+    send(BDist,label,'Generate distance'),
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -376,6 +381,27 @@ fill_operators_dialog(D) :-
 	send(Output, editable, @off),
 
 	send(D, resize_message, message(D, layout, @arg2)).
+
+change_dist_button_label(F,Opt) :->
+    get(F, member(dialog_eval), D),
+    get(D,member,generate,B),
+    (
+        Opt == generate 
+        -> send(B,label,'Generate distance'), get_container_optgroup(D, C),activate_dragmenu(C,1,2,@off)
+        ; send(B,label,'Eval distance'), get_container_optgroup(D, C),activate_dragmenu(C,1,2,@on)
+    ).
+
+distance_action(F) :->  
+    get(F, member(dialog_eval), D),
+	get_container_optgroup(D, CO),
+	get(CO, member(action), S),
+	get(S, selection, Opt),
+    (
+        Opt == generate 
+        -> send(F,restore_view_distance)
+        ; send(F,eval_distance)
+    ).
+    
 
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
@@ -516,7 +542,7 @@ activate_dragmenu(G, DefArity, Arity, OnOff) :-
 	forall(between(DefArity, Arity, I),
 			(       get_term_name(I, StrText),
 					get(G, member(StrText), DM),
-					send(DM, displayed, OnOff)
+					send(DM, active, OnOff)
 			)).
 
 fill_dialog(D) :-
