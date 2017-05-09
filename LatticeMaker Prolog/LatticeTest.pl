@@ -150,7 +150,7 @@ fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,
 
 test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)).
 
-test_refl(Aggr,X) :- call(lat:Aggr,X,X,V),X==V ; writef('%w(%w,%w) not equal to %w\nFailure',[Aggr,X,X,X]),fail.
+test_refl(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('%w(%w,%w) not equal to %w\nFailure',[Aggr,X,X,X]),fail).
 
 
 % COMMUTATIVITY
