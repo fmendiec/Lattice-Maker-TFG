@@ -40,7 +40,9 @@ distributivity(Aggr1,Aggr2) :-
 t_norm(Aggr) :- 
     ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE')).
     
-
+t_conorm(Aggr) :-
+    ( test_tconorm(Aggr) -> writeln('\nT-CONORM: SUCCESS') ; writeln('\nT-CONORM: FAILURE')).
+    
 % TEST PREDICATES
 
 % Extract an element from a given list 
@@ -202,12 +204,28 @@ adj(Aggr1,Aggr2,X,Y,V1,V2) :- (lat:leq(X,V1), lat:leq(V2,Y),!) ; (not(lat:leq(X,
 
 test_mono(Aggr) :- do_test(Aggr,test_in1),do_test(Aggr,test_in2).
 
-% T-Norm
-% Aggregator is an and, is commutative, associative, monotone, and identity element is top
 
-test_tnorm(Aggr) :- is_and(Aggr),commutativity(Aggr),associativity(Aggr),lat:top(T),identity_element(Aggr,T),monotony(Aggr),write('').
+% T-NORM
+% Aggregator is and, is commutative, associative, monotone, and identity element is top
+
+test_tnorm(Aggr) :- is_and(Aggr),commutativity(Aggr),associativity(Aggr),lat:top(T),identity_element(Aggr,T),monotony(Aggr).
 
 identity_element(Aggr,E) :- forall(lat:member(X),((call(lat:Aggr,X,E,V),X==V) ; (writef("%w is not the identity element\n",[E]),fail))),writef('Identity element %w: Success\n',[E]).
 
-is_and(Aggr) :- ( name(Aggr,AA),append("and_",SN,AA) -> writef('%w is an and aggregator\n',[Aggr]) ; writef("%w is not an and aggregator\n",[Aggr]),fail ).
+is_and(Aggr) :- 
+                ( name(Aggr,AA),append("and_",SN,AA) 
+                    -> writef('%w is an AND aggregator\n',[Aggr]) 
+                    ; writef("%w is not an AND aggregator\n",[Aggr]),fail 
+                ).
 
+
+% T-CONORM
+% Aggregator is or, is commutative, associative, monotone, and identity element is top
+
+test_tconorm(Aggr) :- is_or(Aggr),commutativity(Aggr),associativity(Aggr),lat:bot(B),identity_element(Aggr,B),monotony(Aggr).
+
+is_or(Aggr) :- 
+                ( name(Aggr,AA),append("or_",SN,AA) 
+                    -> writef('%w is an OR aggregator\n',[Aggr]) 
+                    ; writef("%w is not an OR aggregator\n",[Aggr]),fail 
+                ).
