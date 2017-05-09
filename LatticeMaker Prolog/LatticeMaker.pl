@@ -88,7 +88,6 @@ resource(imgnormalize, image, image('normalize.xpm')).
 resource(imgsendup, image, image('sendup.xpm')).
 resource(imgundo, image, image('undo.xpm')).
 resource(imgleq, image, image('restore_leq.xpm')).
-resource(imgdist, image, image('restore_distance.xpm')).
 resource(imgeditfind, image, image('find_replace.xpm')).
 resource(imghelp, image, image('help.xpm')).
 
@@ -300,8 +299,7 @@ fill_edit_toolbar(TB) :-
 	send(TB, append, tool_button(message(FrameTB, lattice_to_graph), resource(imgsendup), redraw_graph_from_lattice)),
 	send(TB, append, tool_button(message(FrameTB, undo_send_graph), resource(imgundo), undo_redraw_graph)),
     send(TB, append, gap),
-    send(TB, append, tool_button(message(FrameTB, restore_view_leq), resource(imgleq), restore_leq)),
-    send(TB, append, tool_button(message(FrameTB, restore_view_distance), resource(imgdist), restore_distance)).
+    send(TB, append, tool_button(message(FrameTB, restore_view_leq), resource(imgleq), restore_leq)).
 
 fill_operators_dialog(D) :-
 	add_label(D, aggrhelp, 'Select an Aggregator to EVAL or TEST', normal, blue, 12),
@@ -317,7 +315,7 @@ fill_operators_dialog(D) :-
 	send(S, active, @off),
     
     % Properties definition box
-    send(D,append,new(PD1,text_item(param1))),
+    send(D,append,new(PD1,text_item(definition))),
     send(PD1,width,70),
     send(PD1,editable,@off),
     send(D,append,new(PD2,text_item(param2))),
@@ -335,17 +333,22 @@ fill_operators_dialog(D) :-
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
-    add_label(W3, infor2, '(Some need two aggregators)', normal, blue, 12),
 	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
 	send(E, show_label, @off),
-	send_list(E, append, [noSelection,frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing]),
-	send_list(E, append, [switchness, adjointness, monotone,reflexivity,commutativity, distributivity]),
+	send_list(E, append, [noSelection]),
+    send_list(E,append,['< < < BASIC > > >',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotony,reflexivity,commutativity,'- - - - - - - - - - - - - -']),
+    send_list(E,append,['< < COMBINED > >', t_norm, t_conorm, implication,'- - - - - - - - - - - - - -']),
+	send_list(E, append, ['< < MULTIPLE > >',switchness, adjointness, distributivity,'- - - - - - - - - - - - - -']),
 	send(E, layout, vertical),
 	send(E, alignment, center),
     
-    add_label(W3, infor1, '\nDistance checker', normal, blue, 12),
+    add_label(W3, infor1, '\nDistance measure', normal, blue, 12),
     add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
+    send(W3,append,new(DM, menu(action,cycle,message(D,change_dist_button_label,@arg1)))),
+    send_list(DM,append,[generate,eval]),
+    send(DM, alignment, center),
     add_dragmenu(W3,1,2),
+    activate_dragmenu(W3,1,2,@off),
     
 	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
@@ -365,10 +368,11 @@ fill_operators_dialog(D) :-
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
-    send(D, append, new(BDist, button(distance, message(D, eval_distance))), right),
+    send(D, append, new(BDist, button(generate, message(D, distance_action))), right),
 	send(BDist, font, font(arial, bold, 12)),
 	send(BDist, colour, blue),
     send(BDist, help_message, tag, 'Check the distances'),
+    send(BDist,label,'Generate distance'),
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -376,6 +380,27 @@ fill_operators_dialog(D) :-
 	send(Output, editable, @off),
 
 	send(D, resize_message, message(D, layout, @arg2)).
+
+change_dist_button_label(F,Opt) :->
+    get(F, member(dialog_eval), D),
+    get(D,member,generate,B),
+    (
+        Opt == generate 
+        -> send(B,label,'Generate distance'), get_container_optgroup(D, C),activate_dragmenu(C,1,2,@off)
+        ; send(B,label,'Eval distance'), get_container_optgroup(D, C),activate_dragmenu(C,1,2,@on)
+    ).
+
+distance_action(F) :->  
+    get(F, member(dialog_eval), D),
+	get_container_optgroup(D, CO),
+	get(CO, member(action), S),
+	get(S, selection, Opt),
+    (
+        Opt == generate 
+        -> send(F,restore_view_distance)
+        ; send(F,eval_distance)
+    ).
+    
 
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
@@ -386,7 +411,7 @@ options(F, Opt) :->
     ;       send(SC, active, @off)
     ),
     
-    get(D,member,param1,PD1),
+    get(D,member,definition,PD1),
     get(D,member,param2,PD2),
     send(PD1,clear),
     send(PD2,clear),
@@ -399,18 +424,18 @@ options(F, Opt) :->
         % The property needs two aggregators, write them in the text_item depending on wich one is selected
         -> (   two_aggregators(Opt)
            ->  ( (Name == '', Name2 == '') 
-              ->  get_math_def(Opt,'$1','$2',Exp1,p1), get_math_def(Opt,'$1','$2',Exp2,p2)
+              ->  get_math_def(Opt,'$1','$2',Exp1,param1), get_math_def(Opt,'$1','$2',Exp2,param2)
               ; ( (Name == '', Name2 \= '')
-                 -> get_math_def(Opt,'$1',Name2,Exp1,p1), get_math_def(Opt,'$1',Name2,Exp2,p2)
+                 -> get_math_def(Opt,'$1',Name2,Exp1,param1), get_math_def(Opt,'$1',Name2,Exp2,param2)
                  ; ( (Name \= '', Name2 == '')
-                    -> get_math_def(Opt,Name,'$2',Exp1,p1), get_math_def(Opt,Name,'$2',Exp2,p2)
-                    ;  get_math_def(Opt,Name, Name2,Exp1,p1),get_math_def(Opt,Name, Name2,Exp2,p2)
+                    -> get_math_def(Opt,Name,'$2',Exp1,param1), get_math_def(Opt,Name,'$2',Exp2,param2)
+                    ;  get_math_def(Opt,Name, Name2,Exp1,param1),get_math_def(Opt,Name, Name2,Exp2,param2)
                    ) 
                 )
              )
            
           % Only needs one aggregator
-          ;   (Name == '' -> get_math_def(Opt,'$',Exp1,p1),get_math_def(Opt,'$',Exp2,p2) ; get_math_def(Opt,Name,Exp1,p1), get_math_def(Opt,Name,Exp2,p2))
+          ;   (Name == '' -> get_math_def(Opt,'$',Exp1,param1),get_math_def(Opt,'$',Exp2,param2) ; get_math_def(Opt,Name,Exp1,param1), get_math_def(Opt,Name,Exp2,param2))
           ), send(PD1,append,Exp1),send(PD2,append,Exp2)
         
         % The aggregator only uses one parameter
@@ -433,28 +458,37 @@ options(F, Opt) :->
     
 two_aggregators(switchness).
 two_aggregators(distributivity).
+two_aggregators(adjointness).
 
 two_params(increasing).
 two_params(non_decreasing).
 two_params(decreasing).
 two_params(non_increasing).
 two_params(distributivity).
-    
-get_math_def(frontier_top,X,Z) :- format(atom(Z),"~w(T, T) = T",[X]).
-get_math_def(frontier_bot,X,Z) :- format(atom(Z),"~w(B, B) = B",[X]).
-get_math_def(reflexivity,X,Z) :- format(atom(Z),"~w(X, X) = X",[X]).
-get_math_def(commutativity,X,Z) :- format(atom(Z),"~w(X, Y) == ~w(Y, X)",[X,X]).
-get_math_def(switchness,X,Y,Z) :- format(atom(Z),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[X,Y,Y,X]).
-get_math_def(increasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Y) < ~w(Y, Z)",[X,X,X,X]).
-get_math_def(increasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) < ~w(Z, Y)",[X,X,X,X]).
-get_math_def(non_decreasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) =< ~w(Y, Z)",[X,X]).
-get_math_def(non_decreasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) =< ~w(Z, Y)",[X,X]).
-get_math_def(decreasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) > ~w(Y, Z)",[X,X]).
-get_math_def(decreasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) > ~w(Z, Y)",[X,X]).
-get_math_def(non_increasing,X,Z,p1) :- format(atom(Z),"If X < Y => ~w(X, Z) >= ~w(Y, Z)",[X,X]).
-get_math_def(non_increasing,X,Z,p2) :- format(atom(Z),"If X < Y => ~w(Z, X) >= ~w(Z, Y)",[X,X]).
-get_math_def(distributivity,X,Y,Z,p1) :- format(atom(Z), "~w(~w(X, Y), Z) == ~w(~w(X, Z), ~w(Y, Z))",[Y,X,X,Y,Y]).
-get_math_def(distributivity,X,Y,Z,p2) :- format(atom(Z), "~w(X,~w(Y, Z)) == ~w(~w(X, Y), ~w(X, Z))",[Y,X,X,Y,Y]).
+
+% Return the atom with the mathematical expression of the property
+
+get_math_def(frontier_top,Ag1,S) :- format(atom(S),"~w(T, T) = T",[Ag1]).
+get_math_def(frontier_bot,Ag1,S) :- format(atom(S),"~w(B, B) = B",[Ag1]).
+get_math_def(reflexivity,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
+get_math_def(commutativity,Ag1,S) :- format(atom(S),"~w(X, Y) == ~w(Y, X)",[Ag1,Ag1]).
+get_math_def(associativity,Ag1,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag1,Ag1,Ag1]).
+get_math_def(monotony,Ag1,S) :- format(atom(S), "If X < Y => ~w(X, Z) < ~w(Y, Z) and ~w(Z, X) < ~w(Z, Y)",[Ag1,Ag1,Ag1,Ag1]).
+get_math_def(t_norm,Ag1,S) :- format(atom(S), "~w is AND, commutative, associative, monotone and ~w(X,T)==X",[Ag1,Ag1]).
+get_math_def(t_conorm,Ag1,S) :- format(atom(S), "~w is OR, commutative, associative, monotone and ~w(X,B)==X",[Ag1,Ag1]).
+get_math_def(implication,Ag1,S) :- format(atom(S), "If X < Y => ~w(X, Z) < ~w(Y, Z) and ~w(Z, X) > ~w(Z, Y)", [Ag1,Ag1,Ag1,Ag1]).
+get_math_def(adjointness,Ag1,Ag2,S) :- format(atom(S), "X <= ~w(Y,Z) <==> ~w(X,Z) <= Y", [Ag2,Ag1]).
+get_math_def(switchness,Ag1,Ag2,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag2,Ag2,Ag1]).
+get_math_def(increasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) < ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(increasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) < ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(non_decreasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) =< ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(non_decreasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) =< ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(decreasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) > ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(decreasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) > ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(non_increasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) >= ~w(Y, Z)",[Ag1,Ag1]).
+get_math_def(non_increasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) >= ~w(Z, Y)",[Ag1,Ag1]).
+get_math_def(distributivity,Ag1,Ag2,S,param1) :- format(atom(S), "~w(~w(X, Y), Z) == ~w(~w(X, Z), ~w(Y, Z))",[Ag2,Ag1,Ag1,Ag2,Ag2]).
+get_math_def(distributivity,Ag1,Ag2,S,param2) :- format(atom(S), "~w(X,~w(Y, Z)) == ~w(~w(X, Y), ~w(X, Z))",[Ag2,Ag1,Ag1,Ag2,Ag2]).
 
 
 fill_terms(F) :->
@@ -513,7 +547,7 @@ activate_dragmenu(G, DefArity, Arity, OnOff) :-
 	forall(between(DefArity, Arity, I),
 			(       get_term_name(I, StrText),
 					get(G, member(StrText), DM),
-					send(DM, displayed, OnOff)
+					send(DM, active, OnOff)
 			)).
 
 fill_dialog(D) :-
@@ -1258,7 +1292,7 @@ eval_selected_aggregator(F) :->
 	pce_open(V, write, Fd),
 	set_output(Fd),
 
-    get_aggregator(F,D,aggregators,Name,NumA),
+    get_aggregator(F,D,aggregators,Name,NumA),not(empty_aggr(Name)),
 		append_param(D, NumA, [], LParams),
 		(	call_aggregator(Name, LParams, L)
 		->  maplist(show_result(LParams), L)
@@ -1294,10 +1328,14 @@ test_selected_aggregator(F) :->
     
 	set_output(Fd),
     
+    not((empty_prop(Prop),writeln('ERROR: please, select a valid the property.'))),
+    
     get_aggregator(F,D,aggregators,Name,_),
     
-    (   (Prop == switchness ; Prop == distributivity)
-        -> get_aggregator(F,D,second,Name2,_),call(Prop,Name,Name2)
+    not(empty_aggr(Name)),
+    
+    (   two_aggregators(Prop)
+        -> get_aggregator(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
         ; call(Prop,Name)
     ),
 	close(Fd),
@@ -1305,6 +1343,14 @@ test_selected_aggregator(F) :->
     send(V, editable, @off),
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
+empty_aggr('') :- writeln('ERROR: please, select the aggregator.').
+empty_prop('< < < BASIC > > >').
+empty_prop('< < MULTIPLE > >').
+empty_prop('< < COMBINED > >').
+empty_prop('- - - - - - - - - - - - - -').
+empty_prop(noSelection).
+                        
+    
 eval_distance(F) :-> 
     get(F, member(dialog_eval), D),
 	get(D, member, view, V),
