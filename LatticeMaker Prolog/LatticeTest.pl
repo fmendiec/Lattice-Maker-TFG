@@ -43,6 +43,10 @@ t_norm(Aggr) :-
 t_conorm(Aggr) :-
     ( test_tconorm(Aggr) -> writeln('\nT-CONORM: SUCCESS') ; writeln('\nT-CONORM: FAILURE')).
     
+implication(Aggr) :-
+     writeln('Implication:\n'),test_imp(Aggr).   
+    
+    
 % TEST PREDICATES
 
 % Extract an element from a given list 
@@ -186,18 +190,6 @@ test_distr(Aggr1,Aggr2) :-
                             
 % ADJOINTNESS
 
-fail_adj(Aggr1,Aggr2,X,Y,Z) :- writef('%w <= %w(%w,%w) <=/=> %w(%w,%w) <= %w',[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail.
-
-test_adj(Aggr1,Aggr2) :-    
-                          getAllTriplet(L), 
-                          forall(member((X,Y,Z),L),
-                            (
-                                call(lat:Aggr2,Y,Z,V1),call(lat:Aggr1,X,Z,V2),lat:leq(X,V1),lat:leq(V2,Y),writeln(V1),writeln(V2),writeln(X),writeln(Y)
-                                ; fail_adj(Aggr1,Aggr2,X,Y,Z)
-                            )                             
-                          ).
-adj(Aggr1,Aggr2,X,Y,V1,V2) :- (lat:leq(X,V1), lat:leq(V2,Y),!) ; (not(lat:leq(X,V1)),not(lat:leq(V2,Y))). 
-
 
 % MONOTOMY
 % Increasing in both parameters
@@ -213,7 +205,7 @@ test_tnorm(Aggr) :- is_and(Aggr),commutativity(Aggr),associativity(Aggr),lat:top
 identity_element(Aggr,E) :- forall(lat:member(X),((call(lat:Aggr,X,E,V),X==V) ; (writef("%w is not the identity element\n",[E]),fail))),writef('Identity element %w: Success\n',[E]).
 
 is_and(Aggr) :- 
-                ( name(Aggr,AA),append("and_",SN,AA) 
+                ( name(Aggr,AA),append("and_",_,AA) 
                     -> writef('%w is an AND aggregator\n',[Aggr]) 
                     ; writef("%w is not an AND aggregator\n",[Aggr]),fail 
                 ).
@@ -225,7 +217,13 @@ is_and(Aggr) :-
 test_tconorm(Aggr) :- is_or(Aggr),commutativity(Aggr),associativity(Aggr),lat:bot(B),identity_element(Aggr,B),monotony(Aggr).
 
 is_or(Aggr) :- 
-                ( name(Aggr,AA),append("or_",SN,AA) 
+                ( name(Aggr,AA),append("or_",_,AA) 
                     -> writef('%w is an OR aggregator\n',[Aggr]) 
                     ; writef("%w is not an OR aggregator\n",[Aggr]),fail 
                 ).
+                
+                
+% IMPLICATION
+% Increasing in the first parameter and decreasing in the second one
+
+test_imp(Aggr) :- writeln('Increasing:\n'),do_test(Aggr,test_in1),writeln('Decreasing'),do_test(Aggr,test_de2).
