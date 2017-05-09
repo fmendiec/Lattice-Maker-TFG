@@ -1,46 +1,44 @@
 frontier_top(Aggr) :-
-    writeln('Frontier Top\n'),lat:top(T),test_refl(Aggr,T),write('Success').
+    write('Frontier Top: '),lat:top(T),test_refl(Aggr,T),write('Success').
     
 frontier_bot(Aggr) :-
-    writeln('Frontier Bot\n'),lat:bot(B),test_refl(Aggr,B),write('Success').
+    write('Frontier Bot: '),lat:bot(B),test_refl(Aggr,B),write('Success').
     
 increasing(Aggr) :-
-    writeln('Increasing\n'),parameter_tests(Aggr,test_in1,test_in2).
+    writeln('Increasing:\n'),parameter_tests(Aggr,test_in1,test_in2).
     
 non_increasing(Aggr) :-
-	writeln('Non increasing\n'),parameter_tests(Aggr,test_nin1,test_nin2).
+	writeln('Non increasing:\n'),parameter_tests(Aggr,test_nin1,test_nin2).
     
 decreasing(Aggr) :-
-	writeln('Decreasing\n'),parameter_tests(Aggr,test_de1,test_de2).
+	writeln('Decreasing:\n'),parameter_tests(Aggr,test_de1,test_de2).
     
 non_decreasing(Aggr) :-
-	writeln('Non decreassing\n'),parameter_tests(Aggr,test_nde1,test_nde2).
+	writeln('Non decreassing:\n'),parameter_tests(Aggr,test_nde1,test_nde2).
     
 switchness(Aggr1,Aggr2) :-
-    writeln('Switchness\n'),test_sw(Aggr1,Aggr2),writeln('Success').
+    write('Switchness: '),test_sw(Aggr1,Aggr2),writeln('Success').
     
 associativity(Aggr) :-
-    writeln('Associativity\n'),test_sw(Aggr,Aggr),writeln('Success').
+    write('Associativity: '),test_sw(Aggr,Aggr),writeln('Success').
     
 monotony(Aggr) :-
-	writeln('Monotome\n'),test_mono(Aggr),writeln('Success').
+	writeln('Monotome:\n'),test_mono(Aggr).
     
 adjointness(Aggr1,Aggr2) :-
-	writeln('Adjointness\n'),test_adj(Aggr1,Aggr2),writeln('Success').
+	write('Adjointness: '),test_adj(Aggr1,Aggr2),writeln('Success').
 
 reflexivity(Aggr) :-
-    writeln('Reflexivity\n'),test_refl_all(Aggr),writeln('Success').
+    write('Reflexivity: '),test_refl_all(Aggr),writeln('Success').
 
 commutativity(Aggr) :-
-    writeln('Commutativity\n'),test_com(Aggr),writeln('Success').
+    write('Commutativity: '),test_com(Aggr),writeln('Success').
     
 distributivity(Aggr1,Aggr2) :-
-    writeln('Distributivity\n'),test_distr(Aggr1,Aggr2).
+    write('Distributivity: '),test_distr(Aggr1,Aggr2).
     
 t_norm(Aggr) :- 
-    writeln('T-Norm\n'),test_tnorm(Aggr),writeln('Succes').
-    
-
+    ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE')).
     
 
 % TEST PREDICATES
@@ -207,9 +205,9 @@ test_mono(Aggr) :- do_test(Aggr,test_in1),do_test(Aggr,test_in2).
 % T-Norm
 % Aggregator is an and, is commutative, associative, monotone, and identity element is top
 
-test_tnorm(Aggr) :- is_and(Aggr).%test_com(Aggr),test_sw(Aggr,Aggr),test_mono(Aggr),lat:top(T),identity_element(Aggr,T).
+test_tnorm(Aggr) :- is_and(Aggr),commutativity(Aggr),associativity(Aggr),lat:top(T),identity_element(Aggr,T),monotony(Aggr),write('').
 
-identity_element(Aggr,E) :- forall(lat:member(X),((call(lat:Aggr,X,E,V),X==V) ; (writef("%w is not the identity element",[E])))).
+identity_element(Aggr,E) :- forall(lat:member(X),((call(lat:Aggr,X,E,V),X==V) ; (writef("%w is not the identity element\n",[E]),fail))),writef('Identity element %w: Success\n',[E]).
 
-is_and(Aggr) :- append("and_",SN,Aggr) ; writef("%w is not an and",[Aggr]),fail.
+is_and(Aggr) :- ( name(Aggr,AA),append("and_",SN,AA) -> writef('%w is an and aggregator\n',[Aggr]) ; writef("%w is not an and aggregator\n",[Aggr]),fail ).
 

@@ -1332,7 +1332,7 @@ test_selected_aggregator(F) :->
     not(empty_aggr(Name)),
     
     (   two_aggregators(Prop)
-        -> get_aggregator(F,D,second,Name2,_),not(aggr_selected(Name2)),call(Prop,Name,Name2)
+        -> get_aggregator(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
         ; call(Prop,Name)
     ),
 	close(Fd),
