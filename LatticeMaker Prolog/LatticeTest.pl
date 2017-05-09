@@ -26,7 +26,7 @@ monotony(Aggr) :-
 	writeln('Monotome:\n'),test_mono(Aggr).
     
 adjointness(Aggr1,Aggr2) :-
-	write('Adjointness: '),test_adj(Aggr1,Aggr2),writeln('Success').
+	( test_adj(Aggr1,Aggr2) -> writeln('\nAdjointness: Success') ; writeln('\nAdjointness: Failure')).
 
 reflexivity(Aggr) :-
     write('Reflexivity: '),test_refl_all(Aggr),writeln('Success').
@@ -38,10 +38,10 @@ distributivity(Aggr1,Aggr2) :-
     write('Distributivity: '),test_distr(Aggr1,Aggr2).
     
 t_norm(Aggr) :- 
-    ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE')).
+    ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE\n')).
     
 t_conorm(Aggr) :-
-    ( test_tconorm(Aggr) -> writeln('\nT-CONORM: SUCCESS') ; writeln('\nT-CONORM: FAILURE')).
+    ( test_tconorm(Aggr) -> writeln('\nT-CONORM: SUCCESS') ; writeln('\nT-CONORM: FAILURE\n')).
     
 implication(Aggr) :-
      writeln('Implication:\n'),test_imp(Aggr).   
@@ -189,6 +189,26 @@ test_distr(Aggr1,Aggr2) :-
                             ).
                             
 % ADJOINTNESS
+
+test_adj(Aggr1,Aggr2) :- t_norm(Aggr1),implication(Aggr2),adjoint(Aggr1,Aggr2).
+
+adjoint(Aggr1,Aggr2) :- 
+                            getAllTriplet(L),
+                            forall(member((X,Y,Z),L),
+                                (
+                                    call(lat:Aggr2,Y,Z,V1),
+                                    call(lat:Aggr1,X,Z,V2),
+                                    bicond(Aggr1,Aggr2,X,Y,Z,V1,V2)
+                                )
+                            ).
+
+bicond(Aggr1,Aggr2,X,Y,Z,V1,V2) :- ( lat:leq(X,V1),lat:leq(V2,Y) 
+                                    -> true
+                                    ; ( not(lat:leq(X,V1)),not(lat:leq(V2,Y)) 
+                                        -> true
+                                        ; writef("%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
+                                      )
+                                    ).
 
 
 % MONOTOMY
