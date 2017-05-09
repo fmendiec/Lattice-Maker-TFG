@@ -337,7 +337,7 @@ fill_operators_dialog(D) :-
 	send(E, show_label, @off),
 	send_list(E, append, [noSelection]),
     send_list(E,append,['< < < BASIC > > >',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotone,reflexivity,commutativity,'- - - - - - - - - - - - - -']),
-    send_list(E,append,['< < COMBINED > >', t_norma, t_conorma, implication,'- - - - - - - - - - - - - -']),
+    send_list(E,append,['< < COMBINED > >', t_norm, t_conorm, implication,'- - - - - - - - - - - - - -']),
 	send_list(E, append, ['< < MULTIPLE > >',switchness, adjointness, distributivity,'- - - - - - - - - - - - - -']),
 	send(E, layout, vertical),
 	send(E, alignment, center),
@@ -467,11 +467,13 @@ two_params(non_increasing).
 two_params(distributivity).
 
 % Return the atom with the mathematical expression of the property
+
 get_math_def(frontier_top,Ag1,S) :- format(atom(S),"~w(T, T) = T",[Ag1]).
 get_math_def(frontier_bot,Ag1,S) :- format(atom(S),"~w(B, B) = B",[Ag1]).
 get_math_def(reflexivity,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
 get_math_def(commutativity,Ag1,S) :- format(atom(S),"~w(X, Y) == ~w(Y, X)",[Ag1,Ag1]).
 get_math_def(associativity,Ag1,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag1,Ag1,Ag1]).
+get_math_def(monotone,Ag1,S) :- format(atom(S), "If X < Y => ~w(X, Z) < ~w(Y, Z) and ~w(Z, X) < ~w(Z, Y)",[Ag1,Ag1,Ag1,Ag1,Ag1,Ag1]).
 get_math_def(adjointness,Ag1,Ag2,S) :- format(atom(S), "X <= ~w(Y,Z) <==> ~w(X,Z) <= Y", [Ag2,Ag1]).
 get_math_def(switchness,Ag1,Ag2,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag2,Ag2,Ag1]).
 get_math_def(increasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z) < ~w(Y, Z)",[Ag1,Ag1,Ag1,Ag1]).
@@ -484,6 +486,7 @@ get_math_def(non_increasing,Ag1,S,param1) :- format(atom(S),"If X < Y => ~w(X, Z
 get_math_def(non_increasing,Ag1,S,param2) :- format(atom(S),"If X < Y => ~w(Z, X) >= ~w(Z, Y)",[Ag1,Ag1]).
 get_math_def(distributivity,Ag1,Ag2,S,param1) :- format(atom(S), "~w(~w(X, Y), Z) == ~w(~w(X, Z), ~w(Y, Z))",[Ag2,Ag1,Ag1,Ag2,Ag2]).
 get_math_def(distributivity,Ag1,Ag2,S,param2) :- format(atom(S), "~w(X,~w(Y, Z)) == ~w(~w(X, Y), ~w(X, Z))",[Ag2,Ag1,Ag1,Ag2,Ag2]).
+
 
 fill_terms(F) :->
 	get(F, member(dialog_eval), D),

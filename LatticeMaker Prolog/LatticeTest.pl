@@ -22,8 +22,8 @@ switchness(Aggr1,Aggr2) :-
 associativity(Aggr) :-
     writeln('Associativity\n'),test_sw(Aggr,Aggr),writeln('Success').
     
-monotone(Aggr) :-
-	writeln('Monotome\n').
+monotony(Aggr) :-
+	writeln('Monotome\n'),test_mono(Aggr),writeln('Success').
     
 adjointness(Aggr1,Aggr2) :-
 	writeln('Adjointness\n'),test_adj(Aggr1,Aggr2),writeln('Success').
@@ -36,6 +36,11 @@ commutativity(Aggr) :-
     
 distributivity(Aggr1,Aggr2) :-
     writeln('Distributivity\n'),test_distr(Aggr1,Aggr2).
+    
+t_norm(Aggr) :- 
+    writeln('T-Norm\n'),test_tnorm(Aggr),writeln('Succes').
+    
+
     
 
 % TEST PREDICATES
@@ -192,4 +197,19 @@ test_adj(Aggr1,Aggr2) :-
                             )                             
                           ).
 adj(Aggr1,Aggr2,X,Y,V1,V2) :- (lat:leq(X,V1), lat:leq(V2,Y),!) ; (not(lat:leq(X,V1)),not(lat:leq(V2,Y))). 
+
+
+% MONOTOMY
+% Increasing in both parameters
+
+test_mono(Aggr) :- do_test(Aggr,test_in1),do_test(Aggr,test_in2).
+
+% T-Norm
+% Aggregator is an and, is commutative, associative, monotone, and identity element is top
+
+test_tnorm(Aggr) :- is_and(Aggr).%test_com(Aggr),test_sw(Aggr,Aggr),test_mono(Aggr),lat:top(T),identity_element(Aggr,T).
+
+identity_element(Aggr,E) :- forall(lat:member(X),((call(lat:Aggr,X,E,V),X==V) ; (writef("%w is not the identity element",[E])))).
+
+is_and(Aggr) :- append("and_",SN,Aggr) ; writef("%w is not an and",[Aggr]),fail.
 
