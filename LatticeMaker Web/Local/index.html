@@ -108,7 +108,7 @@ pri_inf(X,Y,bottom).</textarea>
 				<div class = "twocols" id = "controls">
                     <div class = "file-controls">
                         File:
-                        <input type = "text" id = "lattice-name" class = "file-name" value = "alfabeta.lat">
+                        <input type = "text" id = "lattice-name" class = "file-name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
                         <input type = "file" id="latfile" onchange = upload_lattice_button("textarea-lattice","lattice-name","latfile")>
                         <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "./media/upload.png"></button>
                         <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "media/download.png"> </button>
@@ -125,10 +125,16 @@ pri_inf(X,Y,bottom).</textarea>
 				<h2>Properties</h2>
 				<div id = "properties-form">
                     <form id = "properties-form">
-                        Aggregator 1: <select><option>sdjafñkl </option> </select>
-                        Aggregator 2: <select> </select>
+                        Property: 
+                        <select class="lattice-selection"> 
+                            <option>No Selection</option>
+                            <option>Frontier top</option>
+                            <option>Frontier bot</option>
+                        </select>
+                        Aggregator 1: <select class="lattice-selection"> </select>
+                        Aggregator 2: <select class="lattice-selection"> </select>
                         <input type = "submit">
-                        <br>Result<textarea id="property-result" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
+                        <h3>Result</h3><textarea id="property-result" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
                     </form>
                 </div>
 			</div>

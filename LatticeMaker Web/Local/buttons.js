@@ -8,7 +8,7 @@ var addMember = function(idTextArea)
     var newMember = prompt("What is the name of the new member?");
     
     // Cancel
-    if (newMember == null)
+    if (!newMember)
         return;
     
     // Error
@@ -28,7 +28,7 @@ var addMember = function(idTextArea)
     if (members.filter(function(m){ return m.member == newMember; }).length == 0)
     {
         // Get the index of the last member
-        var code = $("#"+idTextArea).val();
+        var code = textarea.value;
         var regex_member = /member\s*\(\s*(.+)\s*\)\s*\./g;
         var match = true;
         var index = 0;
@@ -37,30 +37,28 @@ var addMember = function(idTextArea)
         var member = 'member('+newMember+').'
 
         // Append the new member to TextArea
-        textarea.value = [textarea.value.slice(0,index), member, textarea.value.slice(index+1)].join('\n');
+        code = [code.slice(0,index), member, code.slice(index+1)].join('\n');
 
         // Get the index of the members list
-        code = $("#"+idTextArea).val();
         var regex_members = /\[\s*(.+)\s*\]\s*\)\s*\./g;
         match = regex_members.exec(code);
 
         // Create Members section
-        if (match == null)
+        if (!match)
         {
             index += member.length;
-
-            textarea.value = [textarea.value.slice(0,index+1), 'members(['+newMember+']).', textarea.value.slice(index+1)].join('\n'); 
+            code = [code.slice(0,index+1), 'members(['+newMember+']).', code.slice(index+1)].join('\n'); 
         }
 
         // Add to members section
         else
         {
             index = match.index + match[1].length + 1;
-
             // Append the new member to the list in TextArea
-            textarea.value = [textarea.value.slice(0,index), ','+newMember, textarea.value.slice(index)].join('');
+            code = [code.slice(0,index), ','+newMember, code.slice(index)].join('');
         }
-
+        
+        textarea.value = code;
         // Updating TextArea by triggering the event "change"
         $("#"+idTextArea).trigger('change');
     }
@@ -72,8 +70,6 @@ var removeMember = function(idCanvas,idTextArea)
     var canvas = document.getElementById(idCanvas);
    
     var selected = null;
-    
-    $("#"+idCanvas).css("cursor", "crosshair");
 
     // When user click on canvas
     $("#"+idCanvas).one("click",function(event){    
@@ -82,7 +78,7 @@ var removeMember = function(idCanvas,idTextArea)
         selected = detectSelectedMember(canvas,event);    
         
         // Member selected
-        if (selected != null)
+        if (selected)
             deleteMember(idTextArea,selected.member);
         
         else
@@ -94,14 +90,14 @@ var removeMember = function(idCanvas,idTextArea)
     {
          // Load TextArea
         var textarea = document.getElementById(idTextArea);
-        var code = $("#"+idTextArea).val();
+        var code = textarea.value;
         
         // Delete member predicates
         var regex_member = new RegExp("member\\s*\\(\\s*"+member+"\\s*\\)\\s*\\.","g");
         code = code.replace(regex_member,'\r');
         
         // Delete arcs, top and bottom predicates
-        var regex_arc = new RegExp("arc\\s*\\(\\s*("+member+",.+)|(.+,"+member+")\\s*\\)\\s*\\.","g");
+        var regex_arc = new RegExp("arc\\s*\\(\\s*("+member+"\\s*,.+)|(.+,\\s*"+member+")\\s*\\)\\s*\\.","g");
         code = code.replace(regex_arc,'\r');
         
         // Delete from members list
@@ -158,13 +154,13 @@ var createArc = function(idCanvas,idTextArea)
     {   
         // Load TextArea
         var textarea = document.getElementById(idTextArea);
-        var code = $("#"+idTextArea).val();
+        var code = textarea.value;
         
         // Arc formed by the two members
         var regex_exarc = new RegExp("arc\\s*\\(\\s*(("+member1+"\\s*,\\s*"+member2+")\|("+member2+"\\s*,\\s*"+member1+"))\\s*\\)\\s*\\.","g");
         
         // If the arc exists, don't write it
-        if (code.match(regex_exarc) == null)
+        if (!code.match(regex_exarc))
         {
             // Get the index of the last member
             var regex_arc = /arc\s*\(\s*([^,()]+\s*,\s*[^,()]+)\s*\)\s*\./g;
@@ -173,8 +169,9 @@ var createArc = function(idCanvas,idTextArea)
             while(match = regex_arc.exec(code)){index = match.index + match[0].length};
 
             // Append the new member to TextArea
-            textarea.value = [textarea.value.slice(0,index), 'arc('+member1+','+member2+').', textarea.value.slice(index+1)].join('\n');
+            code = [code.slice(0,index), 'arc('+member1+','+member2+').', code.slice(index+1)].join('\n');
 
+            textarea.value = code;
             // Updating TextArea by triggering the event "change"
             $("#"+idTextArea).trigger('change');
         }
@@ -191,7 +188,7 @@ var removeArc = function(idCanvas,idTextArea)
         var textarea = document.getElementById(idTextArea);
         
         // Delete arcs, top and bottom predicates
-        var code = $("#"+idTextArea).val();
+        var code = textarea.value;
         var regex_arc = new RegExp("arc\\s*\\(\\s*(("+member1+"\\s*,\\s*"+member2+")\|("+member2+"\\s*,\\s*"+member1+"))\\s*\\)\\s*\\.","g");
         code = code.replace(regex_arc,'\r');
         

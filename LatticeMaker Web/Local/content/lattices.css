@@ -42,3 +42,19 @@ div.file-controls button {
     background-color: #E7E8E7;
     outline: 0;
 }
+
+
+.lattice-selection {
+  display: inline-block;
+  height: 30px;
+  width: 150px;
+  outline: none;
+  color: #000;
+  margin-right: 30px;
+  padding: 5px 20px 5px 5px;
+  font-size: 16px;
+  border: 1px solid #C8BFC4;
+  border-radius: 4px;
+  box-shadow: inset 1px 1px 2px #ddd8dc;
+  background: #fff;
+}
