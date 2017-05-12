@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="./content/tree.js"></script>
 		<script type="text/javascript" src="./content/lattices.js"></script>
         <script type = "text/javascript" src = "buttons.js"> </script>
+        <script type = "text/javascript" src = "properties.js" </script>
 		<script>hljs.initHighlightingOnLoad();</script>
 		<link href="http://dectau.uclm.es/unfold/content/img/favicon.ico?d=30082016" type="image/x-icon" rel="icon">
 		<link href="./content/css" rel="stylesheet" type="text/css">
@@ -131,15 +132,15 @@ pri_inf(X,Y,bottom).</textarea>
                             <option>Frontier top</option>
                             <option>Frontier bot</option>
                         </select>
-                        Aggregator 1: <select class="lattice-selection"> </select>
-                        Aggregator 2: <select class="lattice-selection"> </select>
+                        Aggregator 1: <select id = "aggr_combo1" class="lattice-selection"> </select>
+                        Aggregator 2: <select id = "aggr_combo2" class="lattice-selection"> </select>
                         <input type = "submit">
                         <h3>Result</h3><textarea id="property-result" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
                     </form>
                 </div>
 			</div>
 		</div>
-		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" ); upload_lattice_drop("textarea-lattice","lattice-name");
+		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" ); getAggrFromTextArea("textarea-lattice","aggr_combo1","aggr_combo2"); upload_lattice_drop("textarea-lattice","lattice-name"); 
             </script>
 </div>
 
