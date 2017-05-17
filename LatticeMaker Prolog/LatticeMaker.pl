@@ -106,6 +106,7 @@ variable(filename, name, both, "File loaded").
 variable(redrawn, bool, both, "Graph redrawn").
 variable(max_nodes_layer, int, both, "Nodes in widest layer").
 variable(loaded_lattice,bool,both,"The lattice is being loaded").
+variable(property, char_array, both, "Property to test").
 
 % Local configuration
 locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''), grouping([repeat(3)])]).
@@ -346,6 +347,7 @@ fill_operators_dialog(D) :-
     send(PLB,label,'Property'),
     send(PLB,alignment,center),
     send(PLB,select_message,message(D,options,@arg1?key)),
+    add_prop_list('Basic',PLB),
     
     add_label(W4, infor1, '\nDistance measure', normal, blue, 12),
     send(W4,append,new(DM, menu(action,cycle,message(D,change_dist_button_label,@arg1)))),
@@ -437,6 +439,9 @@ options(F, Opt) :->
     send(PD2,clear),
     get_aggregator(F,D,aggregators,Name,_),
     get_aggregator(F,D,second,Name2,_),
+    
+    send(F, slot, property, Opt),
+    
     (
         % The aggregator is applied to two params, write each param in a different text_item
         two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,115),send(PD1,geometry,40,85)
@@ -1335,12 +1340,12 @@ append_param(D, I, L, NewL):-
 		append([S], L, L1),
 		J is I - 1,
 		append_param(D, J, L1, NewL).
-
+        
 test_selected_aggregator(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_optgroup(D, COpt),
-	get(COpt, member(evaluation), E),
-	get(E, selection, Prop),
+	get(COpt, member, list_browser, E),
+	get(F, slot, property, Prop),
 	get(D, member, view, V),
     
 	send(V, clear),
@@ -1349,12 +1354,12 @@ test_selected_aggregator(F) :->
     
 	set_output(Fd),
     
-    not((empty_prop(Prop),writeln('ERROR: please, select a valid the property.'))),
+    not((empty_prop(Prop),send(F, report, error, 'Please, select a valid property.'))),
     
     get_aggregator(F,D,aggregators,Name,_),
     
     not(empty_aggr(Name)),
-    
+
     (   two_aggregators(Prop)
         -> get_aggregator(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
         ; call(Prop,Name)
@@ -1364,12 +1369,8 @@ test_selected_aggregator(F) :->
     send(V, editable, @off),
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
-empty_aggr('') :- writeln('ERROR: please, select the aggregator.').
-empty_prop('< < < BASIC > > >').
-empty_prop('< < MULTIPLE > >').
-empty_prop('< < COMBINED > >').
-empty_prop('- - - - - - - - - - - - - -').
-empty_prop(noSelection).
+empty_aggr('').
+empty_prop(@nil).
                         
     
 eval_distance(F) :-> 
