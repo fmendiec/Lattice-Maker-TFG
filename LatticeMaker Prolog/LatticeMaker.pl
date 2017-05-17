@@ -106,6 +106,7 @@ variable(filename, name, both, "File loaded").
 variable(redrawn, bool, both, "Graph redrawn").
 variable(max_nodes_layer, int, both, "Nodes in widest layer").
 variable(loaded_lattice,bool,both,"The lattice is being loaded").
+variable(property, char_array, both, "Property to test").
 
 % Local configuration
 locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''), grouping([repeat(3)])]).
@@ -307,11 +308,12 @@ fill_operators_dialog(D) :-
 	send(D, append, new(B, menu(aggregators, cycle, message(D, fill_terms)))),
 	send_list(B, append, [empty]),
 	send(B, alignment, left),
+    send(B, label, 'Aggr 1 ($1)'),
     % Second Aggregator Control
 	send(D, append, new(S, menu(second, cycle, message(D, fill_terms))),right),
 	send_list(S, append, [empty]),
 	send(S, alignment, center),
-    send(S, show_label, @on),
+    send(S, label, 'Aggr 2 ($2)'),
 	send(S, active, @off),
     
     % Properties definition box
@@ -327,52 +329,60 @@ fill_operators_dialog(D) :-
 	send(W1, alignment, center),
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
-
+    send(new(W4, dialog_group(group13, group)), right, W3),
+    send(new(W5, dialog_group(aggregators, box)), below, W2),
+    send(new(W6, dialog_group(distances, box)), below, W3),
+    send(new(W7, dialog_group(view, box)), below, W4),
+    
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
-	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
-	send(E, show_label, @off),
-	send_list(E, append, [noSelection]),
-    send_list(E,append,['< < < BASIC > > >',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotony,reflexivity,commutativity,'- - - - - - - - - - - - - -']),
-    send_list(E,append,['< < COMBINED > >', t_norm, t_conorm, implication,'- - - - - - - - - - - - - -']),
-	send_list(E, append, ['< < MULTIPLE > >',switchness, adjointness, distributivity,'- - - - - - - - - - - - - -']),
-	send(E, layout, vertical),
-	send(E, alignment, center),
+    add_label(W3,infor2,'Category',bold,black,12),
+	
+    send(W3,append,new(CC,menu(category,choice,message(D,fill_properties,@arg1)))),
+    send_list(CC,append,['Basic','Multiple','Combined']),
+    send(CC,show_label,@off),
+    send(W3,append,new(PLB,list_browser)),
+    send(PLB,size,size(20,10)),
+    send(PLB,below,CC),
+    send(PLB,label,'Property'),
+    send(PLB,alignment,center),
+    send(PLB,select_message,message(D,options,@arg1?key)),
+    add_prop_list('Basic',PLB),
     
-    add_label(W3, infor1, '\nDistance measure', normal, blue, 12),
-    add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
-    send(W3,append,new(DM, menu(action,cycle,message(D,change_dist_button_label,@arg1)))),
-    send_list(DM,append,[generate,eval]),
-    send(DM, alignment, center),
-    add_dragmenu(W3,1,2),
-    activate_dragmenu(W3,1,2,@off),
+    add_label(W4, infor1, '\nDistance measure', normal, blue, 12),
+    add_dragmenu(W4,1,2),
     
 	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
-	send(D, append, BEval),
+	send(W5, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
 	send(BEval, colour, blue),
     send(BEval, help_message, tag, 'Evaluate the aggregator and terms selected'),
 
 	new(Output, view),
-	send(D, append, new(BClear, button(clear, message(Output, clear))), right),
-	send(BClear, font, font(arial, bold, 12)),
-	send(BClear, colour, blue),
-    send(BClear, help_message, tag, 'Clear the results view'),
 
-	send(D, append, new(BTest, button(test, message(D, test_selected_aggregator))), right),
+	send(W5, append, new(BTest, button(test, message(D, test_selected_aggregator))), right),
 	send(BTest, font, font(arial, bold, 12)),
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
-    send(D, append, new(BDist, button(generate, message(D, distance_action))), right),
+    send(W6, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
 	send(BDist, font, font(arial, bold, 12)),
 	send(BDist, colour, blue),
-    send(BDist, help_message, tag, 'Check the distances'),
-    send(BDist,label,'Generate distance'),
+    send(BDist, help_message, tag, 'Generate the distances'),
+    
+    send(W6, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
+	send(BDistEval, font, font(arial, bold, 12)),
+	send(BDistEval, colour, blue),
+    send(BDistEval, help_message, tag, 'Check the distances'),
+    
+    send(W7, append, new(BClear, button(clear, message(Output, clear)))),
+	send(BClear, font, font(arial, bold, 12)),
+	send(BClear, colour, blue),
+    send(BClear, help_message, tag, 'Clear the results view'),
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -381,27 +391,24 @@ fill_operators_dialog(D) :-
 
 	send(D, resize_message, message(D, layout, @arg2)).
 
-change_dist_button_label(F,Opt) :->
-    get(F, member(dialog_eval), D),
-    get(D,member,generate,B),
-    (
-        Opt == generate 
-        -> send(B,label,'Generate distance'), get_container_optgroup(D, C),activate_dragmenu(C,1,2,@off)
-        ; send(B,label,'Eval distance'), get_container_optgroup(D, C),activate_dragmenu(C,1,2,@on)
-    ).
-
-distance_action(F) :->  
-    get(F, member(dialog_eval), D),
-	get_container_optgroup(D, CO),
-	get(CO, member(action), S),
-	get(S, selection, Opt),
-    (
-        Opt == generate 
-        -> send(F,restore_view_distance)
-        ; send(F,eval_distance)
-    ).
     
-
+fill_properties(F,Arg) :->
+    get(F, member(dialog_eval), D),
+    get_container_optgroup(D,Opt),
+    get(Opt,member,list_browser,LB),
+    add_prop_list(Arg,LB).
+    
+add_prop_list('Basic',LB) :- 
+        send(LB,clear),
+        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,associativity,monotony,reflexivity,commutativity]).
+add_prop_list('Multiple',LB) :- 
+        send(LB,clear),
+        send_list(LB,append,[switchness, adjointness, distributivity]).
+add_prop_list('Combined',LB) :- 
+        send(LB,clear),
+        send_list(LB,append,[t_norm, t_conorm, implication]).
+    
+    
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
     % Unlock the Second Aggregator Combobox
@@ -417,9 +424,12 @@ options(F, Opt) :->
     send(PD2,clear),
     get_aggregator(F,D,aggregators,Name,_),
     get_aggregator(F,D,second,Name2,_),
+    
+    send(F, slot, property, Opt),
+    
     (
         % The aggregator is applied to two params, write each param in a different text_item
-        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,125)
+        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,115),send(PD1,geometry,40,85)
         
         % The property needs two aggregators, write them in the text_item depending on wich one is selected
         -> (   two_aggregators(Opt)
@@ -440,7 +450,8 @@ options(F, Opt) :->
         
         % The aggregator only uses one parameter
         % The property uses two aggregators
-        ; send(PD1,label,'Definition:'),send(PD2,displayed,@off), (   two_aggregators(Opt)
+        ; send(PD1,label,'Definition:'),send(PD2,displayed,@off),send(PD1,geometry,40,100), 
+        (   two_aggregators(Opt)
            ->  ( (Name == '', Name2 == '') 
               ->  get_math_def(Opt,'$1','$2',Exp1) 
               ; ( (Name == '', Name2 \= '')
@@ -1128,7 +1139,7 @@ fill_from_lattice(F) :-
 	maplist(atom_string, L, L1),
 	get_container_combo(Oper, Container),
 	fill_dragmenu(Container, 1, 6, L1),
-	get_container_optgroup(Oper,Dist_combo),
+	get_container_dist(Oper,Dist_combo),
     fill_dragmenu(Dist_combo, 1, 2, L1).
 
 % Fill the Aggregator Combobox given
@@ -1314,12 +1325,12 @@ append_param(D, I, L, NewL):-
 		append([S], L, L1),
 		J is I - 1,
 		append_param(D, J, L1, NewL).
-
+        
 test_selected_aggregator(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_optgroup(D, COpt),
-	get(COpt, member(evaluation), E),
-	get(E, selection, Prop),
+	get(COpt, member, list_browser, E),
+	get(F, slot, property, Prop),
 	get(D, member, view, V),
     
 	send(V, clear),
@@ -1328,12 +1339,12 @@ test_selected_aggregator(F) :->
     
 	set_output(Fd),
     
-    not((empty_prop(Prop),writeln('ERROR: please, select a valid the property.'))),
+    not((empty_prop(Prop),send(F, report, error, 'Please, select a valid property.'))),
     
     get_aggregator(F,D,aggregators,Name,_),
     
     not(empty_aggr(Name)),
-    
+
     (   two_aggregators(Prop)
         -> get_aggregator(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
         ; call(Prop,Name)
@@ -1343,16 +1354,13 @@ test_selected_aggregator(F) :->
     send(V, editable, @off),
 	send(F, report, status, '%s aggregator tested.', E?selection).
 
-empty_aggr('') :- writeln('ERROR: please, select the aggregator.').
-empty_prop('< < < BASIC > > >').
-empty_prop('< < MULTIPLE > >').
-empty_prop('< < COMBINED > >').
-empty_prop('- - - - - - - - - - - - - -').
-empty_prop(noSelection).
+empty_aggr('').
+empty_prop(@nil).
                         
     
 eval_distance(F) :-> 
     get(F, member(dialog_eval), D),
+    get_container_dist(D,CD),
 	get(D, member, view, V),
     
     send(V, clear),
@@ -1360,7 +1368,7 @@ eval_distance(F) :->
 	pce_open(V, write, Fd),
     set_output(Fd),
     
-    get_dist_terms(D,E1,E2),
+    get_dist_terms(CD,E1,E2),
     lat_graph:distance(E1,E2,Z),
     writef('The distance between %w and %w is %w',[E1,E2,Z]),
     
@@ -1372,9 +1380,8 @@ eval_distance(F) :->
 get_dist_terms(D,E1,E2) :-
 	get_term_name(1, StrTerm1),
     get_term_name(2, StrTerm2),
-    get_container_optgroup(D, C),
-    get(C, member, StrTerm1, T1),
-    get(C, member, StrTerm2, T2),
+    get(D, member, StrTerm1, T1),
+    get(D, member, StrTerm2, T2),
     get_var_name(1, X1),
     get_var_name(2, X2),
     get_selection(T1, E1, X1),
@@ -1579,5 +1586,8 @@ get_container_combo(D, G11):-
 get_container_optgroup(D, G12):-
 	get(D, member, group1, G1),
 	get(G1, member, group12, G12).
-
+get_container_dist(D, G13):-
+	get(D, member, group1, G1),
+	get(G1, member, group13, G13).
+    
 :- pce_end_class.
