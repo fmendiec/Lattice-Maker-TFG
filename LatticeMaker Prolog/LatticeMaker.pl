@@ -333,14 +333,15 @@ fill_operators_dialog(D) :-
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
-	send(W3, append, new(E, menu(evaluation, cycle, message(D, options, @arg1)))),
-	send(E, show_label, @off),
-	send_list(E, append, [noSelection]),
-    send_list(E,append,['< < < BASIC > > >',frontier_top, frontier_bot, increasing, non_increasing, decreasing, non_decreasing,associativity,monotony,reflexivity,commutativity,'- - - - - - - - - - - - - -']),
-    send_list(E,append,['< < COMBINED > >', t_norm, t_conorm, implication,'- - - - - - - - - - - - - -']),
-	send_list(E, append, ['< < MULTIPLE > >',switchness, adjointness, distributivity,'- - - - - - - - - - - - - -']),
-	send(E, layout, vertical),
-	send(E, alignment, center),
+	
+    send(W3,append,new(CLB,browser(category,size:=size(10,10)))),
+    send(CLB,label,'Category'),
+    send_list(CLB,append,['Basic','Multiple','Combined']),
+    send(CLB,select_message,message(D,fill_properties,@arg1?key)),
+    send(W3,append,new(PLB,list_browser)),
+    send(PLB,size,size(20,10)),
+    send(PLB,right,CLB),
+    send(PLB,label,'Property'),
     
     add_label(W3, infor1, '\nDistance measure', normal, blue, 12),
     add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
@@ -381,6 +382,22 @@ fill_operators_dialog(D) :-
 
 	send(D, resize_message, message(D, layout, @arg2)).
 
+fill_properties(F,Arg) :->
+    get(F, member(dialog_eval), D),
+    get_container_optgroup(D,Opt),
+    get(Opt,member,list_browser,LB),
+    add_prop_list(Arg,LB).
+    
+add_prop_list('Basic',LB) :- 
+        send(LB,clear),
+        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,associativity,monotony,reflexivity,commutativity]).
+add_prop_list('Multiple',LB) :- 
+        send(LB,clear),
+        send_list(LB,append,[switchness, adjointness, distributivity]).
+add_prop_list('Combined',LB) :- 
+        send(LB,clear),
+        send_list(LB,append,[t_norm, t_conorm, implication]).
+    
 change_dist_button_label(F,Opt) :->
     get(F, member(dialog_eval), D),
     get(D,member,generate,B),
