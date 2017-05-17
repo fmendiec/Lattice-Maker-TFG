@@ -334,15 +334,16 @@ fill_operators_dialog(D) :-
 	add_dragmenu(W2, 1, 6),
 
 	add_label(W3, infor1, 'Select the property to TEST', normal, blue, 12),
+    add_label(W3,infor2,'Category',bold,black,12),
 	
-    send(W3,append,new(CLB,browser(category,size:=size(10,10)))),
-    send(CLB,label,'Category'),
-    send_list(CLB,append,['Basic','Multiple','Combined']),
-    send(CLB,select_message,message(D,fill_properties,@arg1?key)),
+    send(W3,append,new(CC,menu(category,choice,message(D,fill_properties,@arg1)))),
+    send_list(CC,append,['Basic','Multiple','Combined']),
+    send(CC,show_label,@off),
     send(W3,append,new(PLB,list_browser)),
     send(PLB,size,size(20,10)),
-    send(PLB,right,CLB),
+    send(PLB,below,CC),
     send(PLB,label,'Property'),
+    send(PLB,alignment,center),
     send(PLB,select_message,message(D,options,@arg1?key)),
     
     add_label(W4, infor1, '\nDistance measure', normal, blue, 12),
@@ -437,7 +438,7 @@ options(F, Opt) :->
     get_aggregator(F,D,second,Name2,_),
     (
         % The aggregator is applied to two params, write each param in a different text_item
-        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,position,40,125)
+        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,125)
         
         % The property needs two aggregators, write them in the text_item depending on wich one is selected
         -> (   two_aggregators(Opt)
