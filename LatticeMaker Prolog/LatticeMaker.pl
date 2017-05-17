@@ -330,8 +330,10 @@ fill_operators_dialog(D) :-
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
     send(new(W4, dialog_group(group13, group)), right, W3),
-    send(new(W5, dialog_group(group14, box)), below, W1),
-
+    send(new(W5, dialog_group(aggregators, box)), below, W2),
+    send(new(W6, dialog_group(distances, box)), below, W3),
+    send(new(W7, dialog_group(view, box)), below, W4),
+    
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
 	add_dragmenu(W2, 1, 6),
@@ -355,29 +357,29 @@ fill_operators_dialog(D) :-
     
 	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
-	send(D, append, BEval),
+	send(W5, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
 	send(BEval, colour, blue),
     send(BEval, help_message, tag, 'Evaluate the aggregator and terms selected'),
 
 	new(Output, view),
 
-	send(D, append, new(BTest, button(test, message(D, test_selected_aggregator))), right),
+	send(W5, append, new(BTest, button(test, message(D, test_selected_aggregator))), right),
 	send(BTest, font, font(arial, bold, 12)),
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
-    send(D, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
+    send(W6, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
 	send(BDist, font, font(arial, bold, 12)),
 	send(BDist, colour, blue),
     send(BDist, help_message, tag, 'Generate the distances'),
     
-    send(D, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
+    send(W6, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
 	send(BDistEval, font, font(arial, bold, 12)),
 	send(BDistEval, colour, blue),
     send(BDistEval, help_message, tag, 'Check the distances'),
     
-    send(D, append, new(BClear, button(clear, message(Output, clear))), right),
+    send(W7, append, new(BClear, button(clear, message(Output, clear)))),
 	send(BClear, font, font(arial, bold, 12)),
 	send(BClear, colour, blue),
     send(BClear, help_message, tag, 'Clear the results view'),
