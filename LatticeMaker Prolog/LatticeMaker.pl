@@ -327,6 +327,7 @@ fill_operators_dialog(D) :-
 	send(W1, alignment, center),
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
+    send(new(W4, dialog_group(group13, group)), right, W3),
 
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
@@ -342,14 +343,14 @@ fill_operators_dialog(D) :-
     send(PLB,size,size(20,10)),
     send(PLB,right,CLB),
     send(PLB,label,'Property'),
+    send(PLB,select_message,message(D,options,@arg1?key)),
     
-    add_label(W3, infor1, '\nDistance measure', normal, blue, 12),
-    add_label(W3, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
-    send(W3,append,new(DM, menu(action,cycle,message(D,change_dist_button_label,@arg1)))),
+    add_label(W4, infor1, '\nDistance measure', normal, blue, 12),
+    send(W4,append,new(DM, menu(action,cycle,message(D,change_dist_button_label,@arg1)))),
     send_list(DM,append,[generate,eval]),
     send(DM, alignment, center),
-    add_dragmenu(W3,1,2),
-    activate_dragmenu(W3,1,2,@off),
+    add_dragmenu(W4,1,2),
+    activate_dragmenu(W4,1,2,@off),
     
 	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_aggregator))),
@@ -436,7 +437,7 @@ options(F, Opt) :->
     get_aggregator(F,D,second,Name2,_),
     (
         % The aggregator is applied to two params, write each param in a different text_item
-        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,125)
+        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,position,40,125)
         
         % The property needs two aggregators, write them in the text_item depending on wich one is selected
         -> (   two_aggregators(Opt)
