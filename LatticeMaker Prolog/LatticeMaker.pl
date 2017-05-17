@@ -307,11 +307,12 @@ fill_operators_dialog(D) :-
 	send(D, append, new(B, menu(aggregators, cycle, message(D, fill_terms)))),
 	send_list(B, append, [empty]),
 	send(B, alignment, left),
+    send(B, label, 'Aggr 1 ($1)'),
     % Second Aggregator Control
 	send(D, append, new(S, menu(second, cycle, message(D, fill_terms))),right),
 	send_list(S, append, [empty]),
 	send(S, alignment, center),
-    send(S, show_label, @on),
+    send(S, label, 'Aggr 2 ($2)'),
 	send(S, active, @off),
     
     % Properties definition box
@@ -438,7 +439,7 @@ options(F, Opt) :->
     get_aggregator(F,D,second,Name2,_),
     (
         % The aggregator is applied to two params, write each param in a different text_item
-        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,125)
+        two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,115),send(PD1,geometry,40,85)
         
         % The property needs two aggregators, write them in the text_item depending on wich one is selected
         -> (   two_aggregators(Opt)
@@ -459,7 +460,8 @@ options(F, Opt) :->
         
         % The aggregator only uses one parameter
         % The property uses two aggregators
-        ; send(PD1,label,'Definition:'),send(PD2,displayed,@off), (   two_aggregators(Opt)
+        ; send(PD1,label,'Definition:'),send(PD2,displayed,@off),send(PD1,geometry,40,100), 
+        (   two_aggregators(Opt)
            ->  ( (Name == '', Name2 == '') 
               ->  get_math_def(Opt,'$1','$2',Exp1) 
               ; ( (Name == '', Name2 \= '')
