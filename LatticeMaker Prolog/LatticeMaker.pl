@@ -328,9 +328,9 @@ fill_operators_dialog(D) :-
 	send(D, append, new(W1, dialog_group(group1, group))),
 	send(W1, alignment, center),
 	send(W1, append, new(W2, dialog_group(group11, group))),
-	send(new(W3, dialog_group(group12, group)), right, W2),
-    send(new(W4, dialog_group(connectives, box)), below, W2),
-    send(new(W5, dialog_group(distances, box)), below, W3),
+	send(new(W3, dialog_group(group12, group)), left, W2),
+    send(new(W4, dialog_group(connectives, box)), below, W3),
+    send(new(W5, dialog_group(distances, box)), below, W2),
     
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
