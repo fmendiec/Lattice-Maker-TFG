@@ -329,9 +329,8 @@ fill_operators_dialog(D) :-
 	send(W1, alignment, center),
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
-    send(new(W4, dialog_group(group13, group)), right, W3),
-    send(new(W5, dialog_group(connectives, box)), below, W2),
-    send(new(W6, dialog_group(distances, box)), below, W3),
+    send(new(W4, dialog_group(connectives, box)), below, W2),
+    send(new(W5, dialog_group(distances, box)), below, W3),
     
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
@@ -351,29 +350,26 @@ fill_operators_dialog(D) :-
     send(PLB,select_message,message(D,options,@arg1?key)),
     add_prop_list('Basic',PLB),
     
-    add_label(W4, infor1, '\nDistance measure', normal, blue, 12),
-    add_dragmenu(W4,1,2),
-    
 	send(D, gap, size(40, 10)),
 	new(BEval, button(eval, message(D, eval_selected_connective))),
-	send(W5, append, BEval),
+	send(W4, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
 	send(BEval, colour, blue),
     send(BEval, help_message, tag, 'Evaluate the connective and terms selected'),
 
 	new(Output, view),
 
-	send(W5, append, new(BTest, button(test, message(D, test_selected_connective))), right),
+	send(W4, append, new(BTest, button(test, message(D, test_selected_connective))), right),
 	send(BTest, font, font(arial, bold, 12)),
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
 
-    send(W6, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
+    send(W5, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
 	send(BDist, font, font(arial, bold, 12)),
 	send(BDist, colour, blue),
     send(BDist, help_message, tag, 'Generate the distances'),
     
-    send(W6, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
+    send(W5, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
 	send(BDistEval, font, font(arial, bold, 12)),
 	send(BDistEval, colour, blue),
     send(BDistEval, help_message, tag, 'Check the distances'),
@@ -1132,9 +1128,7 @@ fill_from_lattice(F) :-
 	lat_graph:members(L),
 	maplist(atom_string, L, L1),
 	get_container_combo(Oper, Container),
-	fill_dragmenu(Container, 1, 6, L1),
-	get_container_dist(Oper,Dist_combo),
-    fill_dragmenu(Dist_combo, 1, 2, L1).
+	fill_dragmenu(Container, 1, 6, L1).
 
 % Fill the Aggregator Combobox given
 create_predicates(Oper,Combo_name) :- 
@@ -1354,7 +1348,6 @@ empty_prop(@nil).
     
 eval_distance(F) :-> 
     get(F, member(dialog_eval), D),
-    get_container_dist(D,CD),
 	get(D, member, view, V),
     
     send(V, clear),
@@ -1362,24 +1355,12 @@ eval_distance(F) :->
 	pce_open(V, write, Fd),
     set_output(Fd),
     
-    get_dist_terms(CD,E1,E2),
     lat_graph:distance(E1,E2,Z),
     writef('The distance between %w and %w is %w',[E1,E2,Z]),
     
     close(Fd),
 	set_output(Old),
     send(V, editable, @off).
-    
-    
-get_dist_terms(D,E1,E2) :-
-	get_term_name(1, StrTerm1),
-    get_term_name(2, StrTerm2),
-    get(D, member, StrTerm1, T1),
-    get(D, member, StrTerm2, T2),
-    get_var_name(1, X1),
-    get_var_name(2, X2),
-    get_selection(T1, E1, X1),
-    get_selection(T2, E2, X2).
     
 get_node_member(Name, NName):-
 	lat_graph:members(L), 
@@ -1580,8 +1561,5 @@ get_container_combo(D, G11):-
 get_container_optgroup(D, G12):-
 	get(D, member, group1, G1),
 	get(G1, member, group12, G12).
-get_container_dist(D, G13):-
-	get(D, member, group1, G1),
-	get(G1, member, group13, G13).
     
 :- pce_end_class.
