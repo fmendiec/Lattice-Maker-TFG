@@ -332,7 +332,6 @@ fill_operators_dialog(D) :-
     send(new(W4, dialog_group(group13, group)), right, W3),
     send(new(W5, dialog_group(connectives, box)), below, W2),
     send(new(W6, dialog_group(distances, box)), below, W3),
-    send(new(W7, dialog_group(view, box)), below, W4),
     
 	add_label(W2, infor1, 'Select the Terms to EVAL', normal, blue, 12),
 	add_label(W2, infor2, '(Shift + Drag and Drop can be used)', normal, blue, 12),
@@ -342,7 +341,7 @@ fill_operators_dialog(D) :-
     add_label(W3,infor2,'Category',bold,black,12),
 	
     send(W3,append,new(CC,menu(category,choice,message(D,fill_properties,@arg1)))),
-    send_list(CC,append,['Basic','Multiple','Combined']),
+    send_list(CC,append,['Basic','Combined','Multiple']),
     send(CC,show_label,@off),
     send(W3,append,new(PLB,list_browser)),
     send(PLB,size,size(20,10)),
@@ -379,11 +378,6 @@ fill_operators_dialog(D) :-
 	send(BDistEval, colour, blue),
     send(BDistEval, help_message, tag, 'Check the distances'),
     
-    send(W7, append, new(BClear, button(clear, message(Output, clear)))),
-	send(BClear, font, font(arial, bold, 12)),
-	send(BClear, colour, blue),
-    send(BClear, help_message, tag, 'Clear the results view'),
-    
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
 	send(Output, alignment, center),
@@ -400,7 +394,7 @@ fill_properties(F,Arg) :->
     
 add_prop_list('Basic',LB) :- 
         send(LB,clear),
-        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,associativity,monotony,reflexivity,commutativity]).
+        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,monotony,reflexivity,commutativity,associativity]).
 add_prop_list('Multiple',LB) :- 
         send(LB,clear),
         send_list(LB,append,[switchness, adjointness, distributivity]).
