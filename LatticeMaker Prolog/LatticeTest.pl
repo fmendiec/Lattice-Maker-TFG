@@ -214,7 +214,7 @@ bicond(Aggr1,Aggr2,X,Y,Z,V1,V2) :- ( lat:leq(X,V1),lat:leq(V2,Y)
 % MONOTOMY
 % Increasing in both parameters
 
-test_mono(Aggr) :- do_test(Aggr,test_in1),do_test(Aggr,test_in2).
+test_mono(Aggr) :- non_decreasing(Aggr).
 
 
 % T-NORM
@@ -244,4 +244,4 @@ test_tconorm(Aggr) :- lat:bot(B),identity_element(Aggr,B,tconorm),print_connecti
 % IMPLICATION
 % Increasing in the first parameter and decreasing in the second one
 
-test_imp(Aggr) :- writeln('Increasing:\n'),do_test(Aggr,test_in1),writeln('Decreasing'),do_test(Aggr,test_de2).
+test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),writeln('Non-Increasing:\n'),do_test(Aggr,test_nin2),writeln('Second parameter: Success\n').
