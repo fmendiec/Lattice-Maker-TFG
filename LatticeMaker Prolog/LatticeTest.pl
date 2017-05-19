@@ -5,16 +5,16 @@ frontier_bot(Aggr) :-
     write('Frontier Bot: '),lat:bot(B),test_refl(Aggr,B),write('Success').
     
 increasing(Aggr) :-
-    writeln('Increasing:\n'),parameter_tests(Aggr,test_in1,test_in2).
+    writeln('Increasing:\n'),growth_test(Aggr,test_in1,test_in2).
     
 non_increasing(Aggr) :-
-	writeln('Non increasing:\n'),parameter_tests(Aggr,test_nin1,test_nin2).
+	writeln('Non increasing:\n'),growth_test(Aggr,test_nin1,test_nin2).
     
 decreasing(Aggr) :-
-	writeln('Decreasing:\n'),parameter_tests(Aggr,test_de1,test_de2).
+	writeln('Decreasing:\n'),growth_test(Aggr,test_de1,test_de2).
     
 non_decreasing(Aggr) :-
-	writeln('Non decreassing:\n'),parameter_tests(Aggr,test_nde1,test_nde2).
+	writeln('Non decreassing:\n'),growth_test(Aggr,test_nde1,test_nde2).
     
 switchness(Aggr1,Aggr2) :-
     write('Switchness: '),test_sw(Aggr1,Aggr2),writeln('Success').
@@ -35,7 +35,7 @@ commutativity(Aggr) :-
     write('Commutativity: '),test_com(Aggr),writeln('Success').
     
 distributivity(Aggr1,Aggr2) :-
-    write('Distributivity:\n'),test_distr(Aggr1,Aggr2).
+    write('Distributivity:\n\n'),test_distr(Aggr1,Aggr2).
     
 t_norm(Aggr) :- 
     ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE\n')).
@@ -54,21 +54,21 @@ extract([X|_],X).
 extract([_|T],X):- extract(T,X).
 
 % Get all the pairs (X,Y) where X < Y and X != Y
-getCombinations(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z),lat:leq(X,Y),X\=Y),L).
+getXltY(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z),lat:leq(X,Y),X\=Y),L).
 
 % Get all the pairs of three elements
 getAllTriplet(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L).
 
-% Do two parameter tests (the first and the second)
-parameter_tests(Aggr,Test1,Test2):- 
+% Test the two growth tests in both parameters using the given connective
+growth_test(Aggr,Test1,Test2):- 
                                 do_test(Aggr,Test1) ->
                                   % Test1 True
                                   (writeln('First parameter: Success\n'),do_test(Aggr,Test2),writeln('Second Parameter: Success\n'))
                                 ; % Test1 False
                                   (do_test(Aggr,Test2),writeln('Second Parameter: Success\n')).
 
-% Do a single test given
-do_test(Aggr,Test) :- getCombinations(L),forall(member((X,Y,Z),L),call(Test,X,Y,Z,Aggr)).
+% Do the growth test using the connective given
+do_test(Aggr,Test) :- getXltY(L),forall(member((X,Y,Z),L),call(Test,X,Y,Z,Aggr)).
 
 
 % INCREASING
@@ -143,14 +143,14 @@ test_sw(Aggr1,Aggr2) :-
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
-fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\nFailure',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterxample:\n%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
 % REFLEXIVITY
 
 test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)).
 
-test_refl(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('%w(%w,%w) not equal to %w\nFailure',[Aggr,X,X,X]),fail).
+test_refl(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,X,X]),fail).
 
 
 % COMMUTATIVITY
@@ -161,7 +161,7 @@ test_com(Aggr) :-
                   ;  fail_com(Aggr,X,Y))
                   ).
                   
-fail_com(Aggr,X,Y) :- writef('%w(%w,%w) not equal to %w(%w,%w)\nFailure',[Aggr,X,Y,Aggr,Y,X]),fail. 
+fail_com(Aggr,X,Y) :- writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
 
 
 % DISTRIBUTIVITY
@@ -206,7 +206,7 @@ bicond(Aggr1,Aggr2,X,Y,Z,V1,V2) :- ( lat:leq(X,V1),lat:leq(V2,Y)
                                     -> true
                                     ; ( not(lat:leq(X,V1)),not(lat:leq(V2,Y)) 
                                         -> true
-                                        ; writef("%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
+                                        ; writef("Failure\nCounterxample:\n%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
                                       )
                                     ).
 
