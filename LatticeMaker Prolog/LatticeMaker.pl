@@ -363,17 +363,17 @@ fill_operators_dialog(D) :-
 	send(BTest, font, font(arial, bold, 12)),
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
-
-    send(W5, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
-	send(BDist, font, font(arial, bold, 12)),
-	send(BDist, colour, blue),
-    send(BDist, help_message, tag, 'Generate the distances'),
     
     send(W5, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
 	send(BDistEval, font, font(arial, bold, 12)),
 	send(BDistEval, colour, blue),
     send(BDistEval, help_message, tag, 'Check the distances'),
     send(BDistEval, active, @off),
+
+    send(W5, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
+	send(BDist, font, font(arial, bold, 12)),
+	send(BDist, colour, blue),
+    send(BDist, help_message, tag, 'Generate the distances'),
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -1330,7 +1330,6 @@ append_param(D, I, L, NewL):-
 test_selected_connective(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_optgroup(D, COpt),
-	get(COpt, member, list_browser, E),
 	get(F, slot, property, Prop),
 	get(D, member, view, V),
     
