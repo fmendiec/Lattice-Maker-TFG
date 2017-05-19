@@ -22,3 +22,5 @@ pri_inf(X,Y,bottom).
 
 and_gines(bottom,X,bottom).
 and_gines(_,_,top).
+
+and_useless(_,omega,delta).
