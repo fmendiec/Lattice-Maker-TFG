@@ -402,11 +402,12 @@ add_prop_list('Combined',LB) :-
     
 is_dist(F) :-
     get(F, member(dialog_eval), D),
+    get_container_combo(D,C),
     get_connective(F,D,connectives,Name,_),
     get_container_dist_buttons(D,Dist_Buttons),
     get(Dist_Buttons,member,eval,Dist_Eval),
     ( Name == distance
-        -> send(Dist_Eval,active,@on)
+        -> send(Dist_Eval,active,@on),activate_dragmenu(C, 3, 3, @off)
         ;  send(Dist_Eval,active,@off)
     ).
     
@@ -1367,12 +1368,22 @@ eval_distance(F) :->
 	pce_open(V, write, Fd),
     set_output(Fd),
     
+    get_dist_term(D,1,E1),
+    get_dist_term(D,2,E2),
+    
     lat_graph:distance(E1,E2,Z),
     writef('The distance between %w and %w is %w',[E1,E2,Z]),
     
     close(Fd),
 	set_output(Old),
     send(V, editable, @off).
+    
+get_dist_term(D,I,S) :-
+        get_term_name(I, StrTerm),
+		get_container_combo(D, C),
+		get(C, member, StrTerm, T),
+        get_var_name(I,X),
+		get_selection(T, S, X).
     
 get_node_member(Name, NName):-
 	lat_graph:members(L), 
