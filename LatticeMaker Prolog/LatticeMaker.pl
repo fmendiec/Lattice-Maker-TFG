@@ -134,7 +134,7 @@ initialise(GV) :->
 	send(V, font, font(arial, normal, 12)),
 	send(V, size, size(80, 15)),
     send(V, editable, @off),
-	send(V, label, 'Aggregator definitions in lattice'),
+	send(V, label, 'Connective definitions in lattice'),
 
 	new(Pm, message(GV, newnode, @event?position)),
 	send(P, recogniser, click_gesture(left, '', single,
@@ -192,7 +192,7 @@ fill_menu(MB) :-
 	send(MB, append, new(F, popup(file))),
 	send(MB, append, new(E, popup(edit))),
 	send(MB, append, new(G, popup(graphic))),
-	send(MB, append, new(A, popup(aggregator))),
+	send(MB, append, new(A, popup(connective))),
 	send(MB, append, new(H, popup(help))),
 
 	send(F, append, menu_item(new_lattice, message(FrameMB, new))),
@@ -244,9 +244,9 @@ fill_menu(MB) :-
 	send(G, append, menu_item(normalize_graph, message(FrameMB, normalize),
 									condition := message(FrameMB, graph_noempty, P))),
 
-	send(A, append, menu_item(evaluate, message(FrameMB, eval_selected_aggregator),
+	send(A, append, menu_item(evaluate, message(FrameMB, eval_selected_connective),
 									condition := message(FrameMB, lattice_noempty))),
-	send(A, append, menu_item(test_aggregator, message(FrameMB, test_selected_aggregator),
+	send(A, append, menu_item(test_connective, message(FrameMB, test_selected_connective),
 									condition := message(FrameMB, lattice_noempty))),
     send(A, append, menu_item(distance, message(FrameMB, eval_distance),
 									condition := message(FrameMB, lattice_noempty))),
@@ -303,17 +303,17 @@ fill_edit_toolbar(TB) :-
     send(TB, append, tool_button(message(FrameTB, restore_view_leq), resource(imgleq), restore_leq)).
 
 fill_operators_dialog(D) :-
-	add_label(D, aggrhelp, 'Select an Aggregator to EVAL or TEST', normal, blue, 12),
-    % Aggregator Control
-	send(D, append, new(B, menu(aggregators, cycle, message(D, fill_terms)))),
+	add_label(D, aggrhelp, 'Select a connective to EVAL or TEST', normal, blue, 12),
+    % Connective Control
+	send(D, append, new(B, menu(connectives, cycle, message(D, fill_terms)))),
 	send_list(B, append, [empty]),
 	send(B, alignment, left),
-    send(B, label, 'Aggr 1 ($1)'),
-    % Second Aggregator Control
+    send(B, label, 'Connective 1 ($1)'),
+    % Second connective Control
 	send(D, append, new(S, menu(second, cycle, message(D, fill_terms))),right),
 	send_list(S, append, [empty]),
 	send(S, alignment, center),
-    send(S, label, 'Aggr 2 ($2)'),
+    send(S, label, 'Connective 2 ($2)'),
 	send(S, active, @off),
     
     % Properties definition box
@@ -330,7 +330,7 @@ fill_operators_dialog(D) :-
 	send(W1, append, new(W2, dialog_group(group11, group))),
 	send(new(W3, dialog_group(group12, group)), right, W2),
     send(new(W4, dialog_group(group13, group)), right, W3),
-    send(new(W5, dialog_group(aggregators, box)), below, W2),
+    send(new(W5, dialog_group(connectives, box)), below, W2),
     send(new(W6, dialog_group(distances, box)), below, W3),
     send(new(W7, dialog_group(view, box)), below, W4),
     
@@ -356,15 +356,15 @@ fill_operators_dialog(D) :-
     add_dragmenu(W4,1,2),
     
 	send(D, gap, size(40, 10)),
-	new(BEval, button(eval, message(D, eval_selected_aggregator))),
+	new(BEval, button(eval, message(D, eval_selected_connective))),
 	send(W5, append, BEval),
 	send(BEval, font, font(arial, bold, 12)),
 	send(BEval, colour, blue),
-    send(BEval, help_message, tag, 'Evaluate the aggregator and terms selected'),
+    send(BEval, help_message, tag, 'Evaluate the connective and terms selected'),
 
 	new(Output, view),
 
-	send(W5, append, new(BTest, button(test, message(D, test_selected_aggregator))), right),
+	send(W5, append, new(BTest, button(test, message(D, test_selected_connective))), right),
 	send(BTest, font, font(arial, bold, 12)),
 	send(BTest, colour, blue),
     send(BTest, help_message, tag, 'Test the property selected'),
@@ -411,9 +411,9 @@ add_prop_list('Combined',LB) :-
     
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
-    % Unlock the Second Aggregator Combobox
+    % Unlock the Second connective Combobox
 	get(D, member, second, SC),
-    (       two_aggregators(Opt)
+    (       two_connectives(Opt)
     ->      send(SC, active, @on)
     ;       send(SC, active, @off)
     ),
@@ -422,17 +422,17 @@ options(F, Opt) :->
     get(D,member,param2,PD2),
     send(PD1,clear),
     send(PD2,clear),
-    get_aggregator(F,D,aggregators,Name,_),
-    get_aggregator(F,D,second,Name2,_),
+    get_connective(F,D,connectives,Name,_),
+    get_connective(F,D,second,Name2,_),
     
     send(F, slot, property, Opt),
     
     (
-        % The aggregator is applied to two params, write each param in a different text_item
+        % The connective is applied to two params, write each param in a different text_item
         two_params(Opt),send(PD1,label,'Param1:'),send(PD2,displayed,@on),send(PD2,geometry,40,115),send(PD1,geometry,40,85)
         
-        % The property needs two aggregators, write them in the text_item depending on wich one is selected
-        -> (   two_aggregators(Opt)
+        % The property needs two connectives, write them in the text_item depending on wich one is selected
+        -> (   two_connectives(Opt)
            ->  ( (Name == '', Name2 == '') 
               ->  get_math_def(Opt,'$1','$2',Exp1,param1), get_math_def(Opt,'$1','$2',Exp2,param2)
               ; ( (Name == '', Name2 \= '')
@@ -444,14 +444,14 @@ options(F, Opt) :->
                 )
              )
            
-          % Only needs one aggregator
+          % Only needs one connective
           ;   (Name == '' -> get_math_def(Opt,'$',Exp1,param1),get_math_def(Opt,'$',Exp2,param2) ; get_math_def(Opt,Name,Exp1,param1), get_math_def(Opt,Name,Exp2,param2))
           ), send(PD1,append,Exp1),send(PD2,append,Exp2)
         
-        % The aggregator only uses one parameter
-        % The property uses two aggregators
+        % The connective only uses one parameter
+        % The property uses two connectives
         ; send(PD1,label,'Definition:'),send(PD2,displayed,@off),send(PD1,geometry,40,100), 
-        (   two_aggregators(Opt)
+        (   two_connectives(Opt)
            ->  ( (Name == '', Name2 == '') 
               ->  get_math_def(Opt,'$1','$2',Exp1) 
               ; ( (Name == '', Name2 \= '')
@@ -467,9 +467,9 @@ options(F, Opt) :->
           ), send(PD1,append,Exp1)
     ).
     
-two_aggregators(switchness).
-two_aggregators(distributivity).
-two_aggregators(adjointness).
+two_connectives(switchness).
+two_connectives(distributivity).
+two_connectives(adjointness).
 
 two_params(increasing).
 two_params(non_decreasing).
@@ -505,10 +505,10 @@ get_math_def(distributivity,Ag1,Ag2,S,param2) :- format(atom(S), "~w(X,~w(Y, Z))
 fill_terms(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_combo(D, C),
-	get(D, member, aggregators, Aggr),
+	get(D, member, connectives, Aggr),
 	get(Aggr, selection, AggrSelection),
 	(   AggrSelection == empty
-	->  send(F, report, error, 'EMPTY list of aggregators. Load a lattice and retry.')
+	->  send(F, report, error, 'EMPTY list of connectives. Load a lattice and retry.')
 	;   (	atomic_list_concat([_, Arity], '/', AggrSelection),
 			atom_number(Arity, NumA),
 			activate_dragmenu(C, 1, 6, @off),
@@ -1073,7 +1073,7 @@ clearspace(F) :->
 	send(V, clear),
 
 	get(F, member(dialog_eval), D),
-	get(D, member, aggregators, Aggr),
+	get(D, member, connectives, Aggr),
 	send(Aggr, clear),
 	send_list(Aggr, append, [empty]),
 
@@ -1132,7 +1132,7 @@ node(F, Name, Layer, Color, NNodes, Indx, Node:lattice_node) :<-
 fill_from_lattice(F) :-
 	get(F, member(dialog_eval), Oper),
 	
-    create_predicates(Oper,aggregators),
+    create_predicates(Oper,connectives),
     create_predicates(Oper,second),
 	
 	lat_graph:members(L),
@@ -1222,14 +1222,14 @@ change_item(Oper, NewOper) :-
 
 add_connective(F) :->
 	send(F, get_edit_mode)
-	->	new(ND, dialog('New Aggregator')),
+	->	new(ND, dialog('New connective')),
 		send(ND, transient_for, F),
 		send(ND, modal, transient),
 		send(ND, pen, 0),
 
-		add_label(ND, infor, 'Select the aggregator to add to the lattice',
+		add_label(ND, infor, 'Select the connective to add to the lattice',
 							normal, blue, 12),
-		send(ND, append, new(CBO, menu(aggregators, cycle))),
+		send(ND, append, new(CBO, menu(connectives, cycle))),
 		send_list(CBO, append, ['&_godel', '|_godel', '&_luka', '|_luka']),
 		send_list(CBO, append, ['&_prod', '|_prod', '@_aver', 'distance']),
 		send(CBO, alignment, center),
@@ -1282,12 +1282,12 @@ append_in_view(V, Aggr) :-
 	Aggr == agr_aver,
 	send(V, append, 'agr_aver(X,Y,Z) :- pri_add(X,Y,U1), pri_div(U1,2,Z).\n').
 
-% Get the Aggregator selected in the combobox
-get_aggregator(F,D,Combo_name,Name,NumA) :-
+% Get the connective selected in the combobox
+get_connective(F,D,Combo_name,Name,NumA) :-
     get(D, member, Combo_name, Aggr),
     get(Aggr, selection, A),
     (   (A == noselection ; A == empty)
-    ->  send(F, report, error, 'Please, select an aggregator.'),Name = ''
+    ->  send(F, report, error, 'Please, select a connective.'),Name = ''
     ;   name(A, AA),
         change_item(Pred, AA),
         name(NA, Pred),
@@ -1295,7 +1295,7 @@ get_aggregator(F,D,Combo_name,Name,NumA) :-
         atom_number(Arity, NumA)
     ).
 
-eval_selected_aggregator(F) :->
+eval_selected_connective(F) :->
 	get(F, member(dialog_eval), D),
 	get(D, member, view, V),
 
@@ -1303,13 +1303,13 @@ eval_selected_aggregator(F) :->
 	pce_open(V, write, Fd),
 	set_output(Fd),
 
-    get_aggregator(F,D,aggregators,Name,NumA),not(empty_aggr(Name)),
+    get_connective(F,D,connectives,Name,NumA),not(empty_aggr(Name)),
 		append_param(D, NumA, [], LParams),
-		(	call_aggregator(Name, LParams, L)
+		(	call_connective(Name, LParams, L)
 		->  maplist(show_result(LParams), L)
 		;   write(false)
 		),
-		send(F, report, status, '%s aggregator evaluated.', Name),
+		send(F, report, status, '%s connective evaluated.', Name),
 	close(Fd),
 	set_output(Old),
     send(V, editable, @off).
@@ -1326,7 +1326,7 @@ append_param(D, I, L, NewL):-
 		J is I - 1,
 		append_param(D, J, L1, NewL).
         
-test_selected_aggregator(F) :->
+test_selected_connective(F) :->
 	get(F, member(dialog_eval), D),
 	get_container_optgroup(D, COpt),
 	get(COpt, member, list_browser, E),
@@ -1341,18 +1341,18 @@ test_selected_aggregator(F) :->
     
     not((empty_prop(Prop),send(F, report, error, 'Please, select a valid property.'))),
     
-    get_aggregator(F,D,aggregators,Name,_),
+    get_connective(F,D,connectives,Name,_),
     
     not(empty_aggr(Name)),
 
-    (   two_aggregators(Prop)
-        -> get_aggregator(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
+    (   two_connectives(Prop)
+        -> get_connective(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
         ; call(Prop,Name)
     ),
 	close(Fd),
 	set_output(Old),
     send(V, editable, @off),
-	send(F, report, status, '%s aggregator tested.', E?selection).
+	send(F, report, status, '%s connective tested.', E?selection).
 
 empty_aggr('').
 empty_prop(@nil).
