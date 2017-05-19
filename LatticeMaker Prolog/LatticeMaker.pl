@@ -1329,7 +1329,6 @@ append_param(D, I, L, NewL):-
         
 test_selected_connective(F) :->
 	get(F, member(dialog_eval), D),
-	get_container_optgroup(D, COpt),
 	get(F, slot, property, Prop),
 	get(D, member, view, V),
     
