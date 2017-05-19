@@ -373,6 +373,7 @@ fill_operators_dialog(D) :-
 	send(BDistEval, font, font(arial, bold, 12)),
 	send(BDistEval, colour, blue),
     send(BDistEval, help_message, tag, 'Check the distances'),
+    send(BDistEval, active, @off),
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -398,6 +399,16 @@ add_prop_list('Combined',LB) :-
         send(LB,clear),
         send_list(LB,append,[t_norm, t_conorm, implication]).
     
+    
+is_dist(F) :-
+    get(F, member(dialog_eval), D),
+    get_connective(F,D,connectives,Name,_),
+    get_container_dist_buttons(D,Dist_Buttons),
+    get(Dist_Buttons,member,eval,Dist_Eval),
+    ( Name == distance
+        -> send(Dist_Eval,active,@on)
+        ;  send(Dist_Eval,active,@off)
+    ).
     
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
@@ -504,7 +515,8 @@ fill_terms(F) :->
 			activate_dragmenu(C, 1, 6, @off),
 			activate_dragmenu(C, 1, NumA, @on)
 		)
-	).
+	),
+    is_dist(F).
 
 add_label(D, Name, Text, Style, Colour, Size) :-
 	send(D, append, new(L, label(Name, Text))),
@@ -1340,7 +1352,7 @@ test_selected_connective(F) :->
 	close(Fd),
 	set_output(Old),
     send(V, editable, @off),
-	send(F, report, status, '%s connective tested.', E?selection).
+	send(F, report, status, '%s connective tested.', Name).
 
 empty_aggr('').
 empty_prop(@nil).
@@ -1561,5 +1573,8 @@ get_container_combo(D, G11):-
 get_container_optgroup(D, G12):-
 	get(D, member, group1, G1),
 	get(G1, member, group12, G12).
+get_container_dist_buttons(D,G15) :-
+    get(D,member,group1,G1),
+    get(G1,member,distances,G15).
     
 :- pce_end_class.
