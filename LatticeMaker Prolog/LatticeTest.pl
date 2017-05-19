@@ -220,28 +220,26 @@ test_mono(Aggr) :- do_test(Aggr,test_in1),do_test(Aggr,test_in2).
 % T-NORM
 % Aggregator is and, is commutative, associative, monotone, and identity element is top
 
-test_tnorm(Aggr) :- is_and(Aggr),commutativity(Aggr),associativity(Aggr),lat:top(T),identity_element(Aggr,T),monotony(Aggr).
+test_tnorm(Aggr) :- lat:top(T),identity_element(Aggr,T,tnorm),print_connective(Aggr,tnorm),commutativity(Aggr),associativity(Aggr),monotony(Aggr).
 
-identity_element(Aggr,E) :- forall(lat:member(X),((call(lat:Aggr,X,E,V),X==V) ; (writef("%w is not the identity element\n",[E]),fail))),writef('Identity element %w: Success\n',[E]).
+identity_element(Aggr,E,Type) :- writef('Identity element %w: ',[E]),forall(lat:member(X),test_iden(Aggr,X,E,Type)),writeln('Success').
+test_iden(Aggr,X,E,Type) :- 
+            ( call(lat:Aggr,X,E,V),X==V 
+                -> true 
+                ; writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
+            ).
 
-is_and(Aggr) :- 
-                ( name(Aggr,AA),append("and_",_,AA) 
-                    -> writef('%w is an AND aggregator\n',[Aggr]) 
-                    ; writef("%w is not an AND aggregator\n",[Aggr]),fail 
-                ).
+            
+print_connective(Aggr,tnorm) :- writef('%w is a T-Norm connective\n',[Aggr]).
+print_connective(Aggr,tconorm) :- writef('%w is a T-Conorm connective\n',[Aggr]).
+print_connective(Aggr,tnorm,neg) :- writef('%w is not a T-Norm connective',[Aggr]).
+print_connective(Aggr,tconorm,neg) :- writef('%w is not a T-Conorm connective',[Aggr]).
 
 
 % T-CONORM
 % Aggregator is or, is commutative, associative, monotone, and identity element is top
 
-test_tconorm(Aggr) :- is_or(Aggr),commutativity(Aggr),associativity(Aggr),lat:bot(B),identity_element(Aggr,B),monotony(Aggr).
-
-is_or(Aggr) :- 
-                ( name(Aggr,AA),append("or_",_,AA) 
-                    -> writef('%w is an OR aggregator\n',[Aggr]) 
-                    ; writef("%w is not an OR aggregator\n",[Aggr]),fail 
-                ).
-                
+test_tconorm(Aggr) :- lat:bot(B),identity_element(Aggr,B,tconorm),print_connective(Aggr,tconorm),commutativity(Aggr),associativity(Aggr),monotony(Aggr).                
                 
 % IMPLICATION
 % Increasing in the first parameter and decreasing in the second one
