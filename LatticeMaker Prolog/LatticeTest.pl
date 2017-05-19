@@ -23,7 +23,7 @@ associativity(Aggr) :-
     write('Associativity: '),test_sw(Aggr,Aggr),writeln('Success').
     
 monotony(Aggr) :-
-	writeln('Monotome:\n'),test_mono(Aggr).
+	writeln('Monotony:\n'),test_mono(Aggr).
     
 adjointness(Aggr1,Aggr2) :-
 	( test_adj(Aggr1,Aggr2) -> writeln('\nAdjointness: Success') ; writeln('\nAdjointness: Failure')).
@@ -35,7 +35,7 @@ commutativity(Aggr) :-
     write('Commutativity: '),test_com(Aggr),writeln('Success').
     
 distributivity(Aggr1,Aggr2) :-
-    write('Distributivity: '),test_distr(Aggr1,Aggr2).
+    write('Distributivity:\n'),test_distr(Aggr1,Aggr2).
     
 t_norm(Aggr) :- 
     ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE\n')).
@@ -77,13 +77,13 @@ do_test(Aggr,Test) :- getCombinations(L),forall(member((X,Y,Z),L),call(Test,X,Y,
 % If X < Y => $(X,Z) < $(Y,Z)
 test_in1(X,Y,Z,Aggr ):-
                       (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2),V1\=V2) 
-                      ; (writef('First parameter: Failure\nExample: %w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                      ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Increasing on the second parameter
 % If X < Y => $(Z,X) < $(Z,Y)
 test_in2(X,Y,Z,Aggr) :-
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2),V1\=V2) 
-                        ; (writef('Second parameter: Failure\nExample: %w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
 
 
 % NON-DECREASING
@@ -92,13 +92,13 @@ test_in2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) =< $(Y,Z)
 test_nde1(X,Y,Z,Aggr) :- 
                             (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2)) 
-                            ; (writef('First parameter: Failure\nExample: %w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                            ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Non-Decreasing on the second parameter
 % If X < Y => $(Z,X) =< $(Z,Y)
 test_nde2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2)) 
-                        ; (writef('Second parameter: Failure\nExample: %w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
 
 
 % DECREASING
@@ -107,13 +107,13 @@ test_nde2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) > $(Y,Z)
 test_de1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1),V1\=V2) 
-                        ; (writef('First parameter: Failure\nExample: %w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
+                        ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Decreasing on the second parameter 
 % If X < Y => $(Z,X) > $(Z,Y)
 test_de2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1),V1\=V2) 
-                        ; (writef('Second parameter: Failure\nExample: %w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
                         
                         
 % NON INCREASING
@@ -122,13 +122,13 @@ test_de2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) >= $(Y,Z)
 test_nin1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1)) 
-                        ; (writef('First parameter: Failure\nExample: %w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
+                        ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Non-Increasing on the second parameter 
 % If X < Y => $(Z,X) >= $(Z,Y)
 test_nin2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1)) 
-                        ; (writef('Second parameter: Failure\nExample: %w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
                         
                         
 % SWITCHNESS
