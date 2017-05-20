@@ -108,8 +108,8 @@ pri_inf(X,Y,bottom).</textarea>
 				</div>
 				<div class = "twocols" id = "controls">
                     <div class = "file-controls">
-                        File:
-                        <input type = "text" id = "lattice-name" class = "file-name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
+                        <label for="lattice-name">File:</label>
+                        <input type = "text" id = "lattice-name" class = "textbox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
                         <input type = "file" id="latfile" onchange = upload_lattice_button("textarea-lattice","lattice-name","latfile")>
                         <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "./media/upload.png"></button>
                         <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "media/download.png"> </button>
@@ -126,19 +126,23 @@ pri_inf(X,Y,bottom).</textarea>
 				<h2>Properties</h2>
 				<div id = "properties-form">
                     <form id = "properties-form">
-                        Category:
+                        <label for="category-combo">Category:</label>
                         <select id = "category-combo" class="lattice-selection"> 
                             <option>Basic</option>
                             <option>Combined</option>
                             <option>Multiple</option>
                         </select>
-                        Property: 
+                        <label for="property-combo">Property:</label>
                         <select id = "property-combo" class="lattice-selection"> 
                         </select>
-                        Connective 1: <select id = "aggr_combo1" class="lattice-selection"> </select>
-                        Connective 2: <select id = "aggr_combo2" disabled = true class="lattice-selection"> </select>
-                        <input type = "submit">
-                        <h3>Result</h3><textarea id="property-result" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
+                        <label for="aggr-combo1">Connective 1:</label>
+                        <select id = "aggr_combo1" class="lattice-selection"> </select>
+                        <label for="aggr-combo2">Connective 2:</label>
+                        <select id = "aggr_combo2" disabled = true class="lattice-selection"> </select>
+                        <br><br>
+                        <label for = "math-definition">Definition:</label>
+                        <input type = "text" class = "textbox" id = "math-definition" readonly  = "readonly" style="width:800px">
+                        <h3>Result</h3><textarea id="property-result" class="code-try" readonly = "readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
                     </form>
                 </div>
 			</div>

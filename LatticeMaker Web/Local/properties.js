@@ -30,6 +30,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             while (match[2] != undefined && regex_arity.exec(match[2])) arity++;
 
             connective.text = symbol+'_'+match[1]+'/'+arity.toString();
+            connective.value = match[1];
 
             combo_con1.add(connective); 
         }
@@ -80,7 +81,6 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             prop.value = prop_value[i];
             combo_prop.add(prop);
         }
-        
     }
     
     var textarea = document.getElementById(idTextarea);
