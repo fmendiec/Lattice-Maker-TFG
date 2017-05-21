@@ -1,23 +1,14 @@
 var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1, idAggrCombo2, idMathText)
 {   
-    var fill_connectives = function()
-    {
-        var regex_and = /\s*(and_[^\s()]+)(\(.+\))?\s*:-/g;
-        var regex_or = /\s*(or_[^\s()]+)(\(.+\))?\s*:-/g;
-        var regex_aggr = /\s*(aggr_[^\s()]+)(\(.+\))?\s*:-/g;
 
+    // Search all the connectives and, or and aggr in the textarea, calculates its arity and add them to the combobox
+    // Second combobox is a copy of the first one
+    var fill_connectives = function()
+    {   
         $('#'+idAggrCombo1).empty();
         $('#'+idAggrCombo2).empty();
-        addConnective(regex_and,'&');
-        addConnective(regex_or,'|');
-        addConnective(regex_aggr,'@');
-
-        $('#'+idAggrCombo1+' option').clone().appendTo('#'+idAggrCombo2);
-    }
-
-    var addConnective = function(regex,symbol)
-    {   
-        var regex_con = regex;
+        
+        var regex_con = /\W((?:and|or|aggr)_[^\s()]+)(\(.+\))?\s*:-/g;
         var match = true;
 
         while (match = regex_con.exec(textarea.value)) 
@@ -29,30 +20,46 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
 
             while (match[2] != undefined && regex_arity.exec(match[2])) arity++;
 
-           
+            var name = match[1].replace('and','&');
+            name = match[1].replace('or','|');
+            name = match[1].replace('aggr','@');
             
-            connective.text = symbol+'_'+match[1]+'/'+arity.toString();
+            connective.text = name+'/'+arity.toString();
             connective.value = match[1];
 
             combo_con1.add(connective); 
         }
+        
+        $('#'+idAggrCombo1+' option').clone().appendTo('#'+idAggrCombo2);
     }
 
+    // Depending on the category, the properties will be added to the property combobox
     var fill_properties = function() 
     {
+        // Get selected category
         var category = combo_cat.options[combo_cat.selectedIndex].text;
+        
         var prop_text = [];
         var prop_value = [];
         
+        // Unicode characters
+        var top = '\u22A4'; // T
+        var bot = '\u22A5'; // Inverse T
+        var lte = '\u2264'; // <=
+        var prec = '\u227A'; // Preceds
+        var impl = '\u2192'; // ->
+        
+        // Option.Text is the property name to display in the combobox
+        // Option.value will be an array, first item is the predicate name in prolog, second one is the mathematical definition
         switch (category)
         {
             case 'Basic':
             {
                 combo_con2.disabled = true;
                 prop_value = [
-                    ['frontier_top','$1(T,T) == T'],
-                              'frontier_bot',
-                              'increasing',
+                    ['frontier_top','$1 ('+top+', '+top+') == '+ top],
+                    ['frontier_bot','$1 ('+bot+', '+bot+') == '+ bot],
+                    ['increasing', 'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)'],
                               'non_increasing',
                               'decreasing',
                               'non_decreasing',
@@ -87,6 +94,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         
         $('#'+idPropCombo).empty();
         
+        // Add all the options
         for (var i = 0; i < prop_value.length; ++i)
         {
             var prop = document.createElement("option");
@@ -98,13 +106,17 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
     
     var writeMathDef = function()
     {
+        // Get the math definition of the selected property
         var def = combo_prop.options[combo_prop.selectedIndex].value;
+        // Get the two connectives selected
         var conn1 = combo_con1.options[combo_con1.selectedIndex].value;
         var conn2 = combo_con2.options[combo_con2.selectedIndex].value;
         
+        // Math def is needed
         def = def.split(/,(.+)/)[1];
-        
-        def = def.replace('$1',conn1);
+    
+        // Replace $1 for the name of the connective (if there is any selected)
+        def = def.replace(/\$1/g,conn1);
         
         math_text.value = def;
     }
