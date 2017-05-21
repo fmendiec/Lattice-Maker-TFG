@@ -1,10 +1,10 @@
-var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1, idAggrCombo2)
+var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1, idAggrCombo2, idMathText)
 {   
     var fill_connectives = function()
     {
-        var regex_and = /\s*and_([^\s()]+)(\(.+\))?\s*:-/g;
-        var regex_or = /\s*or_([^\s()]+)(\(.+\))?\s*:-/g;
-        var regex_aggr = /\s*aggr_([^\s()]+)(\(.+\))?\s*:-/g;
+        var regex_and = /\s*(and_[^\s()]+)(\(.+\))?\s*:-/g;
+        var regex_or = /\s*(or_[^\s()]+)(\(.+\))?\s*:-/g;
+        var regex_aggr = /\s*(aggr_[^\s()]+)(\(.+\))?\s*:-/g;
 
         $('#'+idAggrCombo1).empty();
         $('#'+idAggrCombo2).empty();
@@ -29,6 +29,8 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
 
             while (match[2] != undefined && regex_arity.exec(match[2])) arity++;
 
+           
+            
             connective.text = symbol+'_'+match[1]+'/'+arity.toString();
             connective.value = match[1];
 
@@ -47,7 +49,18 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             case 'Basic':
             {
                 combo_con2.disabled = true;
-                prop_value = ['frontier_top','frontier_bot','increasing','non_increasing','decreasing','non_decreasing','monotony','reflexivity','commutativity','associativity'];
+                prop_value = [
+                    ['frontier_top','$1(T,T) == T'],
+                              'frontier_bot',
+                              'increasing',
+                              'non_increasing',
+                              'decreasing',
+                              'non_decreasing',
+                              'monotony',
+                              'reflexivity',
+                              'commutativity',
+                              'associativity'
+                             ];
                 prop_text = ['Frontier top', 'Frontier bot', 'Increasing', 'Non increasing','Decreasing','Non decreasing','Monotony','Reflexivity','Commutativity','Associativity'];
                 break;
             }
@@ -83,14 +96,29 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         }
     }
     
+    var writeMathDef = function()
+    {
+        var def = combo_prop.options[combo_prop.selectedIndex].value;
+        var conn1 = combo_con1.options[combo_con1.selectedIndex].value;
+        var conn2 = combo_con2.options[combo_con2.selectedIndex].value;
+        
+        def = def.split(/,(.+)/)[1];
+        
+        def = def.replace('$1',conn1);
+        
+        math_text.value = def;
+    }
+    
     var textarea = document.getElementById(idTextarea);
     var combo_cat = document.getElementById(idCatCombo);
     var combo_prop = document.getElementById(idPropCombo);
     var combo_con1 = document.getElementById(idAggrCombo1);
     var combo_con2 = document.getElementById(idAggrCombo2);
+    var math_text = document.getElementById(idMathText);
 
     jQuery('#'+idTextarea).bind('change',fill_connectives);
     jQuery('#'+idCatCombo).bind('change',fill_properties);
+    jQuery('#'+idPropCombo).bind('change',writeMathDef);
     
     $('#'+idTextarea).trigger('change');
     $('#'+idCatCombo).trigger('change');
