@@ -42,14 +42,6 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         var prop_text = [];
         var prop_value = [];
         
-        // Unicode characters
-        var top = '\u22A4'; // T
-        var bot = '\u22A5'; // Inverse T
-        var lte = '\u2264'; // <=
-        var gte = '\u2265'; // >=
-        var prec = '\u227A'; // Preceds
-        var impl = '\u2192'; // ->
-        
         // Option.Text is the property name to display in the combobox
         // Option.value will be an array, first item is the predicate name in prolog, second one is the mathematical definition
         switch (category)
@@ -57,18 +49,6 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             case 'Basic':
             {
                 combo_con2.disabled = true;
-                
-                prop_def = [   '$1 ('+top+', '+top+') == '+ top,
-                               '$1 ('+bot+', '+bot+') == '+ bot,
-                               'If X '+prec+' Y '+impl+' $1(X, Z)  <  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  <  $1(Z, Y)',
-                               'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  '+lte+'  $1(Z, Y)',
-                               'If X '+prec+' Y '+impl+' $1(X, Z)  >  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  >  $1(Z, Y)',
-                               'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)',
-                               
-                               '$1(X, X) == X',
-                               '$1(X, Y) == $1(Y, X)',
-                               '$1($1(X, Y), Z) == $1(X, $1(Y, Z))'
-                              ];
                 
                 prop_value = ['frontier_top','frontier_bot','increasing',
                              'non_increasing','decreasing','non_decreasing',
@@ -82,6 +62,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             case 'Combined':
             {
                 combo_con2.disabled = true;
+                
                 prop_value = ['t_norm','t_conorm','implication'];
                 prop_text = ['T-Norm', 'T-Conorm', 'Implicaiton'];
                 break;
@@ -90,6 +71,9 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             case 'Multiple':
             {
                 combo_con2.disabled = false;
+                
+                prop_def = ['$1($1(X, Y), Z) == $1(X, $1(Y, Z))', ];
+                
                 prop_value = ['switchness','distributivity','adjointness'];
                 prop_text = ['Switchness', 'Distributitivy', 'Adjointness'];
                 break;
@@ -114,13 +98,39 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
     var writeMathDef = function()
     {
         // Get the math definition of the selected property
-        var def = combo_prop.options[combo_prop.selectedIndex].value;
+        var prop = combo_prop.options[combo_prop.selectedIndex].value;
         // Get the two connectives selected
         var conn1 = combo_con1.options[combo_con1.selectedIndex].value;
         var conn2 = combo_con2.options[combo_con2.selectedIndex].value;
         
-        // Math def is needed
-        def = def.split(/\|(.+)/)[1];
+        // Unicode characters
+        var top = '\u22A4'; // T
+        var bot = '\u22A5'; // Inverse T
+        var lte = '\u2264'; // <=
+        var gte = '\u2265'; // >=
+        var prec = '\u227A'; // Preceds
+        var impl = '\u2192'; // ->
+        
+        def_map = { 'frontier_top' : {param1 : '$1 ('+top+', '+top+') == '+ top},
+                    'frontier_bot' : {param1 : '$1 ('+bot+', '+bot+') == '+ bot},
+                    'increasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  <  $1(Y, Z)', 
+                                    param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  <  $1(Z, Y)'},
+                    'non_increasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)', 
+                                        param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+lte+'  $1(Z, Y)'},
+                    'decreasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  >  $1(Y, Z)', 
+                                    param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  >  $1(Z, Y)'},
+                    'non_decreasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)', 
+                                        param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'},
+                    'monotony' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)', 
+                                  param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'},
+                    'reflexivity' : { param1 : '$1(X, X) == X'},
+                    'commutativity' : { param1 : '$1(X, Y) == $1(Y, X)'},
+                    'associativity' : { param1 : '$1( $1(X, Y), Z) == $1(X, $1(Y, Z))'},
+                    'switchness' : { param1 : '$1( $2(X, Y), Z) == $2(X, $1(Y, Z))'}
+                  };
+        
+        
+        def = def_map[prop].param1;
         
         // Replace $1 for the name of the connective (if there is any selected)
         def = def.replace(/\$1/g,conn1);
@@ -136,7 +146,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
     var math_text = document.getElementById(idMathText);
 
     jQuery('#'+idTextarea).bind('change',fill_connectives);
-    jQuery('#'+idCatCombo).bind('change',fill_properties);
+    jQuery('#'+idCatCombo).bind('change',function(){ fill_properties(); writeMathDef() });
     jQuery('#'+idPropCombo).bind('change',writeMathDef);
     
     $('#'+idTextarea).trigger('change');
