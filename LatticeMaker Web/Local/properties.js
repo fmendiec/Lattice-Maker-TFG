@@ -136,13 +136,21 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
                                     param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'}
                   };
         
-        
-        def = def_map[prop].param1;
+        var param1 = def_map[prop].param1;
+        var param2 = def_map[prop].param2;
         
         // Replace $1 for the name of the connective (if there is any selected)
-        def = def.replace(/\$1/g,conn1);
+        param1 = param1.replace(/\$1/g,conn1);
+        param1 = param1.replace(/\$2/g,conn2);
         
-        math_text.value = def;
+        if (param2)
+        {
+            param2 = param2.replace(/\$1/g,conn1);
+            param2 = param2.replace(/\$2/g,conn2);
+            math_text.value = 'Param1:\t'+param1+'\nParam2:\t'+param2;
+        }
+        else
+            math_text.value = param1;
     }
     
     var textarea = document.getElementById(idTextarea);

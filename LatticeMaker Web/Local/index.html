@@ -123,6 +123,7 @@ pri_inf(X,Y,bottom).</textarea>
                         <button type = "button" class = "button-lattice" title = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")> <img src = "media/remove_arrow.png"> </button>
                     </div>
 				</div>
+                <br><br>
 				<h2>Properties</h2>
 				<div id = "properties-form">
                     <form id = "properties-form">
@@ -140,8 +141,8 @@ pri_inf(X,Y,bottom).</textarea>
                         <label for="aggr-combo2">Connective 2:</label>
                         <select id = "aggr_combo2" disabled = true class="lattice-selection"> </select>
                         <br><br>
-                        <label for = "math-definition">Definition:</label>
-                        <input type = "text" class = "textbox" id = "math-definition" readonly  = "readonly" style="width:800px">
+                        <label for  = "math-definition">Mathematical definition:</label>
+                        <textarea class = "math-displayer" id = "math-definition" readonly  = "readonly" ></textarea>
                         <h3>Result</h3><textarea id="property-result" class="code-try" readonly = "readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
                     </form>
                 </div>
