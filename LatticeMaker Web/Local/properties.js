@@ -46,6 +46,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         var top = '\u22A4'; // T
         var bot = '\u22A5'; // Inverse T
         var lte = '\u2264'; // <=
+        var gte = '\u2265'; // >=
         var prec = '\u227A'; // Preceds
         var impl = '\u2192'; // ->
         
@@ -56,18 +57,24 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
             case 'Basic':
             {
                 combo_con2.disabled = true;
-                prop_value = [
-                    ['frontier_top','$1 ('+top+', '+top+') == '+ top],
-                    ['frontier_bot','$1 ('+bot+', '+bot+') == '+ bot],
-                    ['increasing', 'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)'],
-                              'non_increasing',
-                              'decreasing',
-                              'non_decreasing',
-                              'monotony',
-                              'reflexivity',
-                              'commutativity',
-                              'associativity'
-                             ];
+                
+                prop_def = [   '$1 ('+top+', '+top+') == '+ top,
+                               '$1 ('+bot+', '+bot+') == '+ bot,
+                               'If X '+prec+' Y '+impl+' $1(X, Z)  <  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  <  $1(Z, Y)',
+                               'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  '+lte+'  $1(Z, Y)',
+                               'If X '+prec+' Y '+impl+' $1(X, Z)  >  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  >  $1(Z, Y)',
+                               'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)|If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)',
+                               
+                               '$1(X, X) == X',
+                               '$1(X, Y) == $1(Y, X)',
+                               '$1($1(X, Y), Z) == $1(X, $1(Y, Z))'
+                              ];
+                
+                prop_value = ['frontier_top','frontier_bot','increasing',
+                             'non_increasing','decreasing','non_decreasing',
+                             'monotony','reflexivity','commutativity',
+                             'associativity'];
+                
                 prop_text = ['Frontier top', 'Frontier bot', 'Increasing', 'Non increasing','Decreasing','Non decreasing','Monotony','Reflexivity','Commutativity','Associativity'];
                 break;
             }
@@ -113,8 +120,8 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         var conn2 = combo_con2.options[combo_con2.selectedIndex].value;
         
         // Math def is needed
-        def = def.split(/,(.+)/)[1];
-    
+        def = def.split(/\|(.+)/)[1];
+        
         // Replace $1 for the name of the connective (if there is any selected)
         def = def.replace(/\$1/g,conn1);
         
