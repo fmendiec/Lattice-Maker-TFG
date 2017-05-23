@@ -64,7 +64,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
                 combo_con2.disabled = true;
                 
                 prop_value = ['t_norm','t_conorm','implication'];
-                prop_text = ['T-Norm', 'T-Conorm', 'Implicaiton'];
+                prop_text = ['T-Norm', 'T-Conorm', 'Implication'];
                 break;
             }
                 
@@ -110,6 +110,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         var gte = '\u2265'; // >=
         var prec = '\u227A'; // Preceds
         var impl = '\u2192'; // ->
+        var iff = '\u21D4'; // <==>
         
         def_map = { 'frontier_top' : {param1 : '$1 ('+top+', '+top+') == '+ top},
                     'frontier_bot' : {param1 : '$1 ('+bot+', '+bot+') == '+ bot},
@@ -126,7 +127,13 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
                     'reflexivity' : { param1 : '$1(X, X) == X'},
                     'commutativity' : { param1 : '$1(X, Y) == $1(Y, X)'},
                     'associativity' : { param1 : '$1( $1(X, Y), Z) == $1(X, $1(Y, Z))'},
-                    'switchness' : { param1 : '$1( $2(X, Y), Z) == $2(X, $1(Y, Z))'}
+                    'switchness' : { param1 : '$1( $2(X, Y), Z) == $2(X, $1(Y, Z))'},
+                    'adjointness' : { param1 : '$1 is a T-Norm, $2 is a implication and X '+lte+' $2(Y,Z) '+iff+' $1(X,Z) '+lte+' Y'},
+                    'distributivity' : { param1 : '$2( $1(X, Y), Z) == $1( $2(X, Z), $2(Y, Z))', param2 : '$2(X,$1(Y, Z)) == $1( $2(X, Y), $2(X, Z))'},
+                    't_norm' : { param1 : 'Top is the identity element, $1 is commutative, associative and monotone'},
+                    't_conorm' : { param1 : 'Bot is the identity element, $1 is commutative, associative and monotone'},
+                    'implication' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)',
+                                    param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'}
                   };
         
         
