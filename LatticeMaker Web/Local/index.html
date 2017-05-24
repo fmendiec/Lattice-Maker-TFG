@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="./content/tree.js"></script>
 		<script type="text/javascript" src="./content/lattices.js"></script>
         <script type = "text/javascript" src = "buttons.js"> </script>
+        <script type = "text/javascript" src = "properties.js" </script>
 		<script>hljs.initHighlightingOnLoad();</script>
 		<link href="http://dectau.uclm.es/unfold/content/img/favicon.ico?d=30082016" type="image/x-icon" rel="icon">
 		<link href="./content/css" rel="stylesheet" type="text/css">
@@ -107,8 +108,8 @@ pri_inf(X,Y,bottom).</textarea>
 				</div>
 				<div class = "twocols" id = "controls">
                     <div class = "file-controls">
-                        File:
-                        <input type = "text" id = "lattice-name" class = "file-name" value = "alfabeta.lat">
+                        <label for="lattice-name">File:</label>
+                        <input type = "text" id = "lattice-name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
                         <input type = "file" id="latfile" onchange = upload_lattice_button("textarea-lattice","lattice-name","latfile")>
                         <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "./media/upload.png"></button>
                         <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "media/download.png"> </button>
@@ -122,18 +123,39 @@ pri_inf(X,Y,bottom).</textarea>
                         <button type = "button" class = "button-lattice" title = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")> <img src = "media/remove_arrow.png"> </button>
                     </div>
 				</div>
+                <br><br>
 				<h2>Properties</h2>
 				<div id = "properties-form">
                     <form id = "properties-form">
-                        Aggregator 1: <select><option>sdjafñkl </option> </select>
-                        Aggregator 2: <select> </select>
-                        <input type = "submit">
-                        <br>Result<textarea id="property-result" class="code-try" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
+                        <label for="category-combo">Category:</label>
+                        <select id = "category-combo" class="lattice-selection"> 
+                            <option>Basic</option>
+                            <option>Combined</option>
+                            <option>Multiple</option>
+                        </select>
+                        <label for="property-combo">Property:</label>
+                        <select id = "property-combo" class="lattice-selection"> 
+                        </select>
+                        <label for="aggr-combo1">Connective 1:</label>
+                        <select id = "aggr_combo1" class="lattice-selection"> </select>
+                        <label for="aggr-combo2">Connective 2:</label>
+                        <select id = "aggr_combo2" disabled = true class="lattice-selection"> </select>
+                        <br><br>
+                        <div class = "twocols">
+                            <div style="width:80%">
+                                <label for  = "math-definition">Mathematical definition:</label>
+                                <textarea id = "math-definition" readonly  = "readonly" ></textarea>
+                            </div>
+                            <div style="width:20%">
+                                <input type="submit" id = "test-submit" class = "button-lattice" value = "Test" style = "width:150px;height:50px;margin-top:25px;">
+                            </div>
+                        </div>
+                        <h3>Result</h3><textarea id="property-result" class="code-try" readonly = "readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 200px;"> </textarea>
                     </form>
                 </div>
 			</div>
 		</div>
-		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" ); upload_lattice_drop("textarea-lattice","lattice-name");
+		<script type="text/javascript">latticeMaker( "textarea-lattice","canvas-lattice" ); properties_tester("textarea-lattice","category-combo","property-combo","aggr_combo1","aggr_combo2","math-definition"); upload_lattice_drop("textarea-lattice","lattice-name"); 
             </script>
 </div>
 

@@ -53,11 +53,13 @@ include( "content/php/inc/meta/$_view.php" );
 		<script type="text/javascript" src="content/js/tree.js"></script>
 		<script type="text/javascript" src="content/js/lattices.js"></script>
         <script type="text/javascript" src="content/js/buttons.js"> </script>
+        <script type="text/javascript" src="content/js/properties.js"> </script>
 		<script>hljs.initHighlightingOnLoad();</script>
 		<link href="content/img/favicon.ico?d=30082016" type="image/x-icon" rel="icon" />
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300,400italic,700italic' rel='stylesheet' type='text/css'>
 		<link href='https://fonts.googleapis.com/css?family=Roboto+Mono' rel='stylesheet' type='text/css'>
 		<link rel="StyleSheet" href="content/css/main.css" type="text/css" media="ALL" />
+        <link rel="StyleSheet" href="content/lattices.css" type="text/css" media="ALL">
 		<link rel="StyleSheet" href="content/css/highlight.css" type="text/css" media="ALL" />
 	</head>
 	<body>
