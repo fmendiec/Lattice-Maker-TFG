@@ -453,6 +453,7 @@ var latticeMaker = function( id_textarea, id_canvas ) {
 	};
 
 	// Elementos
+    members = [];
 	var arcs = [];
 	var top = false;
 	var bottom = false;
@@ -514,5 +515,3 @@ var latticeArc = function( from, to ) {
 	this.from = from;
 	this.to = to;
 };
-
-var members = [];

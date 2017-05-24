@@ -109,7 +109,7 @@ pri_inf(X,Y,bottom).</textarea>
 				<div class = "twocols" id = "controls">
                     <div class = "file-controls">
                         <label for="lattice-name">File:</label>
-                        <input type = "text" id = "lattice-name" class = "textbox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
+                        <input type = "text" id = "lattice-name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
                         <input type = "file" id="latfile" onchange = upload_lattice_button("textarea-lattice","lattice-name","latfile")>
                         <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "./media/upload.png"></button>
                         <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "media/download.png"> </button>
@@ -144,7 +144,7 @@ pri_inf(X,Y,bottom).</textarea>
                         <div class = "twocols">
                             <div style="width:80%">
                                 <label for  = "math-definition">Mathematical definition:</label>
-                                <textarea class = "math-displayer" id = "math-definition" readonly  = "readonly" ></textarea>
+                                <textarea id = "math-definition" readonly  = "readonly" ></textarea>
                             </div>
                             <div style="width:20%">
                                 <input type="submit" id = "test-submit" class = "button-lattice" value = "Test" style = "width:150px;height:50px;margin-top:25px;">
