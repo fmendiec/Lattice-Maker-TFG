@@ -29,8 +29,8 @@
     the GNU General Public License.
 */
 
-:- module(lattice_viewer,
-          [ lattice_viewer/0
+:- module(lattice_maker,
+          [ lattice_maker/0
           ]).
 
 :- use_module(library(pce)).
@@ -91,11 +91,11 @@ resource(imgleq, image, image('restore_leq.xpm')).
 resource(imgeditfind, image, image('find_replace.xpm')).
 resource(imghelp, image, image('help.xpm')).
 
-lattice_viewer :-
-	new(@GV, lattice_viewer),
+lattice_maker :-
+	new(@GV, lattice_maker),
     send(@GV, open_centered).
 
-:- pce_begin_class(lattice_viewer, frame).
+:- pce_begin_class(lattice_maker, frame).
 
 variable(drawnode, bool, both, "Node selected").
 variable(drawarrow,     bool, both, "Arrow selected").
@@ -113,7 +113,7 @@ locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''),
 set_locale(lattice).
 
 initialise(GV) :->
-	"Create lattice_viewer"::
+	"Create lattice_maker"::
 	send(GV, send_super, initialise, 'Lattice Maker'),
 	send(GV, background, gainsboro),
 
@@ -1399,7 +1399,7 @@ check_distance(F) :->
     
     writeln('Checking distance:\n'),
     
-    %call(idempotency,lat_graph:distance),
+    call(idempotency,lat_graph:distance),
     call(commutativity,lat_graph:distance),
     call(minor_distance,lat_graph:distance),
     
