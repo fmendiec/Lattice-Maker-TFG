@@ -370,10 +370,16 @@ fill_operators_dialog(D) :-
     send(BDistEval, help_message, tag, 'Check the distances'),
     send(BDistEval, active, @off),
 
-    send(W5, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
-	send(BDist, font, font(arial, bold, 12)),
-	send(BDist, colour, blue),
-    send(BDist, help_message, tag, 'Generate the distances'),
+    send(W5, append, new(BDistGen, button(generate, message(D, restore_view_distance))), right),
+	send(BDistGen, font, font(arial, bold, 12)),
+	send(BDistGen, colour, blue),
+    send(BDistGen, help_message, tag, 'Generate the distances'),
+    
+    send(W5, append, new(BDistCheck, button(check, message(D, check_distance))), right),
+	send(BDistCheck, font, font(arial, bold, 12)),
+	send(BDistCheck, colour, blue),
+    send(BDistCheck, help_message, tag, 'Check distance'),
+    
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -1379,6 +1385,28 @@ eval_distance(F) :->
     close(Fd),
 	set_output(Old),
     send(V, editable, @off).
+    
+
+check_distance(F) :->
+    get(F, member(dialog_eval), D),
+	get(D, member, view, V),
+    
+	send(V, clear),
+	current_output(Old),
+	pce_open(V, write, Fd),
+    
+	set_output(Fd),
+    
+    writeln('Checking distance:\n'),
+    
+    %call(idempotency,lat_graph:distance),
+    call(commutativity,lat_graph:distance),
+    call(minor_distance,lat_graph:distance),
+    
+    close(Fd),
+	set_output(Old),
+    send(V, editable, @off).
+
     
 get_dist_term(D,I,S) :-
         get_term_name(I, StrTerm),

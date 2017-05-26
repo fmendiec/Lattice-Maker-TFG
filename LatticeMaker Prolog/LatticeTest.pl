@@ -46,6 +46,8 @@ t_conorm(Aggr) :-
 implication(Aggr) :-
      writeln('Implication:\n'),test_imp(Aggr).   
     
+minor_distance(Aggr) :- 
+    writeln('Minor distance: '),test_mdist(Aggr),write('Sucess').
     
 % TEST PREDICATES
 
@@ -245,3 +247,21 @@ test_tconorm(Aggr) :- lat:bot(B),identity_element(Aggr,B,tconorm),print_connecti
 % Increasing in the first parameter and decreasing in the second one
 
 test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),writeln('Non-Increasing:\n'),do_test(Aggr,test_nin2),writeln('Second parameter: Success\n').
+
+
+% DISTANCES
+
+test_mdist(Aggr) :- triplet(L),forall(member((X,Y,Z),L),((call(lat:Aggr,X,Z,V1),sum(Aggr,X,Y,Z,V2),lat:leq(V1,V2)) ; fail_dist(Aggr,X,Y,Z) )).
+
+% Get all the triplet (X,Y,Z) where X is the initial element, Z is the final element, and Y is the intermediate element
+triplet(L) :- findall((X,Y,Z),(lat:members(LX),extract(LX,X),greater(X,LZ),extract(LZ,Z),inter(X,Z,LY),extract(LY,Y)),L).
+
+% Get all the intermediate elements between X and Z
+inter(X,Z,Y) :- findall(E, (lat:members(M),extract(M,E),lat:leq(X,E),lat:leq(E,Z)),Y).
+
+% Get all the elements greater or equal than X 
+greater(X,Z) :- findall(E,(lat:members(M),extract(M,E),lat:leq(X,E)),Z).
+
+sum(Aggr, X,Y,Z,V) :- call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,Z,V2),V is V1+V2.
+
+fail_dist(Aggr,X,Y,Z) :- writef('Failure\nCounterexample\n%w(%w,%w) > %w(%w,%w) + %w(%w,%w)\n',[Aggr,X,Z,Aggr,X,Y,Aggr,Y,Z]),fail. 
