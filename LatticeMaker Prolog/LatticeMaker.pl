@@ -391,7 +391,7 @@ fill_properties(F,Arg) :->
     
 add_prop_list('Basic',LB) :- 
         send(LB,clear),
-        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,monotony,reflexivity,commutativity,associativity]).
+        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,monotony,idempotency,commutativity,associativity]).
 add_prop_list('Multiple',LB) :- 
         send(LB,clear),
         send_list(LB,append,[switchness, adjointness, distributivity]).
@@ -485,7 +485,7 @@ two_params(implication).
 
 get_math_def(frontier_top,Ag1,S) :- format(atom(S),"~w(T, T) = T",[Ag1]).
 get_math_def(frontier_bot,Ag1,S) :- format(atom(S),"~w(B, B) = B",[Ag1]).
-get_math_def(reflexivity,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
+get_math_def(idempotency,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
 get_math_def(commutativity,Ag1,S) :- format(atom(S),"~w(X, Y) == ~w(Y, X)",[Ag1,Ag1]).
 get_math_def(associativity,Ag1,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag1,Ag1,Ag1]).
 get_math_def(t_norm,Ag1,S) :- format(atom(S), "~w is AND, commutative, associative, monotone and ~w(X,T)==X",[Ag1,Ag1]).

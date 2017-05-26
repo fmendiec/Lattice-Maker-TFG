@@ -1,8 +1,8 @@
 frontier_top(Aggr) :-
-    write('Frontier Top: '),lat:top(T),test_refl(Aggr,T),write('Success').
+    write('Frontier Top: '),lat:top(T),test_idemp(Aggr,T),write('Success').
     
 frontier_bot(Aggr) :-
-    write('Frontier Bot: '),lat:bot(B),test_refl(Aggr,B),write('Success').
+    write('Frontier Bot: '),lat:bot(B),test_idemp(Aggr,B),write('Success').
     
 increasing(Aggr) :-
     writeln('Increasing:\n'),growth_test(Aggr,test_in1,test_in2).
@@ -28,8 +28,8 @@ monotony(Aggr) :-
 adjointness(Aggr1,Aggr2) :-
 	( test_adj(Aggr1,Aggr2) -> writeln('\nAdjointness: Success') ; writeln('\nAdjointness: Failure')).
 
-reflexivity(Aggr) :-
-    write('Reflexivity: '),test_refl_all(Aggr),writeln('Success').
+idempotency(Aggr) :-
+    write('Idempotency: '),test_idemp_all(Aggr),writeln('Success').
 
 commutativity(Aggr) :-
     write('Commutativity: '),test_com(Aggr),writeln('Success').
@@ -77,13 +77,13 @@ do_test(Aggr,Test) :- getXltY(L),forall(member((X,Y,Z),L),call(Test,X,Y,Z,Aggr))
 % If X < Y => $(X,Z) < $(Y,Z)
 test_in1(X,Y,Z,Aggr ):-
                       (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2),V1\=V2) 
-                      ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                      ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Increasing on the second parameter
 % If X < Y => $(Z,X) < $(Z,Y)
 test_in2(X,Y,Z,Aggr) :-
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2),V1\=V2) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
 
 
 % NON-DECREASING
@@ -92,13 +92,13 @@ test_in2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) =< $(Y,Z)
 test_nde1(X,Y,Z,Aggr) :- 
                             (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2)) 
-                            ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                            ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Non-Decreasing on the second parameter
 % If X < Y => $(Z,X) =< $(Z,Y)
 test_nde2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2)) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
 
 
 % DECREASING
@@ -107,13 +107,13 @@ test_nde2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) > $(Y,Z)
 test_de1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1),V1\=V2) 
-                        ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
+                        ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Decreasing on the second parameter 
 % If X < Y => $(Z,X) > $(Z,Y)
 test_de2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1),V1\=V2) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
                         
                         
 % NON INCREASING
@@ -122,13 +122,13 @@ test_de2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) >= $(Y,Z)
 test_nin1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1)) 
-                        ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
+                        ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Non-Increasing on the second parameter 
 % If X < Y => $(Z,X) >= $(Z,Y)
 test_nin2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1)) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
                         
                         
 % SWITCHNESS
@@ -143,14 +143,14 @@ test_sw(Aggr1,Aggr2) :-
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
-fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterxample:\n%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterexample:\n%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
-% REFLEXIVITY
+% IDEMPOTENCY
 
-test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)).
+test_idemp_all(Aggr) :- lat:members(L),forall(member(X,L),test_idemp(Aggr,X)).
 
-test_refl(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,X,X]),fail).
+test_idemp(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,X,X]),fail).
 
 
 % COMMUTATIVITY
@@ -161,7 +161,7 @@ test_com(Aggr) :-
                   ;  fail_com(Aggr,X,Y))
                   ).
                   
-fail_com(Aggr,X,Y) :- writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
+fail_com(Aggr,X,Y) :- writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
 
 
 % DISTRIBUTIVITY
@@ -206,7 +206,7 @@ bicond(Aggr1,Aggr2,X,Y,Z,V1,V2) :- ( lat:leq(X,V1),lat:leq(V2,Y)
                                     -> true
                                     ; ( not(lat:leq(X,V1)),not(lat:leq(V2,Y)) 
                                         -> true
-                                        ; writef("Failure\nCounterxample:\n%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
+                                        ; writef("Failure\nCounterexample:\n%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
                                       )
                                     ).
 
@@ -226,7 +226,7 @@ identity_element(Aggr,E,Type) :- writef('Identity element %w: ',[E]),forall(lat:
 test_iden(Aggr,X,E,Type) :- 
             ( call(lat:Aggr,X,E,V),X==V 
                 -> true 
-                ; writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
+                ; writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
             ).
 
             
