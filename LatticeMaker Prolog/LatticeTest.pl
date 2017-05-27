@@ -49,6 +49,15 @@ implication(Aggr) :-
 minor_distance(Aggr) :- 
     writeln('Minor distance: '),test_mdist(Aggr),write('Sucess').
     
+
+supreme_and_infimum :-
+    supr_inf.
+
+ 
+    
+    
+    
+    
 % TEST PREDICATES
 
 % Extract an element from a given list 
@@ -265,3 +274,42 @@ greater(X,Z) :- findall(E,(lat:members(M),extract(M,E),lat:leq(X,E)),Z).
 sum(Aggr, X,Y,Z,V) :- call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,Z,V2),V is V1+V2.
 
 fail_dist(Aggr,X,Y,Z) :- writef('Failure\nCounterexample\n%w(%w,%w) > %w(%w,%w) + %w(%w,%w)\n',[Aggr,X,Z,Aggr,X,Y,Aggr,Y,Z]),fail. 
+
+
+% SUPREMES AND INFIMUMS
+
+is_min(X,L) :- forall(member(Y,L),lat:leq(X,Y)).
+ 
+min_supreme_list(L,Min) :- setof(X,(extract(L,X),is_min(X,L)),Min). 
+
+supreme(X,Y,S) :- X \= Y,list_supr(X,Y,L),min_supreme_list(L,[S]). 
+    
+list_supr(X,X,[]).
+list_supr(X,Y,L) :- lat:members(M),setof(E,(extract(M,E),lat:leq(X,E),lat:leq(Y,E)),L).
+
+
+% --------------------------------------------------------------------------------------
+
+is_max(X,L) :- forall(member(Y,L),lat:leq(Y,X)).
+
+max_infimum_list(L,Max) :- setof(X,(extract(L,X),is_max(X,L)),Max).  
+
+infimum(X,Y,I) :- X \= Y,list_inf(X,Y,L),max_infimum_list(L,[I]). 
+    
+list_inf(X,X,[]).
+list_inf(X,Y,L) :- lat:members(M),setof(E,(extract(M,E),lat:leq(E,X),lat:leq(E,Y)),L).
+
+
+% ---------------------------------------------------------------------------------------
+
+supr_inf :- lat:members(M),
+            findall((X,Y),(extract(M,X),extract(M,Y),X \= Y),L),
+            forall(member((X,Y),L),
+                (
+                    (supreme(X,Y,_) ; fail_sup(X,Y)),
+                    (infimum(X,Y,_) ; fail_inf(X,Y))
+                )
+            ).
+
+fail_sup(X,Y) :- writef('IMPORTANT ERROR:\n supreme(%w,%w) does not exist\n',[X,Y]),fail.
+fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,Y]),fail.

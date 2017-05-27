@@ -835,8 +835,27 @@ normalize(F) :->
 	send(F, lattice),
 	fill_from_lattice(F),
 	send(F, set_edit_mode_off),
+    
+    get(F, member(dialog_eval), D),
+	get(D, member, view, V),
+    
+	send(V, clear),
+	current_output(Old),
+	pce_open(V, write, Fd),
+    
+	set_output(Fd),
+    
+    call(supreme_and_infimum),
+    
+    close(Fd),
+	set_output(Old),
+    send(V, editable, @off),
+    
     % The lattice is already normalized
 	send(F, report, status, 'Graph has been normalized').
+    
+
+    
 
 draw_graph(F) :->
 	(	prepare_for_drawing,
@@ -904,6 +923,7 @@ lattice_to_graph(F) :->
 		)
 	;	send(F, report, error, 'Lattice in view has errors')
 	),
+    
 	send(B, modified, M),
 	send(F, redrawn, @on).
 
