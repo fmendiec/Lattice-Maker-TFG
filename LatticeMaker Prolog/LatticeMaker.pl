@@ -29,8 +29,8 @@
     the GNU General Public License.
 */
 
-:- module(lattice_viewer,
-          [ lattice_viewer/0
+:- module(lattice_maker,
+          [ lattice_maker/0
           ]).
 
 :- use_module(library(pce)).
@@ -91,11 +91,11 @@ resource(imgleq, image, image('restore_leq.xpm')).
 resource(imgeditfind, image, image('find_replace.xpm')).
 resource(imghelp, image, image('help.xpm')).
 
-lattice_viewer :-
-	new(@GV, lattice_viewer),
+lattice_maker :-
+	new(@GV, lattice_maker),
     send(@GV, open_centered).
 
-:- pce_begin_class(lattice_viewer, frame).
+:- pce_begin_class(lattice_maker, frame).
 
 variable(drawnode, bool, both, "Node selected").
 variable(drawarrow,     bool, both, "Arrow selected").
@@ -113,7 +113,7 @@ locale_create(_, default, [alias(lattice), decimal_point('.'), thousand_sep(''),
 set_locale(lattice).
 
 initialise(GV) :->
-	"Create lattice_viewer"::
+	"Create lattice_maker"::
 	send(GV, send_super, initialise, 'Lattice Maker'),
 	send(GV, background, gainsboro),
 
@@ -370,10 +370,16 @@ fill_operators_dialog(D) :-
     send(BDistEval, help_message, tag, 'Check the distances'),
     send(BDistEval, active, @off),
 
-    send(W5, append, new(BDist, button(generate, message(D, restore_view_distance))), right),
-	send(BDist, font, font(arial, bold, 12)),
-	send(BDist, colour, blue),
-    send(BDist, help_message, tag, 'Generate the distances'),
+    send(W5, append, new(BDistGen, button(generate, message(D, restore_view_distance))), right),
+	send(BDistGen, font, font(arial, bold, 12)),
+	send(BDistGen, colour, blue),
+    send(BDistGen, help_message, tag, 'Generate the distances'),
+    
+    send(W5, append, new(BDistCheck, button(check, message(D, check_distance))), right),
+	send(BDistCheck, font, font(arial, bold, 12)),
+	send(BDistCheck, colour, blue),
+    send(BDistCheck, help_message, tag, 'Check distance'),
+    
     
 	send(D, append, Output, next_row),
 	send(Output, size, size(50, 8)),
@@ -391,7 +397,7 @@ fill_properties(F,Arg) :->
     
 add_prop_list('Basic',LB) :- 
         send(LB,clear),
-        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,monotony,reflexivity,commutativity,associativity]).
+        send_list(LB,append,[frontier_top, frontier_bot, increasing, non_increasing, decreasing,non_decreasing,monotony,idempotency,commutativity,associativity]).
 add_prop_list('Multiple',LB) :- 
         send(LB,clear),
         send_list(LB,append,[switchness, adjointness, distributivity]).
@@ -485,7 +491,7 @@ two_params(implication).
 
 get_math_def(frontier_top,Ag1,S) :- format(atom(S),"~w(T, T) = T",[Ag1]).
 get_math_def(frontier_bot,Ag1,S) :- format(atom(S),"~w(B, B) = B",[Ag1]).
-get_math_def(reflexivity,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
+get_math_def(idempotency,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
 get_math_def(commutativity,Ag1,S) :- format(atom(S),"~w(X, Y) == ~w(Y, X)",[Ag1,Ag1]).
 get_math_def(associativity,Ag1,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag1,Ag1,Ag1]).
 get_math_def(t_norm,Ag1,S) :- format(atom(S), "~w is AND, commutative, associative, monotone and ~w(X,T)==X",[Ag1,Ag1]).
@@ -829,8 +835,27 @@ normalize(F) :->
 	send(F, lattice),
 	fill_from_lattice(F),
 	send(F, set_edit_mode_off),
+    
+    get(F, member(dialog_eval), D),
+	get(D, member, view, V),
+    
+	send(V, clear),
+	current_output(Old),
+	pce_open(V, write, Fd),
+    
+	set_output(Fd),
+    
+    call(supreme_and_infimum),
+    
+    close(Fd),
+	set_output(Old),
+    send(V, editable, @off),
+    
     % The lattice is already normalized
 	send(F, report, status, 'Graph has been normalized').
+    
+
+    
 
 draw_graph(F) :->
 	(	prepare_for_drawing,
@@ -898,6 +923,7 @@ lattice_to_graph(F) :->
 		)
 	;	send(F, report, error, 'Lattice in view has errors')
 	),
+    
 	send(B, modified, M),
 	send(F, redrawn, @on).
 
@@ -1379,6 +1405,28 @@ eval_distance(F) :->
     close(Fd),
 	set_output(Old),
     send(V, editable, @off).
+    
+
+check_distance(F) :->
+    get(F, member(dialog_eval), D),
+	get(D, member, view, V),
+    
+	send(V, clear),
+	current_output(Old),
+	pce_open(V, write, Fd),
+    
+	set_output(Fd),
+    
+    writeln('Checking distance:\n'),
+    
+    call(idempotency,lat_graph:distance),
+    call(commutativity,lat_graph:distance),
+    call(minor_distance,lat_graph:distance),
+    
+    close(Fd),
+	set_output(Old),
+    send(V, editable, @off).
+
     
 get_dist_term(D,I,S) :-
         get_term_name(I, StrTerm),

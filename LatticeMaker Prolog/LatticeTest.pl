@@ -1,8 +1,8 @@
 frontier_top(Aggr) :-
-    write('Frontier Top: '),lat:top(T),test_refl(Aggr,T),write('Success').
+    write('Frontier Top: '),lat:top(T),test_idemp(Aggr,T),write('Success').
     
 frontier_bot(Aggr) :-
-    write('Frontier Bot: '),lat:bot(B),test_refl(Aggr,B),write('Success').
+    write('Frontier Bot: '),lat:bot(B),test_idemp(Aggr,B),write('Success').
     
 increasing(Aggr) :-
     writeln('Increasing:\n'),growth_test(Aggr,test_in1,test_in2).
@@ -28,8 +28,8 @@ monotony(Aggr) :-
 adjointness(Aggr1,Aggr2) :-
 	( test_adj(Aggr1,Aggr2) -> writeln('\nAdjointness: Success') ; writeln('\nAdjointness: Failure')).
 
-reflexivity(Aggr) :-
-    write('Reflexivity: '),test_refl_all(Aggr),writeln('Success').
+idempotency(Aggr) :-
+    write('Idempotency: '),test_idemp_all(Aggr),writeln('Success').
 
 commutativity(Aggr) :-
     write('Commutativity: '),test_com(Aggr),writeln('Success').
@@ -45,6 +45,17 @@ t_conorm(Aggr) :-
     
 implication(Aggr) :-
      writeln('Implication:\n'),test_imp(Aggr).   
+    
+minor_distance(Aggr) :- 
+    writeln('Minor distance: '),test_mdist(Aggr),write('Sucess').
+    
+
+supreme_and_infimum :-
+    supr_inf.
+
+ 
+    
+    
     
     
 % TEST PREDICATES
@@ -77,13 +88,13 @@ do_test(Aggr,Test) :- getXltY(L),forall(member((X,Y,Z),L),call(Test,X,Y,Z,Aggr))
 % If X < Y => $(X,Z) < $(Y,Z)
 test_in1(X,Y,Z,Aggr ):-
                       (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2),V1\=V2) 
-                      ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                      ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) >= %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Increasing on the second parameter
 % If X < Y => $(Z,X) < $(Z,Y)
 test_in2(X,Y,Z,Aggr) :-
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2),V1\=V2) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) >= %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
 
 
 % NON-DECREASING
@@ -92,13 +103,13 @@ test_in2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) =< $(Y,Z)
 test_nde1(X,Y,Z,Aggr) :- 
                             (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2)) 
-                            ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                            ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
 
 % Non-Decreasing on the second parameter
 % If X < Y => $(Z,X) =< $(Z,Y)
 test_nde2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V1,V2)) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) > %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
 
 
 % DECREASING
@@ -107,13 +118,13 @@ test_nde2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) > $(Y,Z)
 test_de1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1),V1\=V2) 
-                        ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
+                        ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) =< %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Decreasing on the second parameter 
 % If X < Y => $(Z,X) > $(Z,Y)
 test_de2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1),V1\=V2) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) =< %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
                         
                         
 % NON INCREASING
@@ -122,13 +133,13 @@ test_de2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) >= $(Y,Z)
 test_nin1(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V2,V1)) 
-                        ; (writef('First parameter: Failure\nCounterxample:\n%w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
+                        ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) < %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Non-Increasing on the second parameter 
 % If X < Y => $(Z,X) >= $(Z,Y)
 test_nin2(X,Y,Z,Aggr) :- 
                         (call(lat:Aggr,Z,X,V1),call(lat:Aggr,Z,Y,V2),lat:leq(V2,V1)) 
-                        ; (writef('Second parameter: Failure\nCounterxample:\n%w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
+                        ; (writef('Second parameter: Failure\nCounterexample:\n%w(%w, %w) < %w(%w,%w)\n', [Aggr,Z,X,Aggr,Z,Y]),fail).
                         
                         
 % SWITCHNESS
@@ -143,14 +154,14 @@ test_sw(Aggr1,Aggr2) :-
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
-fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterxample:\n%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterexample:\n%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
-% REFLEXIVITY
+% IDEMPOTENCY
 
-test_refl_all(Aggr) :- lat:members(L),forall(member(X,L),test_refl(Aggr,X)).
+test_idemp_all(Aggr) :- lat:members(L),forall(member(X,L),test_idemp(Aggr,X)).
 
-test_refl(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,X,X]),fail).
+test_idemp(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,X,X]),fail).
 
 
 % COMMUTATIVITY
@@ -161,7 +172,7 @@ test_com(Aggr) :-
                   ;  fail_com(Aggr,X,Y))
                   ).
                   
-fail_com(Aggr,X,Y) :- writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
+fail_com(Aggr,X,Y) :- writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
 
 
 % DISTRIBUTIVITY
@@ -206,7 +217,7 @@ bicond(Aggr1,Aggr2,X,Y,Z,V1,V2) :- ( lat:leq(X,V1),lat:leq(V2,Y)
                                     -> true
                                     ; ( not(lat:leq(X,V1)),not(lat:leq(V2,Y)) 
                                         -> true
-                                        ; writef("Failure\nCounterxample:\n%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
+                                        ; writef("Failure\nCounterexample:\n%w <= %w(%w, %w) <=\\=> %w(%w, %w) <= %w\n",[X,Aggr2,Y,Z,Aggr1,X,Z,Y]),fail
                                       )
                                     ).
 
@@ -226,7 +237,7 @@ identity_element(Aggr,E,Type) :- writef('Identity element %w: ',[E]),forall(lat:
 test_iden(Aggr,X,E,Type) :- 
             ( call(lat:Aggr,X,E,V),X==V 
                 -> true 
-                ; writef('Failure\nCounterxample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
+                ; writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
             ).
 
             
@@ -245,3 +256,60 @@ test_tconorm(Aggr) :- lat:bot(B),identity_element(Aggr,B,tconorm),print_connecti
 % Increasing in the first parameter and decreasing in the second one
 
 test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),writeln('Non-Increasing:\n'),do_test(Aggr,test_nin2),writeln('Second parameter: Success\n').
+
+
+% DISTANCES
+
+test_mdist(Aggr) :- triplet(L),forall(member((X,Y,Z),L),((call(lat:Aggr,X,Z,V1),sum(Aggr,X,Y,Z,V2),lat:leq(V1,V2)) ; fail_dist(Aggr,X,Y,Z) )).
+
+% Get all the triplet (X,Y,Z) where X is the initial element, Z is the final element, and Y is the intermediate element
+triplet(L) :- findall((X,Y,Z),(lat:members(LX),extract(LX,X),greater(X,LZ),extract(LZ,Z),inter(X,Z,LY),extract(LY,Y)),L).
+
+% Get all the intermediate elements between X and Z
+inter(X,Z,Y) :- findall(E, (lat:members(M),extract(M,E),lat:leq(X,E),lat:leq(E,Z)),Y).
+
+% Get all the elements greater or equal than X 
+greater(X,Z) :- findall(E,(lat:members(M),extract(M,E),lat:leq(X,E)),Z).
+
+sum(Aggr, X,Y,Z,V) :- call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,Z,V2),V is V1+V2.
+
+fail_dist(Aggr,X,Y,Z) :- writef('Failure\nCounterexample\n%w(%w,%w) > %w(%w,%w) + %w(%w,%w)\n',[Aggr,X,Z,Aggr,X,Y,Aggr,Y,Z]),fail. 
+
+
+% SUPREMES AND INFIMUMS
+
+is_min(X,L) :- forall(member(Y,L),lat:leq(X,Y)).
+ 
+min_supreme_list(L,Min) :- setof(X,(extract(L,X),is_min(X,L)),Min). 
+
+supreme(X,Y,S) :- X \= Y,list_supr(X,Y,L),min_supreme_list(L,[S]). 
+    
+list_supr(X,X,[]).
+list_supr(X,Y,L) :- lat:members(M),setof(E,(extract(M,E),lat:leq(X,E),lat:leq(Y,E)),L).
+
+
+% --------------------------------------------------------------------------------------
+
+is_max(X,L) :- forall(member(Y,L),lat:leq(Y,X)).
+
+max_infimum_list(L,Max) :- setof(X,(extract(L,X),is_max(X,L)),Max).  
+
+infimum(X,Y,I) :- X \= Y,list_inf(X,Y,L),max_infimum_list(L,[I]). 
+    
+list_inf(X,X,[]).
+list_inf(X,Y,L) :- lat:members(M),setof(E,(extract(M,E),lat:leq(E,X),lat:leq(E,Y)),L).
+
+
+% ---------------------------------------------------------------------------------------
+
+supr_inf :- lat:members(M),
+            findall((X,Y),(extract(M,X),extract(M,Y),X \= Y),L),
+            forall(member((X,Y),L),
+                (
+                    (supreme(X,Y,_) ; fail_sup(X,Y)),
+                    (infimum(X,Y,_) ; fail_inf(X,Y))
+                )
+            ).
+
+fail_sup(X,Y) :- writef('IMPORTANT ERROR:\n supreme(%w,%w) does not exist\n',[X,Y]),fail.
+fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,Y]),fail.
