@@ -515,3 +515,502 @@ var latticeArc = function( from, to ) {
 	this.from = from;
 	this.to = to;
 };
+
+
+// BUTTONS
+
+var addMember = function(idTextArea)
+{
+    
+    // Load TextArea
+    var textarea = document.getElementById(idTextArea);
+    
+    // Read the new member's name
+    var newMember = prompt("What is the name of the new member?");
+    
+    // Cancel
+    if (!newMember)
+        return;
+    
+    // Error
+    if (newMember == '')
+    {
+        alert('ERROR: Member must have a name.');
+        return;
+    }
+    
+    // Not valid characters
+    if (newMember.indexOf(',') != -1 || newMember.indexOf('(') != -1 || newMember.indexOf(')') != -1)
+    {
+        alert('ERROR: Member cannot contain \',\', \'(\' or \')\'')
+        return;
+    }
+        
+    if (members.filter(function(m){ return m.member == newMember; }).length == 0)
+    {
+        // Get the index of the last member
+        var code = textarea.value;
+        var regex_member = /member\s*\(\s*(.+)\s*\)\s*\./g;
+        var match = true;
+        var index = 0;
+        while(match = regex_member.exec(code)){index = match.index + match[0].length};
+
+        var member = 'member('+newMember+').'
+
+        // Append the new member to TextArea
+        code = [code.slice(0,index), member, code.slice(index+1)].join('\n');
+
+        // Get the index of the members list
+        var regex_members = /\[\s*(.+)\s*\]\s*\)\s*\./g;
+        match = regex_members.exec(code);
+
+        // Create Members section
+        if (!match)
+        {
+            index += member.length;
+            code = [code.slice(0,index+1), 'members(['+newMember+']).', code.slice(index+1)].join('\n'); 
+        }
+
+        // Add to members section
+        else
+        {
+            index = match.index + match[1].length + 1;
+            // Append the new member to the list in TextArea
+            code = [code.slice(0,index), ','+newMember, code.slice(index)].join('');
+        }
+        
+        textarea.value = code;
+        // Updating TextArea by triggering the event "change"
+        $("#"+idTextArea).trigger('change');
+    }
+}
+
+var removeMember = function(idCanvas,idTextArea)
+{    
+    // Load Canvas
+    var canvas = document.getElementById(idCanvas);
+   
+    var selected = null;
+
+    // When user click on canvas
+    $("#"+idCanvas).one("click",function(event){    
+        
+        // Get selected member
+        selected = detectSelectedMember(canvas,event);    
+        
+        // Member selected
+        if (selected)
+            deleteMember(idTextArea,selected.member);
+        
+        else
+            alert('Member not selected') 
+    });
+    
+    // Delete member predicates
+    var deleteMember = function(idTextArea,member) 
+    {
+         // Load TextArea
+        var textarea = document.getElementById(idTextArea);
+        var code = textarea.value;
+        
+        // Delete member predicates
+        var regex_member = new RegExp("member\\s*\\(\\s*"+member+"\\s*\\)\\s*\\.","g");
+        code = code.replace(regex_member,'\r');
+        
+        // Delete arcs, top and bottom predicates
+        var regex_arc = new RegExp("arc\\s*\\(\\s*("+member+"\\s*,.+)|(.+,\\s*"+member+")\\s*\\)\\s*\\.","g");
+        code = code.replace(regex_arc,'\r');
+        
+        // Delete from members list
+        // Get member list
+        var regex_members = /members\s*\(\s*\[\s*(.*)\s*\]\s*\)\s*\./g;
+        var match = code.match(regex_members);
+        
+        // Member to be delete from list
+        var memberBegin = new RegExp("\\[\\s*"+member+"\\s*,","g");
+        var memberMiddle = new RegExp(",\\s*"+member+"\\s*,","g");
+        var memberEnd = new RegExp(",\\s*"+member+"\\]","g");
+        
+        // Update List
+        
+        var newMem = match[0].replace(memberBegin,"\[");
+        newMem = newMem.replace(memberMiddle,",");
+        newMem = newMem.replace(memberEnd,"\]");
+        
+        code = code.replace(match,newMem);
+        
+        // Update Text and Graph
+        textarea.value = code;
+        $("#"+idTextArea).trigger('change');
+    }
+    
+}
+
+
+var detectSelectedMember = function(canvas,event)
+{
+    var chosen = null;
+    var rect = canvas.getBoundingClientRect(); 
+    
+    // Get mouse position
+    posx = event.clientX - rect.left;
+    posy = event.clientY - rect.top;
+
+    for (member of members)
+    {
+        // Mouse position is within a member
+        if (Math.sqrt( Math.pow(member.x - pos.x, 2) + Math.pow(member.y - pos.y, 2) ) < 24)
+        {   
+            chosen = member;
+            break;
+        }
+    };    
+    
+    return chosen;
+}
+
+var createArc = function(idCanvas,idTextArea)
+{
+    var addArc = function(member1,member2)
+    {   
+        // Load TextArea
+        var textarea = document.getElementById(idTextArea);
+        var code = textarea.value;
+        
+        // Arc formed by the two members
+        var regex_exarc = new RegExp("arc\\s*\\(\\s*(("+member1+"\\s*,\\s*"+member2+")\|("+member2+"\\s*,\\s*"+member1+"))\\s*\\)\\s*\\.","g");
+        
+        // If the arc exists, don't write it
+        if (!code.match(regex_exarc))
+        {
+            // Get the index of the last member
+            var regex_arc = /arc\s*\(\s*([^,()]+\s*,\s*[^,()]+)\s*\)\s*\./g;
+            var match = true;
+            var index = 0;
+            while(match = regex_arc.exec(code)){index = match.index + match[0].length};
+
+            // Append the new member to TextArea
+            code = [code.slice(0,index), 'arc('+member1+','+member2+').', code.slice(index+1)].join('\n');
+
+            textarea.value = code;
+            // Updating TextArea by triggering the event "change"
+            $("#"+idTextArea).trigger('change');
+        }
+    }
+    
+    selectTwo(idCanvas,addArc);   
+}
+
+var removeArc = function(idCanvas,idTextArea)
+{   
+    var deleteArc = function(member1,member2)
+    {
+        // Load TextArea
+        var textarea = document.getElementById(idTextArea);
+        
+        // Delete arcs, top and bottom predicates
+        var code = textarea.value;
+        var regex_arc = new RegExp("arc\\s*\\(\\s*(("+member1+"\\s*,\\s*"+member2+")\|("+member2+"\\s*,\\s*"+member1+"))\\s*\\)\\s*\\.","g");
+        code = code.replace(regex_arc,'\r');
+        
+        // Update Text and Graph
+        textarea.value = code;
+        $("#"+idTextArea).trigger('change');
+    }
+    
+    selectTwo(idCanvas,deleteArc);
+}
+
+var selectTwo = function(idCanvas, func)
+{
+    // Load Canvas
+    var canvas = document.getElementById(idCanvas);
+    var ctx = canvas.getContext( "2d" );
+   
+    var select1 = null, select2 = null;
+
+    // When user click on canvas
+    $("#"+idCanvas).one("click",function(event){    
+  
+        // Get the first selected member
+        select1 = detectSelectedMember(canvas,event); 
+        
+            // When user click on canvas
+            $("#"+idCanvas).one("click",function(event){    
+
+                // Get the second selected member
+                select2 = detectSelectedMember(canvas,event);
+                
+                // Member selected
+                if (select1 != null && select2 != null)
+                    func(select1.member,select2.member);
+
+                if (select1 == null)
+                    alert('Member 1 not selected')
+                
+                if (select2 == null)
+                    alert('Member 2 not selected')
+                    
+            });
+    });
+}
+
+var normalize_from_text = function(idTextArea)
+{
+    $("#"+idTextArea).trigger('change');
+}
+
+var save_lattice = function(idTextArea, idTextBox)
+{     
+    // Get the text from TextArea and create a Blob object (file of plain data)
+    var textToWrite = document.getElementById(idTextArea).value;
+    var textBlob = new Blob([textToWrite], {type:'text/plain'});
+
+    // Get name
+    var fileName = document.getElementById(idTextBox).value;
+    
+    if (fileName == "")
+    {
+        alert("ERROR: The file must have a name");
+        return;
+    }
+    
+    // Create download link in DOM
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileName;
+    
+    // Allow save file in webkit and Gecko based browsers
+    window.URL = window.URL || window.webkitURL;
+
+    // Create the link Object
+    downloadLink.href = window.URL.createObjectURL(textBlob);
+    
+    // Remove the link after the download using a function
+    downloadLink.onclick = destroyClickedElement;
+    document.body.appendChild(downloadLink);
+
+    // Click the new link
+    downloadLink.click();
+
+    var destroyClickedElement = function(event)
+    {
+        // Remove the link from the DOM
+        document.body.removeChild(event.target);
+    }   
+}
+
+var upload_lattice_drop = function(idTextArea,idTextBox)
+{
+    var dropZone = document.getElementById(idTextArea); 
+    
+    dropZone.addEventListener('dragover', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    });
+
+    // Get file data on drop
+    dropZone.addEventListener('drop', function(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var files = evt.dataTransfer.files; // FileList object.
+        var reader = new FileReader();  
+        
+        reader.onload = function(event) {            
+             document.getElementById(idTextArea).value = event.target.result;
+             $("#"+idTextArea).trigger('change');
+        }     
+        
+        document.getElementById(idTextBox).value = files[0].name;
+        reader.readAsText(files[0],"UTF-8"); 
+    });
+};
+
+var upload_lattice_button = function(idTextArea,idTextBox,idUploadButton)
+{
+    var files = document.getElementById(idUploadButton).files;
+    var reader = new FileReader();  
+        
+    reader.onload = function(event) {            
+         document.getElementById(idTextArea).value = event.target.result;
+         $("#"+idTextArea).trigger('change');
+    }     
+        
+    document.getElementById(idTextBox).value = files[0].name;
+    reader.readAsText(files[0],"UTF-8"); 
+};
+
+
+
+// PROPERTIES
+
+var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1, idAggrCombo2, idMathText)
+{   
+
+    // Search all the connectives and, or and aggr in the textarea, calculates its arity and add them to the combobox
+    // Second combobox is a copy of the first one
+    var fill_connectives = function()
+    {   
+        $('#'+idAggrCombo1).empty();
+        $('#'+idAggrCombo2).empty();
+        
+        var regex_con = /\W((?:and|or|aggr)_[^\s()]+)(\(.+\))?\s*:-/g;
+        var match = true;
+
+        while (match = regex_con.exec(textarea.value)) 
+        { 
+            var connective = document.createElement("option");
+
+            var regex_arity = /[^,()]+/g;
+            var arity = 0;
+
+            while (match[2] != undefined && regex_arity.exec(match[2])) arity++;
+
+            var name = match[1].replace('and','&');
+            name = match[1].replace('or','|');
+            name = match[1].replace('aggr','@');
+            
+            connective.text = name+'/'+arity.toString();
+            connective.value = match[1];
+
+            combo_con1.add(connective); 
+        }
+        
+        $('#'+idAggrCombo1+' option').clone().appendTo('#'+idAggrCombo2);
+    }
+
+    // Depending on the category, the properties will be added to the property combobox
+    var fill_properties = function() 
+    {
+        // Get selected category
+        var category = combo_cat.options[combo_cat.selectedIndex].text;
+        
+        var prop_text = [];
+        var prop_value = [];
+        
+        // Option.Text is the property name to display in the combobox
+        // Option.value will be an array, first item is the predicate name in prolog, second one is the mathematical definition
+        switch (category)
+        {
+            case 'Basic':
+            {
+                combo_con2.disabled = true;
+                
+                prop_value = ['frontier_top','frontier_bot','increasing',
+                             'non_increasing','decreasing','non_decreasing',
+                             'monotony','reflexivity','commutativity',
+                             'associativity'];
+                
+                prop_text = ['Frontier top', 'Frontier bot', 'Increasing', 'Non increasing','Decreasing','Non decreasing','Monotony','Reflexivity','Commutativity','Associativity'];
+                break;
+            }
+            
+            case 'Combined':
+            {
+                combo_con2.disabled = true;
+                
+                prop_value = ['t_norm','t_conorm','implication'];
+                prop_text = ['T-Norm', 'T-Conorm', 'Implication'];
+                break;
+            }
+                
+            case 'Multiple':
+            {
+                combo_con2.disabled = false;
+                
+                prop_def = ['$1($1(X, Y), Z) == $1(X, $1(Y, Z))', ];
+                
+                prop_value = ['switchness','distributivity','adjointness'];
+                prop_text = ['Switchness', 'Distributitivy', 'Adjointness'];
+                break;
+            }
+            
+            default:
+                break;
+        }
+        
+        $('#'+idPropCombo).empty();
+        
+        // Add all the options
+        for (var i = 0; i < prop_value.length; ++i)
+        {
+            var prop = document.createElement("option");
+            prop.text = prop_text[i];
+            prop.value = prop_value[i];
+            combo_prop.add(prop);
+        }
+    }
+    
+    var writeMathDef = function()
+    {
+        // Get the math definition of the selected property
+        var prop = combo_prop.options[combo_prop.selectedIndex].value;
+        // Get the two connectives selected
+        var conn1 = combo_con1.options[combo_con1.selectedIndex].value;
+        var conn2 = combo_con2.options[combo_con2.selectedIndex].value;
+        
+        // Unicode characters
+        var top = '\u22A4'; // T
+        var bot = '\u22A5'; // Inverse T
+        var lte = '\u2264'; // <=
+        var gte = '\u2265'; // >=
+        var prec = '\u227A'; // Preceds
+        var impl = '\u2192'; // ->
+        var iff = '\u21D4'; // <==>
+        
+        def_map = { 'frontier_top' : {param1 : '$1 ('+top+', '+top+') == '+ top},
+                    'frontier_bot' : {param1 : '$1 ('+bot+', '+bot+') == '+ bot},
+                    'increasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  <  $1(Y, Z)', 
+                                    param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  <  $1(Z, Y)'},
+                    'non_increasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)', 
+                                        param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+lte+'  $1(Z, Y)'},
+                    'decreasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  >  $1(Y, Z)', 
+                                    param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  >  $1(Z, Y)'},
+                    'non_decreasing' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)', 
+                                        param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'},
+                    'monotony' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)', 
+                                  param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'},
+                    'reflexivity' : { param1 : '$1(X, X) == X'},
+                    'commutativity' : { param1 : '$1(X, Y) == $1(Y, X)'},
+                    'associativity' : { param1 : '$1( $1(X, Y), Z) == $1(X, $1(Y, Z))'},
+                    'switchness' : { param1 : '$1( $2(X, Y), Z) == $2(X, $1(Y, Z))'},
+                    'adjointness' : { param1 : '$1 is a T-Norm, $2 is a implication and X '+lte+' $2(Y,Z) '+iff+' $1(X,Z) '+lte+' Y'},
+                    'distributivity' : { param1 : '$2( $1(X, Y), Z) == $1( $2(X, Z), $2(Y, Z))', param2 : '$2(X,$1(Y, Z)) == $1( $2(X, Y), $2(X, Z))'},
+                    't_norm' : { param1 : 'Top is the identity element, $1 is commutative, associative and monotone'},
+                    't_conorm' : { param1 : 'Bot is the identity element, $1 is commutative, associative and monotone'},
+                    'implication' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+lte+'  $1(Y, Z)',
+                                    param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'}
+                  };
+        
+        var param1 = def_map[prop].param1;
+        var param2 = def_map[prop].param2;
+        
+        // Replace $1 for the name of the connective (if there is any selected)
+        param1 = param1.replace(/\$1/g,conn1);
+        param1 = param1.replace(/\$2/g,conn2);
+        
+        if (param2)
+        {
+            param2 = param2.replace(/\$1/g,conn1);
+            param2 = param2.replace(/\$2/g,conn2);
+            math_text.value = 'Param1:\t'+param1+'\nParam2:\t'+param2;
+        }
+        else
+            math_text.value = param1;
+    }
+    
+    var textarea = document.getElementById(idTextarea);
+    var combo_cat = document.getElementById(idCatCombo);
+    var combo_prop = document.getElementById(idPropCombo);
+    var combo_con1 = document.getElementById(idAggrCombo1);
+    var combo_con2 = document.getElementById(idAggrCombo2);
+    var math_text = document.getElementById(idMathText);
+
+    jQuery('#'+idTextarea).bind('change',fill_connectives);
+    jQuery('#'+idCatCombo).bind('change',function(){ fill_properties(); writeMathDef() });
+    jQuery('#'+idPropCombo).bind('change',writeMathDef);
+    
+    $('#'+idTextarea).trigger('change');
+    $('#'+idCatCombo).trigger('change');
+};
