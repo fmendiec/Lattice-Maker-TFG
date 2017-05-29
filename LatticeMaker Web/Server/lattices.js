@@ -1030,8 +1030,7 @@ jQuery(document).ready(function(){
           timeout: 10000,
           success: function(data, textStatus, jqXHR) {
               console.log(data);
-          }
-            
+          },
           error: function(jqXHR, textStatus, errorThrown) {
             console.log('Error');
           }

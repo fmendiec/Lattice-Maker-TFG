@@ -62,16 +62,16 @@ pri_inf(X,Y,bottom).</textarea>
                             <label for="lattice-name">File:</label>
                             <input type = "text" id = "lattice-name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value = "alfabeta.lat">
                             <input type = "file" id="latfile" onchange = upload_lattice_button("textarea-lattice","lattice-name","latfile")>
-                            <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "./media/upload.png"></button>
-                            <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "media/download.png"> </button>
+                            <button type = "button" class = "button-lattice" title = "Upload lattice" onclick = "latfile.click()"><img src = "content/img/lattices/upload.png"></button>
+                            <button type = "button" class = "button-lattice" title = "Download lattice" onclick = save_lattice("textarea-lattice","lattice-name")> <img src = "content/img/lattices/download.png"> </button>
                         </div>
 
                         <div class = "lattice-controls">
-                            <button type = "button" class = "button-lattice" title = "Normalize" onclick = normalize_from_text("textarea-lattice")> <img src = "img/lattices/normalize.png"> </button>
-                            <button type = "button" class = "button-lattice" title = "Add new member" onclick = addMember("textarea-lattice")> <img src = "../../img/lattices/add_member.png"> </button>
-                            <button type = "button" class = "button-lattice" title = "Remove member" onclick = removeMember("canvas-lattice","textarea-lattice")> <img src = "img/lattices/remove_member.png"> </button>
-                            <button type = "button" class = "button-lattice" title = "Add connection" onclick = createArc("canvas-lattice","textarea-lattice")> <img src = "img/lattices/add_arrow.png"> </button>
-                            <button type = "button" class = "button-lattice" title = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")> <img src = "img/lattices/remove_arrow.png"> </button>
+                            <button type = "button" class = "button-lattice" title = "Normalize" onclick = normalize_from_text("textarea-lattice")> <img src = "content/img/lattices/normalize.png"> </button>
+                            <button type = "button" class = "button-lattice" title = "Add new member" onclick = addMember("textarea-lattice")> <img src = "content/img/lattices/add_member.png"> </button>
+                            <button type = "button" class = "button-lattice" title = "Remove member" onclick = removeMember("canvas-lattice","textarea-lattice")> <img src = "content/img/lattices/remove_member.png"> </button>
+                            <button type = "button" class = "button-lattice" title = "Add connection" onclick = createArc("canvas-lattice","textarea-lattice")> <img src = "content/img/lattices/add_arrow.png"> </button>
+                            <button type = "button" class = "button-lattice" title = "Remove connection" onclick = removeArc("canvas-lattice","textarea-lattice")> <img src = "content/img/lattices/remove_arrow.png"> </button>
                         </div>
                     </div>
                     <br><br>
