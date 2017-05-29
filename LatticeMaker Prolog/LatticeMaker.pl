@@ -845,7 +845,7 @@ normalize(F) :->
     
 	set_output(Fd),
     
-    call(supreme_and_infimum),
+    call(supreme_and_infimum,lat),
     
     close(Fd),
 	set_output(Old),

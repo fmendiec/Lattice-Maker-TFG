@@ -49,14 +49,10 @@ implication(Aggr) :-
 minor_distance(Aggr) :- 
     writeln('Minor distance: '),test_mdist(Aggr),write('Sucess').
     
-
-supreme_and_infimum :-
-    supr_inf.
+supreme_and_infimum(Mod) :-
+    supr_inf(Mod).
 
  
-    
-    
-    
     
 % TEST PREDICATES
 
@@ -278,38 +274,41 @@ fail_dist(Aggr,X,Y,Z) :- writef('Failure\nCounterexample\n%w(%w,%w) > %w(%w,%w) 
 
 % SUPREMES AND INFIMUMS
 
-is_min(X,L) :- forall(member(Y,L),lat:leq(X,Y)).
+is_min(X,L,Mod) :- forall(member(Y,L),Mod:leq(X,Y)).
  
-min_supreme_list(L,Min) :- setof(X,(extract(L,X),is_min(X,L)),Min). 
+min_supreme_list(L,Min,Mod) :- setof(X,(extract(L,X),is_min(X,L,Mod)),Min). 
 
-supreme(X,Y,S) :- X \= Y,list_supr(X,Y,L),min_supreme_list(L,[S]). 
+supreme(X,Y,S,Mod) :- X \= Y,list_supr(X,Y,L,Mod),min_supreme_list(L,[S],Mod). 
     
-list_supr(X,X,[]).
-list_supr(X,Y,L) :- lat:members(M),setof(E,(extract(M,E),lat:leq(X,E),lat:leq(Y,E)),L).
+list_supr(X,X,[],_).
+list_supr(X,Y,L,Mod) :- Mod:members(M),setof(E,(extract(M,E),Mod:leq(X,E),Mod:leq(Y,E)),L).
 
 
-% --------------------------------------------------------------------------------------
+is_max(X,L,Mod) :- forall(member(Y,L),Mod:leq(Y,X)).
 
-is_max(X,L) :- forall(member(Y,L),lat:leq(Y,X)).
+max_infimum_list(L,Max,Mod) :- setof(X,(extract(L,X),is_max(X,L,Mod)),Max).  
 
-max_infimum_list(L,Max) :- setof(X,(extract(L,X),is_max(X,L)),Max).  
-
-infimum(X,Y,I) :- X \= Y,list_inf(X,Y,L),max_infimum_list(L,[I]). 
+infimum(X,Y,I,Mod) :- X \= Y,list_inf(X,Y,L,Mod),max_infimum_list(L,[I],Mod). 
     
-list_inf(X,X,[]).
-list_inf(X,Y,L) :- lat:members(M),setof(E,(extract(M,E),lat:leq(E,X),lat:leq(E,Y)),L).
+list_inf(X,X,[],_).
+list_inf(X,Y,L,Mod) :- Mod:members(M),setof(E,(extract(M,E),Mod:leq(E,X),Mod:leq(E,Y)),L).
 
-
-% ---------------------------------------------------------------------------------------
-
-supr_inf :- lat:members(M),
+supr_inf(Mod) :- lat:members(M),
             findall((X,Y),(extract(M,X),extract(M,Y),X \= Y),L),
             forall(member((X,Y),L),
                 (
-                    (supreme(X,Y,_) ; fail_sup(X,Y)),
-                    (infimum(X,Y,_) ; fail_inf(X,Y))
+                    (supreme(X,Y,_,Mod) ; fail_sup(X,Y)),
+                    (infimum(X,Y,_,Mod) ; fail_inf(X,Y))
                 )
             ).
 
-fail_sup(X,Y) :- writef('IMPORTANT ERROR:\n supreme(%w,%w) does not exist\n',[X,Y]),fail.
-fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,Y]),fail.
+fail_sup(X,Y) :- writef('IMPORTANT ERROR:\n supreme(%w,%w) does not exist\n',[X,Y]).
+fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,Y]).
+
+supr_inf(X,Mod) :- Mod:members(M),
+            findall(Y,(extract(M,Y),X \= Y),L),
+            forall(member(Y,L),
+                (
+                    supreme(X,Y,_,Mod),infimum(X,Y,_,Mod)
+                )
+            ).
