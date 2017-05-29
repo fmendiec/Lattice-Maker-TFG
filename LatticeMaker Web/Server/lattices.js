@@ -1022,12 +1022,10 @@ jQuery(document).ready(function(){
     // Test the property
     jQuery('#properties-form').bind('submit',function(e){
         e.preventDefault();
-        var lattice = $('#textarea-lattice').val();
-        
         jQuery.ajax({
           url : "content/pl/lattices-run.php",
           method : "post",
-          data : lattice + '\n' + jQuery("#properties-form").serialize(),
+          data : jQuery("#lattices-form").serialize(),
           dataType : "html",
           timeout: 10000,
           success: function(data, textStatus, jqXHR) {
