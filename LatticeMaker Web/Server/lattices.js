@@ -900,10 +900,10 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
                 
                 prop_value = ['frontier_top','frontier_bot','increasing',
                              'non_increasing','decreasing','non_decreasing',
-                             'monotony','reflexivity','commutativity',
+                             'monotony','idempotency','commutativity',
                              'associativity'];
                 
-                prop_text = ['Frontier top', 'Frontier bot', 'Increasing', 'Non increasing','Decreasing','Non decreasing','Monotony','Reflexivity','Commutativity','Associativity'];
+                prop_text = ['Frontier top', 'Frontier bot', 'Increasing', 'Non increasing','Decreasing','Non decreasing','Monotony','Idempotency','Commutativity','Associativity'];
                 break;
             }
             
@@ -972,7 +972,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
                                         param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'},
                     'monotony' : { param1 : 'If X '+prec+' Y '+impl+' $1(X, Z)  '+gte+'  $1(Y, Z)', 
                                   param2 : 'If X '+prec+' Y '+impl+' $1(Z, X)  '+gte+'  $1(Z, Y)'},
-                    'reflexivity' : { param1 : '$1(X, X) == X'},
+                    'idempotency' : { param1 : '$1(X, X) == X'},
                     'commutativity' : { param1 : '$1(X, Y) == $1(Y, X)'},
                     'associativity' : { param1 : '$1( $1(X, Y), Z) == $1(X, $1(Y, Z))'},
                     'switchness' : { param1 : '$1( $2(X, Y), Z) == $2(X, $1(Y, Z))'},
