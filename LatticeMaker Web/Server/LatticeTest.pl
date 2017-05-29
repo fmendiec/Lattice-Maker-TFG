@@ -319,7 +319,7 @@ fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,
 % WEB
 
 test_property(File,Prop,Aggr1) :-
-              consult(File),call(Prop,lat:Aggr1).
+              consult(File),call(Prop,Aggr1).
               
 test_property(File, Prop, Aggr1, Aggr2) :-
-              consult(File),call(Prop,lat:Aggr1,lat:Aggr2).
+              consult(File),call(Prop,Aggr1,Aggr2).

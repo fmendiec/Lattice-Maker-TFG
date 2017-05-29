@@ -1,6 +1,6 @@
 		<!-- LATTICES -->
 		<div id="lattices" class="container">
-            <form id = "lattices-form" method="post">
+            <form action = "lattices" id = "lattices-form" method="post">
                 <div class="match-width">
                     <h1>Lattice Maker</h1>
                     <div class="twocols">

@@ -855,7 +855,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
         $('#'+idAggrCombo1).empty();
         $('#'+idAggrCombo2).empty();
         
-        var regex_con = /\W((?:and|or|aggr)_[^\s()]+)(\(.+\))?\s*:-/g;
+        var regex_con = /\W((?:and|or|aggr)_[^\s()]+)(\([^:\-.]+\))?\s*(?::-|.)/g;
         var match = true;
 
         while (match = regex_con.exec(textarea.value)) 
@@ -867,14 +867,15 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
 
             while (match[2] != undefined && regex_arity.exec(match[2])) arity++;
 
-            var name = match[1].replace('and','&');
-            name = match[1].replace('or','|');
-            name = match[1].replace('aggr','@');
+            var name = match[1].replace('/and/','&');
+            name = match[1].replace('/or/','|');
+            name = match[1].replace('/aggr/','@');
             
             connective.text = name+'/'+arity.toString();
             connective.value = match[1];
-
-            combo_con1.add(connective); 
+            
+            if ($('#'+idAggrCombo1+' option:contains('+ connective.text +')').length == 0)
+                combo_con1.add(connective); 
         }
         
         $('#'+idAggrCombo1+' option').clone().appendTo('#'+idAggrCombo2);
@@ -1020,7 +1021,7 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
 jQuery(document).ready(function(){
     
     // Test the property
-    jQuery('#properties-form').bind('submit',function(e){
+    jQuery('#lattices-form').bind('submit',function(e){
         e.preventDefault();
         jQuery.ajax({
           url : "content/pl/lattices-run.php",
@@ -1029,10 +1030,10 @@ jQuery(document).ready(function(){
           dataType : "html",
           timeout: 10000,
           success: function(data, textStatus, jqXHR) {
-              console.log(data);
+              jQuery('#property-result').val(data);
           },
           error: function(jqXHR, textStatus, errorThrown) {
-            console.log('Error');
+              jQuery('#property-result').val('There was an error');
           }
         })
     })
