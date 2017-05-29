@@ -1014,3 +1014,29 @@ var properties_tester = function(idTextarea,idCatCombo,idPropCombo,idAggrCombo1,
     $('#'+idTextarea).trigger('change');
     $('#'+idCatCombo).trigger('change');
 };
+
+
+// DOCUMENT READY
+jQuery(document).ready(function(){
+    
+    // Test the property
+    jQuery('#properties-form').bind('submit',function(e){
+        e.preventDefault();
+        var lattice = $('#textarea-lattice').val();
+        
+        jQuery.ajax({
+          url : "content/pl/lattices-run.php",
+          method : "post",
+          data : lattice + '\n' + jQuery("#properties-form").serialize(),
+          dataType : "html",
+          timeout: 10000,
+          success: function(data, textStatus, jqXHR) {
+              console.log(data);
+          }
+            
+          error: function(jqXHR, textStatus, errorThrown) {
+            console.log('Error');
+          }
+        })
+    })
+})
