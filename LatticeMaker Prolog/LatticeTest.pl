@@ -46,8 +46,11 @@ t_conorm(Aggr) :-
 implication(Aggr) :-
      writeln('Implication:\n'),test_imp(Aggr).   
     
-minor_distance(Aggr) :- 
-    writeln('Minor distance: '),test_mdist(Aggr),write('Sucess').
+valid_distance(Aggr) :- 
+    write('distance(X,X) == 0: '),test_check_dist1(Aggr),writeln('Success'),
+    commutativity(Aggr),
+    write('d(X,Z) <= d(X,Y) + d(Y,Z): '),test_check_dist3(Aggr),write('Success\n'),
+    writeln('\nIt is a valid distance').
     
 supreme_and_infimum(Mod) :-
     supr_inf(Mod).
@@ -150,14 +153,14 @@ test_sw(Aggr1,Aggr2) :-
 
 calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
 calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
-fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterexample:\n%w(%w(%w,%w),%w) not equal to %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
+fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterexample:\n%w(%w(%w,%w),%w) =\\= %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
 
 
 % IDEMPOTENCY
 
 test_idemp_all(Aggr) :- lat:members(L),forall(member(X,L),test_idemp(Aggr,X)).
 
-test_idemp(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,X,X]),fail).
+test_idemp(Aggr,X) :- ( call(lat:Aggr,X,X,V),X==V -> true ; writef('Failure\nCounterexample:\n%w(%w,%w) =\\= %w\n',[Aggr,X,X,X]),fail).
 
 
 % COMMUTATIVITY
@@ -168,7 +171,7 @@ test_com(Aggr) :-
                   ;  fail_com(Aggr,X,Y))
                   ).
                   
-fail_com(Aggr,X,Y) :- writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
+fail_com(Aggr,X,Y) :- writef('Failure\nCounterexample:\n%w(%w,%w) =\\= %w(%w,%w)\n',[Aggr,X,Y,Aggr,Y,X]),fail. 
 
 
 % DISTRIBUTIVITY
@@ -177,13 +180,13 @@ test_distr1(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,X,Y,V),call(lat:Aggr2,V,Z,V1),c
                                   call(lat:Aggr1,U1,U2,V2),V1==V2 
                                   ; fail_distr1(Aggr1,Aggr2,X,Y,Z).
                                   
-fail_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
+fail_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nExample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
 
 test_distr2(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,V1),call(lat:Aggr2,X,Y,U1),call(lat:Aggr2,X,Z,U2),
                                   call(lat:Aggr1,U1,U2,V2),V1==V2 
                                   ; fail_distr2(Aggr1,Aggr2,X,Y,Z).
                                   
-fail_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) not equal to %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
+fail_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
 
 test_distr(Aggr1,Aggr2) :-
                             (
@@ -233,7 +236,7 @@ identity_element(Aggr,E,Type) :- writef('Identity element %w: ',[E]),forall(lat:
 test_iden(Aggr,X,E,Type) :- 
             ( call(lat:Aggr,X,E,V),X==V 
                 -> true 
-                ; writef('Failure\nCounterexample:\n%w(%w,%w) not equal to %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
+                ; writef('Failure\nCounterexample:\n%w(%w,%w) =\\= %w\n',[Aggr,X,E,X]),print_connective(Aggr,Type,neg),fail 
             ).
 
             
@@ -256,7 +259,12 @@ test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('
 
 % DISTANCES
 
-test_mdist(Aggr) :- triplet(L),forall(member((X,Y,Z),L),((call(lat:Aggr,X,Z,V1),sum(Aggr,X,Y,Z,V2),lat:leq(V1,V2)) ; fail_dist(Aggr,X,Y,Z) )).
+% d(X,X) == 0
+test_check_dist1(Aggr) :- lat:members(L),forall(member(X,L),(call(lat:Aggr,X,X,V),V == 0 ; fail_dist(Aggr,X))).
+
+
+% d(X,Z) <= d(X,Y) + d(Y,Z)
+test_check_dist3(Aggr) :- triplet(L),forall(member((X,Y,Z),L),((call(lat:Aggr,X,Z,V1),sum(Aggr,X,Y,Z,V2),lat:leq(V1,V2)) ; fail_dist(Aggr,X,Y,Z) )).
 
 % Get all the triplet (X,Y,Z) where X is the initial element, Z is the final element, and Y is the intermediate element
 triplet(L) :- findall((X,Y,Z),(lat:members(LX),extract(LX,X),greater(X,LZ),extract(LZ,Z),inter(X,Z,LY),extract(LY,Y)),L).
@@ -269,7 +277,8 @@ greater(X,Z) :- findall(E,(lat:members(M),extract(M,E),lat:leq(X,E)),Z).
 
 sum(Aggr, X,Y,Z,V) :- call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,Z,V2),V is V1+V2.
 
-fail_dist(Aggr,X,Y,Z) :- writef('Failure\nCounterexample\n%w(%w,%w) > %w(%w,%w) + %w(%w,%w)\n',[Aggr,X,Z,Aggr,X,Y,Aggr,Y,Z]),fail. 
+fail_dist(Aggr,X) :- writef('\nFailure\nCounterexample\n%w(%w, %w) =\\= 0\n',[Aggr,X,X]),fail.
+fail_dist(Aggr,X,Y,Z) :- writef('\nFailure\nCounterexample\n%w(%w,%w) > %w(%w,%w) + %w(%w,%w)\n',[Aggr,X,Z,Aggr,X,Y,Aggr,Y,Z]),fail. 
 
 
 % SUPREMES AND INFIMUMS
