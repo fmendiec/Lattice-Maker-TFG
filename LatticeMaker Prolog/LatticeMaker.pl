@@ -845,7 +845,7 @@ normalize(F) :->
     
 	set_output(Fd),
     
-    call(supreme_and_infimum),
+    call(supreme_and_infimum,lat),
     
     close(Fd),
 	set_output(Old),
@@ -1419,9 +1419,7 @@ check_distance(F) :->
     
     writeln('Checking distance:\n'),
     
-    call(idempotency,lat_graph:distance),
-    call(commutativity,lat_graph:distance),
-    call(minor_distance,lat_graph:distance),
+    call(valid_distance,lat_graph:distance),
     
     close(Fd),
 	set_output(Old),

@@ -99,12 +99,14 @@ colour(X, blue):- lat_graph:top(X).
 colour(X, red):- detached_top(X), detached_bot(X).
 colour(X, orange):- detached_top(X).
 colour(X, purple):- detached_bot(X).
+colour(X, brown) :- not(supr_inf(X,lat_graph)).
 colour(_, green).
 
 detached_bottop(X):- detached_bot(X), detached_top(X).
 detached_bot(X):- lat_graph:bot(B), not(lat_graph:leq(B, X)).
 detached_top(X):- lat_graph:top(T), not(lat_graph:leq(X, T)).
 attached_top(X):- lat_graph:top(T), lat_graph:leq(X, T).
+
 
 %%%%%%%
 %%%%% ARCS
