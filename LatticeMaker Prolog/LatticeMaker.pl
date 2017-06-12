@@ -372,18 +372,18 @@ fill_operators_dialog(D) :-
     send(W5, append, new(BDistEval, button(eval, message(D, eval_distance))), right),
 	send(BDistEval, font, font(arial, bold, 12)),
 	send(BDistEval, colour, blue),
-    send(BDistEval, help_message, tag, 'Check the distances'),
+    send(BDistEval, help_message, tag, 'Eval distance'),
     send(BDistEval, active, @off),
 
+	send(W5, append, new(BDistCheck, button(test, message(D, check_distance))), right),
+	send(BDistCheck, font, font(arial, bold, 12)),
+	send(BDistCheck, colour, blue),
+    send(BDistCheck, help_message, tag, 'Check distance'),
+	
     send(W5, append, new(BDistGen, button(generate, message(D, restore_view_distance))), right),
 	send(BDistGen, font, font(arial, bold, 12)),
 	send(BDistGen, colour, blue),
     send(BDistGen, help_message, tag, 'Generate the distances'),
-    
-    send(W5, append, new(BDistCheck, button(check, message(D, check_distance))), right),
-	send(BDistCheck, font, font(arial, bold, 12)),
-	send(BDistCheck, colour, blue),
-    send(BDistCheck, help_message, tag, 'Check distance'),
     
     
 	send(D, append, Output, next_row),
@@ -421,6 +421,17 @@ is_dist(F) :-
         -> send(Dist_Eval,active,@on),activate_dragmenu(C, 3, 3, @off)
         ;  send(Dist_Eval,active,@off)
     ).
+
+is_supr_inf(F) :-
+	get(F, member(dialog_eval), D),
+    get_container_combo(D,C),
+    get(D, member, connectives, Aggr),
+    get(Aggr, selection, Name),
+	get(D,member,group1,G1),
+    get(G1,member,connectives,CN),
+	get(CN,member,test,T),
+	( Name == 'supremum/6' ; Name == 'infimum/6'),
+	send(T,active,@off).
     
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
@@ -532,7 +543,11 @@ fill_terms(F) :->
 			activate_dragmenu(C, 1, NumA, @on)
 		)
 	),
-    is_dist(F).
+	get(D,member,group1,G1),
+    get(G1,member,connectives,CN),
+	get(CN,member,test,T),
+	send(T,active,@on),
+    is_dist(F);is_supr_inf(F).
 
 add_label(D, Name, Text, Style, Colour, Size) :-
 	send(D, append, new(L, label(Name, Text))),
@@ -849,8 +864,8 @@ normalize(F) :->
 	pce_open(V, write, Fd),
     
 	set_output(Fd),
-    
-    call(supreme_and_infimum,lat),
+    lat:members(M),
+    call(supremum_and_infimum,lat,M),
     
     close(Fd),
 	set_output(Old),
@@ -1188,6 +1203,7 @@ create_predicates(Oper,Combo_name) :-
 	->  send_list(Aggr, append, [empty])
 	;   send_list(Aggr, append, [noselection]),
 		maplist(fill_combo_aggr(Aggr), ListPP),
+		send_list(Aggr, append, ['supremum/6','infimum/6']),
 		send(Aggr, sort),
 		send(Aggr, selection, noselection)
 	).
@@ -1267,7 +1283,7 @@ add_connective(F) :->
 							normal, blue, 12),
 		send(ND, append, new(CBO, menu(connectives, cycle))),
 		send_list(CBO, append, ['&_godel', '|_godel', '&_luka', '|_luka']),
-		send_list(CBO, append, ['&_prod', '|_prod', '@_aver', 'distance']),
+		send_list(CBO, append, ['&_prod', '|_prod', '@_aver', 'distance',]),
 		send(CBO, alignment, center),
 		send(ND, append, button(add, message(ND, return, CBO?selection))),
 		send(ND, append, button(cancel, message(ND, return, @nil))),

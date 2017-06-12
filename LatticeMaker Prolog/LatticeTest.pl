@@ -52,8 +52,8 @@ valid_distance(Aggr) :-
     write('d(X,Z) <= d(X,Y) + d(Y,Z): '),test_check_dist3(Aggr),write('Success\n'),
     writeln('\nIt is a valid distance').
     
-supreme_and_infimum(Mod) :-
-    supr_inf(Mod).
+supremum_and_infimum(Mod,L) :-
+    supr_inf(Mod,L).
 
  
     
@@ -281,13 +281,13 @@ fail_dist(Aggr,X) :- writef('\nFailure\nCounterexample\n%w(%w, %w) =\\= 0\n',[Ag
 fail_dist(Aggr,X,Y,Z) :- writef('\nFailure\nCounterexample\n%w(%w,%w) > %w(%w,%w) + %w(%w,%w)\n',[Aggr,X,Z,Aggr,X,Y,Aggr,Y,Z]),fail. 
 
 
-% SUPREMES AND INFIMUMS
+% supremumS AND INFIMUMS
 
 is_min(X,L,Mod) :- forall(member(Y,L),Mod:leq(X,Y)).
  
-min_supreme_list(L,Min,Mod) :- setof(X,(extract(L,X),is_min(X,L,Mod)),Min). 
+min_supremum_list(L,Min,Mod) :- setof(X,(extract(L,X),is_min(X,L,Mod)),Min). 
 
-supreme(X,Y,S,Mod) :- X \= Y,list_supr(X,Y,L,Mod),min_supreme_list(L,[S],Mod). 
+supremum(X,Y,S,Mod) :- X \= Y,list_supr(X,Y,L,Mod),min_supremum_list(L,[S],Mod). 
     
 list_supr(X,X,[],_).
 list_supr(X,Y,L,Mod) :- Mod:members(M),setof(E,(extract(M,E),Mod:leq(X,E),Mod:leq(Y,E)),L).
@@ -302,22 +302,22 @@ infimum(X,Y,I,Mod) :- X \= Y,list_inf(X,Y,L,Mod),max_infimum_list(L,[I],Mod).
 list_inf(X,X,[],_).
 list_inf(X,Y,L,Mod) :- Mod:members(M),setof(E,(extract(M,E),Mod:leq(E,X),Mod:leq(E,Y)),L).
 
-supr_inf(Mod) :- lat:members(M),
-            findall((X,Y),(extract(M,X),extract(M,Y),X \= Y),L),
+supr_inf(Mod,List) :-
+            findall((X,Y),(extract(List,X),extract(List,Y),X \= Y),L),
             forall(member((X,Y),L),
                 (
-                    (supreme(X,Y,_,Mod) ; fail_sup(X,Y)),
+                    (supremum(X,Y,_,Mod) ; fail_sup(X,Y)),
                     (infimum(X,Y,_,Mod) ; fail_inf(X,Y))
                 )
             ).
 
-fail_sup(X,Y) :- writef('IMPORTANT ERROR:\n supreme(%w,%w) does not exist\n',[X,Y]).
+fail_sup(X,Y) :- writef('IMPORTANT ERROR:\n supremum(%w,%w) does not exist\n',[X,Y]).
 fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,Y]).
 
-supr_inf(X,Mod) :- Mod:members(M),
+supr_inf_one(X,Mod) :- Mod:members(M),
             findall(Y,(extract(M,Y),X \= Y),L),
             forall(member(Y,L),
                 (
-                    supreme(X,Y,_,Mod),infimum(X,Y,_,Mod)
+                    supremum(X,Y,_,Mod),infimum(X,Y,_,Mod)
                 )
             ).
