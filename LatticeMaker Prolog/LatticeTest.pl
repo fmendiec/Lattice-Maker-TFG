@@ -26,7 +26,7 @@ monotony(Aggr) :-
 	writeln('Monotony:\n'),test_mono(Aggr).
     
 adjointness(Aggr1,Aggr2) :-
-	( test_adj(Aggr1,Aggr2) -> writeln('\nAdjointness: Success') ; writeln('\nAdjointness: Failure')).
+	( test_adj(Aggr1,Aggr2) -> writeln('\nAdjointness: Success') ; writeln('\nAdjointness: Failure'),fail).
 
 idempotency(Aggr) :-
     write('Idempotency: '),test_idemp_all(Aggr),writeln('Success').
@@ -38,10 +38,10 @@ distributivity(Aggr1,Aggr2) :-
     write('Distributivity:\n\n'),test_distr(Aggr1,Aggr2).
     
 t_norm(Aggr) :- 
-    ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE\n')).
+    ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE\n'),fail).
     
 t_conorm(Aggr) :-
-    ( test_tconorm(Aggr) -> writeln('\nT-CONORM: SUCCESS') ; writeln('\nT-CONORM: FAILURE\n')).
+    ( test_tconorm(Aggr) -> writeln('\nT-CONORM: SUCCESS') ; writeln('\nT-CONORM: FAILURE\n'),fail).
     
 implication(Aggr) :-
      writeln('Implication:\n'),test_imp(Aggr).   

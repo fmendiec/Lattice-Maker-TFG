@@ -358,6 +358,11 @@ fill_operators_dialog(D) :-
     send(BEval, help_message, tag, 'Evaluate the connective and terms selected'),
 
 	new(Output, view),
+	
+	new(Box1,box(40,40)),
+	send(Box1, right, Output),
+	send(Box1, radius, 360),
+	send(Box1,fill_pattern,black),
 
 	send(W4, append, new(BTest, button(test, message(D, test_selected_connective))), right),
 	send(BTest, font, font(arial, bold, 12)),
@@ -1361,7 +1366,9 @@ test_selected_connective(F) :->
 	get(F, member(dialog_eval), D),
 	get(F, slot, property, Prop),
 	get(D, member, view, V),
-    
+	get(D, member, box, Box1),
+	send(Box1,fill_pattern,black),
+	
 	send(V, clear),
 	current_output(Old),
 	pce_open(V, write, Fd),
@@ -1375,8 +1382,14 @@ test_selected_connective(F) :->
     not(empty_aggr(Name)),
 
     (   two_connectives(Prop)
-        -> get_connective(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
-        ; call(Prop,Name)
+        -> ( get_connective(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
+			-> send(Box1, fill_pattern, green)
+			; send(Box1, fill_pattern, red)
+		    )
+        ; ( call(Prop,Name)
+			-> send(Box1,fill_pattern,green)
+			; send(Box1,fill_pattern,red)
+		  )
     ),
 	close(Fd),
 	set_output(Old),
@@ -1384,8 +1397,7 @@ test_selected_connective(F) :->
 	send(F, report, status, '%s connective tested.', Name).
 
 empty_aggr('').
-empty_prop(@nil).
-                        
+empty_prop(@nil).                        
     
 eval_distance(F) :-> 
     get(F, member(dialog_eval), D),
