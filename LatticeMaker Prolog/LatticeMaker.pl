@@ -1350,6 +1350,8 @@ get_connective(F,D,Combo_name,Name,NumA) :-
 eval_selected_connective(F) :->
 	get(F, member(dialog_eval), D),
 	get(D, member, view, V),
+	get(D, member, box, Box1),
+	send(Box1,fill_pattern,black),
 
 	current_output(Old),
 	pce_open(V, write, Fd),
@@ -1358,8 +1360,8 @@ eval_selected_connective(F) :->
     get_connective(F,D,connectives,Name,NumA),not(empty_aggr(Name)),
 		append_param(D, NumA, [], LParams),
 		(	call_connective(Name, LParams, L)
-		->  maplist(show_result(LParams), L)
-		;   write(false)
+		->  maplist(show_result(LParams), L),send(Box1, fill_pattern, green)
+		;   write(false),send(Box1,fill_pattern,red)
 		),
 		send(F, report, status, '%s connective evaluated.', Name),
 	close(Fd),
@@ -1418,6 +1420,8 @@ empty_prop(@nil).
 eval_distance(F) :-> 
     get(F, member(dialog_eval), D),
 	get(D, member, view, V),
+	get(D, member, box, Box1),
+	send(Box1,fill_pattern,black),
     
     send(V, clear),
 	current_output(Old),
@@ -1438,6 +1442,8 @@ eval_distance(F) :->
 check_distance(F) :->
     get(F, member(dialog_eval), D),
 	get(D, member, view, V),
+	get(D, member, box, Box1),
+	send(Box1,fill_pattern,black),
     
 	send(V, clear),
 	current_output(Old),
@@ -1447,7 +1453,11 @@ check_distance(F) :->
     
     writeln('Checking distance:\n'),
     
-    call(valid_distance,lat_graph:distance),
+    ( call(valid_distance,lat_graph:distance)
+		-> send(Box1,fill_pattern,green)
+		; send(Box1,fill_pattern,red)
+	),
+	
     
     close(Fd),
 	set_output(Old),
