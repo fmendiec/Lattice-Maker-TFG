@@ -1,20 +1,20 @@
-frontier_top(Aggr) :-
+ frontier_top(Aggr) :-
     write('Frontier Top: '),lat:top(T),test_idemp(Aggr,T),write('Success').
     
 frontier_bot(Aggr) :-
     write('Frontier Bot: '),lat:bot(B),test_idemp(Aggr,B),write('Success').
     
-increasing(Aggr) :-
-    writeln('Increasing:\n'),growth_test(Aggr,test_in1,test_in2).
+increasing(Aggr,S) :-
+    writeln('Increasing:\n'),growth_test(Aggr,test_in1,test_in2,S).
     
-non_increasing(Aggr) :-
-	writeln('Non increasing:\n'),growth_test(Aggr,test_nin1,test_nin2).
+non_increasing(Aggr,S) :-
+	writeln('Non increasing:\n'),growth_test(Aggr,test_nin1,test_nin2,S).
     
-decreasing(Aggr) :-
-	writeln('Decreasing:\n'),growth_test(Aggr,test_de1,test_de2).
+decreasing(Aggr,S) :-
+	writeln('Decreasing:\n'),growth_test(Aggr,test_de1,test_de2,S).
     
-non_decreasing(Aggr) :-
-	writeln('Non decreassing:\n'),growth_test(Aggr,test_nde1,test_nde2).
+non_decreasing(Aggr,S) :-
+	writeln('Non decreassing:\n'),growth_test(Aggr,test_nde1,test_nde2,S).
     
 switchness(Aggr1,Aggr2) :-
     write('Switchness: '),test_sw(Aggr1,Aggr2),writeln('Success').
@@ -34,8 +34,8 @@ idempotency(Aggr) :-
 commutativity(Aggr) :-
     write('Commutativity: '),test_com(Aggr),writeln('Success').
     
-distributivity(Aggr1,Aggr2) :-
-    write('Distributivity:\n\n'),test_distr(Aggr1,Aggr2).
+distributivity(Aggr1,Aggr2,S) :-
+    write('Distributivity:\n\n'),test_distr(Aggr1,Aggr2,S).
     
 t_norm(Aggr) :- 
     ( test_tnorm(Aggr) -> writeln('\nT-NORM: SUCCESS') ; writeln('\nT-NORM: FAILURE\n'),fail).
@@ -70,12 +70,17 @@ getXltY(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(
 getAllTriplet(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L).
 
 % Test the two growth tests in both parameters using the given connective
-growth_test(Aggr,Test1,Test2):- 
+growth_test(Aggr,Test1,Test2,S):- 
                                 do_test(Aggr,Test1) ->
                                   % Test1 True
-                                  (writeln('First parameter: Success\n'),do_test(Aggr,Test2),writeln('Second Parameter: Success\n'))
+                                  (writeln('First parameter: Success\n'),send(S,fill_pattern,orange),do_test(Aggr,Test2),
+								   writeln('Second Parameter: Success\n'),send(S,fill_pattern,green)
+								   )
                                 ; % Test1 False
-                                  (do_test(Aggr,Test2),writeln('Second Parameter: Success\n')).
+                                  (	do_test(Aggr,Test2) 
+									-> writeln('Second Parameter: Success\n'),send(S,fill_pattern,orange) 
+									; send(S,fill_pattern,red)
+								  ).
 
 % Do the growth test using the connective given
 do_test(Aggr,Test) :- getXltY(L),forall(member((X,Y,Z),L),call(Test,X,Y,Z,Aggr)).
@@ -188,14 +193,17 @@ test_distr2(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,V1),c
                                   
 fail_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
 
-test_distr(Aggr1,Aggr2) :-
+test_distr(Aggr1,Aggr2,S) :-
                             (
                                 getAllTriplet(L),
                                 forall(member((X,Y,Z),L),test_distr1(Aggr1,Aggr2,X,Y,Z))
                             ->
-                                writeln('First parameter: Success\n'), forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
+                                writeln('First parameter: Success\n'),send(S,fill_pattern,orange),forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n'),send(S,fill_pattern,green)
                             ;
-                                getAllTriplet(L),forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)),writeln('Second parameter: Success\n')
+                                ( getAllTriplet(L),forall(member((X,Y,Z),L),test_distr2(Aggr1,Aggr2,X,Y,Z)) 
+								->  writeln('Second parameter: Success\n'),send(S,fill_pattern,orange)
+								;   send(S,fill_pattern,red)
+								)
                             ).
                             
 % ADJOINTNESS
@@ -224,7 +232,7 @@ bicond(Aggr1,Aggr2,X,Y,Z,V1,V2) :- ( lat:leq(X,V1),lat:leq(V2,Y)
 % MONOTOMY
 % Increasing in both parameters
 
-test_mono(Aggr) :- non_decreasing(Aggr).
+test_mono(Aggr) :- writeln('Non decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),do_test(Aggr,test_nde2),writeln('Second parameter: Success\n').
 
 
 % T-NORM

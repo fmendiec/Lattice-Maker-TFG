@@ -1400,13 +1400,20 @@ test_selected_connective(F) :->
     not(empty_aggr(Name)),
 
     (   two_connectives(Prop)
-        -> ( get_connective(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
-			-> send(Box1, fill_pattern, green)
-			; send(Box1, fill_pattern, red)
-		    )
-        ; ( call(Prop,Name)
-			-> send(Box1,fill_pattern,green)
-			; send(Box1,fill_pattern,red)
+        -> ( two_params(Prop) 
+			  -> get_connective(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2,Box1)
+			; ( get_connective(F,D,second,Name2,_),not(empty_aggr(Name2)),call(Prop,Name,Name2)
+				-> send(Box1, fill_pattern, green)
+				; send(Box1, fill_pattern, red)
+			  )
+			)
+        ; (
+			two_params(Prop),Prop \= monotony, Prop \= implication 
+			->	call(Prop,Name,Box1)
+			; (call(Prop,Name)
+				-> send(Box1,fill_pattern,green)
+				; send(Box1,fill_pattern,red)
+			  )
 		  )
     ),
 	close(Fd),
