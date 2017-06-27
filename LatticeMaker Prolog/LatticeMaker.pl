@@ -430,7 +430,7 @@ is_supr_inf(F) :-
 	get(D,member,group1,G1),
     get(G1,member,connectives,CN),
 	get(CN,member,test,T),
-	( Name == 'supremum/6' ; Name == 'infimum/6'),
+	( Name == 'supremum/2' ; Name == 'infimum/2'),
 	send(T,active,@off).
     
 options(F, Opt) :->
@@ -1203,7 +1203,7 @@ create_predicates(Oper,Combo_name) :-
 	->  send_list(Aggr, append, [empty])
 	;   send_list(Aggr, append, [noselection]),
 		maplist(fill_combo_aggr(Aggr), ListPP),
-		send_list(Aggr, append, ['supremum/6','infimum/6']),
+		send_list(Aggr, append, ['supremum/2','infimum/2']),
 		send(Aggr, sort),
 		send(Aggr, selection, noselection)
 	).
@@ -1283,7 +1283,7 @@ add_connective(F) :->
 							normal, blue, 12),
 		send(ND, append, new(CBO, menu(connectives, cycle))),
 		send_list(CBO, append, ['&_godel', '|_godel', '&_luka', '|_luka']),
-		send_list(CBO, append, ['&_prod', '|_prod', '@_aver', 'distance',]),
+		send_list(CBO, append, ['&_prod', '|_prod', '@_aver']),
 		send(CBO, alignment, center),
 		send(ND, append, button(add, message(ND, return, CBO?selection))),
 		send(ND, append, button(cancel, message(ND, return, @nil))),
