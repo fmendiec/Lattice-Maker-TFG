@@ -418,19 +418,18 @@ is_dist(F) :-
     get_container_dist_buttons(D,Dist_Buttons),
     get(Dist_Buttons,member,eval,Dist_Eval),
     ( Name == distance
-        -> send(Dist_Eval,active,@on),activate_dragmenu(C, 3, 3, @off)
+        -> send(Dist_Eval,active,@on)
         ;  send(Dist_Eval,active,@off)
     ).
 
 is_supr_inf(F) :-
 	get(F, member(dialog_eval), D),
     get_container_combo(D,C),
-    get(D, member, connectives, Aggr),
-    get(Aggr, selection, Name),
+    get_connective(F,D,connectives,Name,_),
 	get(D,member,group1,G1),
     get(G1,member,connectives,CN),
 	get(CN,member,test,T),
-	( Name == 'supremum/2' ; Name == 'infimum/2'),
+	( Name == 'infimum';Name=='supremum'),
 	send(T,active,@off).
     
 options(F, Opt) :->
@@ -547,7 +546,7 @@ fill_terms(F) :->
     get(G1,member,connectives,CN),
 	get(CN,member,test,T),
 	send(T,active,@on),
-    is_dist(F);is_supr_inf(F).
+    (is_dist(F);is_supr_inf(F)).
 
 add_label(D, Name, Text, Style, Colour, Size) :-
 	send(D, append, new(L, label(Name, Text))),
@@ -1203,7 +1202,7 @@ create_predicates(Oper,Combo_name) :-
 	->  send_list(Aggr, append, [empty])
 	;   send_list(Aggr, append, [noselection]),
 		maplist(fill_combo_aggr(Aggr), ListPP),
-		send_list(Aggr, append, ['supremum/2','infimum/2']),
+		send_list(Aggr, append, ['supremum/3','infimum/3']),
 		send(Aggr, sort),
 		send(Aggr, selection, noselection)
 	).
@@ -1274,6 +1273,9 @@ change_item(Oper, NewOper) :-
 change_item(Oper, NewOper) :-
 	append("infimum", SN, Oper),
 	append("infimum", SN, NewOper).
+change_item(Oper, NewOper) :-
+	append("supremum", SN, Oper),
+	append("supremum", SN, NewOper).
 
 add_connective(F) :->
 	send(F, get_edit_mode)
@@ -1360,12 +1362,19 @@ eval_selected_connective(F) :->
 	pce_open(V, write, Fd),
 	set_output(Fd),
 
-	
     get_connective(F,D,connectives,Name,NumA),not(empty_aggr(Name)),
-		append_param(D, NumA, [], LParams),
-		(	call_connective(Name, LParams, L)
-		->  maplist(show_result(LParams), L),send(Box1, fill_pattern, green)
-		;   write(false),send(Box1,fill_pattern,red)
+		(   ( Name == infimum ; Name == supremum)
+			->  ( get_combo_term(D,1,E1),
+				  get_combo_term(D,2,E2),
+				  get_combo_term(D,3,R),
+				  call(Name,E1,E2,R,lat)
+				-> writef('The %w between %w and %w is %w',[Name,E1,E2,R]),send(Box1, fill_pattern, green)
+				;  write(false),send(Box1,fill_pattern,red)
+				)
+			; (append_param(D, NumA, [], LParams),call_connective(Name, LParams, L)
+			  ->  maplist(show_result(LParams), L),send(Box1, fill_pattern, green)
+			  ;   write(false),send(Box1,fill_pattern,red)
+			  )
 		),
 		send(F, report, status, '%s connective evaluated.', Name),
 	close(Fd),
@@ -1375,11 +1384,7 @@ eval_selected_connective(F) :->
 append_param(D, I, L, NewL):-
 	I < 1
 	->  NewL = L
-	;   get_term_name(I, StrTerm),
-		get_container_combo(D, C),
-		get(C, member, StrTerm, T),
-		get_var_name(I, X),
-		get_selection(T, S, X),
+	;   get_combo_term(D,I,S),
 		append([S], L, L1),
 		J is I - 1,
 		append_param(D, J, L1, NewL).
@@ -1439,8 +1444,8 @@ eval_distance(F) :->
 	pce_open(V, write, Fd),
     set_output(Fd),
     
-    get_dist_term(D,1,E1),
-    get_dist_term(D,2,E2),
+    get_combo_term(D,1,E1),
+    get_combo_term(D,2,E2),
     
     lat_graph:distance(E1,E2,Z),
     writef('The distance between %w and %w is %w',[E1,E2,Z]),
@@ -1475,7 +1480,7 @@ check_distance(F) :->
     send(V, editable, @off).
 
     
-get_dist_term(D,I,S) :-
+get_combo_term(D,I,S) :-
         get_term_name(I, StrTerm),
 		get_container_combo(D, C),
 		get(C, member, StrTerm, T),
