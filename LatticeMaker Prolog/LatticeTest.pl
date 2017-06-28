@@ -53,8 +53,8 @@ valid_distance(Aggr) :-
     write('d(X,Z) <= d(X,Y) + d(Y,Z): '),test_check_dist4(Aggr),writeln('Success'),
     writeln('\nIt is a valid distance').
     
-supremum_and_infimum(Mod,L) :-
-    supr_inf(Mod,L).
+supremum_and_infimum(H,T,Mod) :-
+    supr_inf(H,T,Mod).
 
  
 
@@ -384,8 +384,8 @@ list_inf(X,Y,L,Mod) :- Mod:members(M),setof(E,(extract(M,E),Mod:leq(E,X),Mod:leq
 infimum(X,Y,I,Mod) :- X \= Y,list_inf(X,Y,L,Mod),max_infimum_list(L,[I],Mod). 
 
 % Check if all the elements in the List has supremum and infimum, displaying a message for those wich don't have
-supr_inf(Mod,List) :-
-            findall((X,Y),(extract(List,X),extract(List,Y),X \= Y),L),
+supr_inf(X,List,Mod) :-
+            findall((X,Y),(extract(List,Y),X \= Y),L),
             forall(member((X,Y),L),
                 (
                     (supremum(X,Y,_,Mod) ; fail_sup(X,Y)),

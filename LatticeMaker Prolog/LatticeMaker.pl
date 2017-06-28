@@ -857,7 +857,9 @@ normalize(F) :->
     
 	set_output(Fd),
     lat:members(M),
-    call(supremum_and_infimum,lat,M),
+	
+	check_supr_inf(M,lat),
+    
     
     close(Fd),
 	set_output(Old),
@@ -866,8 +868,8 @@ normalize(F) :->
     % The lattice is already normalized
 	send(F, report, status, 'Graph has been normalized').
     
-
-    
+check_supr_inf([H],_).
+check_supr_inf([H|T],Mod) :- call(supremum_and_infimum,H,T,Mod),check_supr_inf(T,Mod).
 
 draw_graph(F) :->
 	(	prepare_for_drawing,
