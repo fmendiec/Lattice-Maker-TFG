@@ -410,28 +410,6 @@ add_prop_list('Combined',LB) :-
         send(LB,clear),
         send_list(LB,append,[t_norm, t_conorm, implication]).
     
-    
-is_dist(F) :-
-    get(F, member(dialog_eval), D),
-    get_container_combo(D,C),
-    get_connective(F,D,connectives,Name,_),
-    get_container_dist_buttons(D,Dist_Buttons),
-    get(Dist_Buttons,member,eval,Dist_Eval),
-    ( Name == distance
-        -> send(Dist_Eval,active,@on)
-        ;  send(Dist_Eval,active,@off)
-    ).
-
-is_supr_inf(F) :-
-	get(F, member(dialog_eval), D),
-    get_container_combo(D,C),
-    get_connective(F,D,connectives,Name,_),
-	get(D,member,group1,G1),
-    get(G1,member,connectives,CN),
-	get(CN,member,test,T),
-	( Name == 'infimum';Name=='supremum'),
-	send(T,active,@off).
-    
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
     % Unlock the Second connective Combobox
@@ -542,11 +520,26 @@ fill_terms(F) :->
 			activate_dragmenu(C, 1, NumA, @on)
 		)
 	),
+    get_connective(F,D,connectives,Name,_),
+	% Get Eval distance button
+	get_container_dist_buttons(D,Dist_Buttons),
+	get(Dist_Buttons,member,eval,Dist_Eval),
+	% Get Test button
 	get(D,member,group1,G1),
     get(G1,member,connectives,CN),
-	get(CN,member,test,T),
-	send(T,active,@on),
-    (is_dist(F);is_supr_inf(F)).
+    get(CN,member,test,T),
+	
+	( Name == distance
+		% Unlock the Eval distance button
+		-> send(Dist_Eval,active,@on)
+        ;  ( (Name == infimum ; Name == supremum)
+				% Lock the Test button
+				-> send(T,active,@off)
+				  % Unlock Test button and lock Eval button
+				; send(T,active,@on),
+				  send(Dist_Eval,active,@off)
+			)
+    ).
 
 add_label(D, Name, Text, Style, Colour, Size) :-
 	send(D, append, new(L, label(Name, Text))),
