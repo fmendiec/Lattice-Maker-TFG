@@ -400,9 +400,9 @@ fail_inf(X,Y) :- writef('IMPORTANT ERROR:\n infimum(%w,%w) does not exist\n',[X,
 
 % Check if one element has supremum and infimum
 supr_inf_one(X,Mod) :- Mod:members(M),
-            findall(Y,(extract(M,Y),X \= Y),L),
+			delete(M,X,L),
             forall(member(Y,L),
                 (
-                    supremum(X,Y,_,Mod),infimum(X,Y,_,Mod)
+                    X \= Y,supremum(X,Y,_,Mod),infimum(X,Y,_,Mod)
                 )
             ).

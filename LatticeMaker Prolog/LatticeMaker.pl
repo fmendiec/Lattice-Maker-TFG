@@ -1271,6 +1271,9 @@ change_item(Oper, NewOper) :-
 change_item(Oper, NewOper) :-
 	append("distance", SN, Oper),
 	append("distance", SN, NewOper).
+change_item(Oper, NewOper) :-
+	append("infimum", SN, Oper),
+	append("infimum", SN, NewOper).
 
 add_connective(F) :->
 	send(F, get_edit_mode)
@@ -1357,6 +1360,7 @@ eval_selected_connective(F) :->
 	pce_open(V, write, Fd),
 	set_output(Fd),
 
+	
     get_connective(F,D,connectives,Name,NumA),not(empty_aggr(Name)),
 		append_param(D, NumA, [], LParams),
 		(	call_connective(Name, LParams, L)
