@@ -39,3 +39,18 @@ aprox2(A,[B|C],R,D):- Aux is A-D, abs(Aux, Abs),
 						aprox2(B,C,R,D)).
 abs(X,X):- X > 0,!.
 abs(X,Y):- Y is 0-X.
+
+agr_im_godel(X,Y,1) :- leq(Y,X),!.
+agr_im_godel(X,_,X). 
+agr_im_luka(X,Y,Z) :- pri_add(X,Y,V),pri_sub(1,V,Z),leq(Z,1),!.
+agr_im_luka(_,_,1).
+agr_im_kleene(X,Y,Z) :- pri_sub(1,X,Z),leq(Y,Z),!.
+agr_im_kleene(_,Y,Y).
+agr_t_zadeh(X,Y,X) :- leq(X,Y),!.
+agr_t_zadeh(_,Y,Y).
+agr_s_zadeh(X,Y,X) :- leq(Y,X),!.
+agr_s_zadeh(_,Y,Y).
+agr_t_luka(X,Y,Z) :- pri_add(X,Y,V),pri_sub(V,1,Z),leq(0,Z),!.
+agr_t_luka(_,_,0).
+agr_s_luka(X,Y,Z) :- pri_add(X,Y,Z),leq(Z,1),!.
+agr_s_luka(_,_,1).

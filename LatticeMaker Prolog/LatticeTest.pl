@@ -228,15 +228,15 @@ test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('
 test_sw(Aggr1,Aggr2) :- 
                     getAllTriplet(L),
                     forall(member((X,Y,Z),L),
-                        (calc_sw1(Aggr1,Aggr2,X,Y,Z,V1),calc_sw2(Aggr1,Aggr2,X,Y,Z,V2),V1==V2
-                        ;   fail_sw(Aggr1,Aggr2,X,Y,Z))
-                    ).
-
-% $1($2(X,Y),Z) 
-calc_sw1(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr2,X,Y,V),call(lat:Aggr1,V,Z,R).
-
-% $2(X,$1(Y,Z))
-calc_sw2(Aggr1,Aggr2,X,Y,Z,R) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,R).
+								(
+									% $1($2(X,Y),Z) 
+									call(lat:Aggr2,X,Y,U1),call(lat:Aggr1,U1,Z,V1),
+									% $2(X,$1(Y,Z))
+									call(lat:Aggr1,Y,Z,U2),call(lat:Aggr2,X,U2,V2),
+									V1==V2
+									;   fail_sw(Aggr1,Aggr2,X,Y,Z)
+								)
+						   ).
 
 % Counterexample message
 fail_sw(Aggr1,Aggr2,X,Y,Z) :- writef('Failure\nCounterexample:\n%w(%w(%w,%w),%w) =\\= %w(%w,%w(%w,%w))\n',[Aggr1,Aggr2,X,Y,Z,Aggr2,X,Aggr1,Y,Z]),fail.
@@ -250,7 +250,7 @@ test_distr1(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,X,Y,V),call(lat:Aggr2,V,Z,V1),
 								  V1==V2 
                                   ; fail_distr1(Aggr1,Aggr2,X,Y,Z).
                                   
-fail_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nExample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
+fail_distr1(Aggr1,Aggr2,X,Y,Z) :- writef('First parameter: Failure\nCounterexample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,Aggr1,X,Y,Z,Aggr1,Aggr2,X,Z,Aggr2,Y,Z]),fail.
 
 % Second parameter
 % $2(X,$1(Y,Z)) == $1($2(X,Y),$2(X,Z))
@@ -259,7 +259,7 @@ test_distr2(Aggr1,Aggr2,X,Y,Z) :- call(lat:Aggr1,Y,Z,V),call(lat:Aggr2,X,V,V1),
 								  V1==V2 
                                   ; fail_distr2(Aggr1,Aggr2,X,Y,Z).
                                   
-fail_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nExample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
+fail_distr2(Aggr1,Aggr2,X,Y,Z) :- writef('Second parameter: Failure\nCounterexample: %w(%w(%w,%w),%w) =\\= %w(%w(%w,%w), %w(%w,%w))\n\n',[Aggr2,X,Aggr1,Y,Z,Aggr1,Aggr2,X,Y,Aggr2,X,Z]),fail.
 
 
 % Execute the distributivity tests in both parameters and change the semaphore color
@@ -283,7 +283,7 @@ test_distr(Aggr1,Aggr2,S) :-
                             
 % ADJOINTNESS
 
-% First aggregator is a t-norm, the second one is an implication and both verifies that:
+% First connective is a t-norm, the second one is an implication and both verifies that:
 % X <= $2(Y,Z) <==> $1(X,Z) <= Y
 test_adj(Aggr1,Aggr2) :- t_norm(Aggr1),implication(Aggr2),adjoint(Aggr1,Aggr2).
 
@@ -403,6 +403,6 @@ supr_inf_one(X,Mod) :- Mod:members(M),
 			delete(M,X,L),
             forall(member(Y,L),
                 (
-                    X \= Y,supremum(X,Y,_,Mod),infimum(X,Y,_,Mod)
+                    supremum(X,Y,_,Mod),infimum(X,Y,_,Mod)
                 )
             ).
