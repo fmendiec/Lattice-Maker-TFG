@@ -236,7 +236,27 @@ var selectTwo = function(idCanvas, func)
 
 var normalize_from_text = function(idTextArea)
 {
-    $("#"+idTextArea).trigger('change');
+	// Load TextArea
+	var textarea = document.getElementById(idTextArea);
+	var code = textarea.value;
+	
+	// Default ordering relation
+	var regex_leq = /\s*leq.*\./g;
+	
+	code = code.replace(regex_leq,'\r');
+	
+	// Get the index of the last arc
+	var regex_arc = /arc\s*\(\s*([^,()]+\s*,\s*[^,()]+)\s*\)\s*\./g;
+	var match = true;
+	var index = 0;
+	while(match = regex_arc.exec(code)){index = match.index + match[0].length};
+
+	// Append the leq to TextArea
+	code = [code.slice(0,index), '\nleq(X, X).\nleq(X, Y) :- arc(X, Z), leq(Z, Y).', code.slice(index+1)].join('');
+
+	textarea.value = code;
+	// Updating TextArea by triggering the event "change"
+	$("#"+idTextArea).trigger('change');
 }
 
 var save_lattice = function(idTextArea, idTextBox)

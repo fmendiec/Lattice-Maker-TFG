@@ -408,7 +408,7 @@ add_prop_list('Multiple',LB) :-
         send_list(LB,append,[switchness, adjointness, distributivity]).
 add_prop_list('Combined',LB) :- 
         send(LB,clear),
-        send_list(LB,append,[t_norm, t_conorm, implication]).
+        send_list(LB,append,[t_norm, t_conorm, implication, aggregator]).
     
 options(F, Opt) :->
 	get(F, member(dialog_eval), D),
@@ -486,6 +486,7 @@ get_math_def(frontier_top,Ag1,S) :- format(atom(S),"~w(T, T) = T",[Ag1]).
 get_math_def(frontier_bot,Ag1,S) :- format(atom(S),"~w(B, B) = B",[Ag1]).
 get_math_def(idempotency,Ag1,S) :- format(atom(S),"~w(X, X) = X",[Ag1]).
 get_math_def(commutativity,Ag1,S) :- format(atom(S),"~w(X, Y) == ~w(Y, X)",[Ag1,Ag1]).
+get_math_def(aggregator,Ag1,S) :- format(atom(S),"Frontier top, frontier bot, monotony",[]).
 get_math_def(associativity,Ag1,S) :- format(atom(S),"~w(~w(X, Y), Z) == ~w(X, ~w(Y, Z))",[Ag1,Ag1,Ag1,Ag1]).
 get_math_def(t_norm,Ag1,S) :- format(atom(S), "~w is AND, commutative, associative, monotone and ~w(X,T)==X",[Ag1,Ag1]).
 get_math_def(t_conorm,Ag1,S) :- format(atom(S), "~w is OR, commutative, associative, monotone and ~w(X,B)==X",[Ag1,Ag1]).

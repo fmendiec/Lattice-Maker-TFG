@@ -1,8 +1,8 @@
  frontier_top(Aggr) :-
-    write('Frontier Top: '),lat:top(T),test_idemp(Aggr,T),write('Success').
+    write('Frontier Top: '),lat:top(T),test_idemp(Aggr,T),write('Success\n').
     
 frontier_bot(Aggr) :-
-    write('Frontier Bot: '),lat:bot(B),test_idemp(Aggr,B),write('Success').
+    write('Frontier Bot: '),lat:bot(B),test_idemp(Aggr,B),write('Success\n').
     
 increasing(Aggr,S) :-
     writeln('Increasing:\n'),growth_test(Aggr,test_in1,test_in2,S).
@@ -14,7 +14,7 @@ decreasing(Aggr,S) :-
 	writeln('Decreasing:\n'),growth_test(Aggr,test_de1,test_de2,S).
     
 non_decreasing(Aggr,S) :-
-	writeln('Non decreassing:\n'),growth_test(Aggr,test_nde1,test_nde2,S).
+	writeln('Non decreasing:\n'),growth_test(Aggr,test_nde1,test_nde2,S).
     
 switchness(Aggr1,Aggr2) :-
     write('Switchness: '),test_sw(Aggr1,Aggr2),writeln('Success').
@@ -45,6 +45,9 @@ t_conorm(Aggr) :-
     
 implication(Aggr) :-
      writeln('Implication:\n'),test_imp(Aggr).   
+	 
+aggregator(Aggr) :-
+	writeln('Aggregator:\n'),test_aggr(Aggr).
     
 valid_distance(Aggr) :- 
 	write('d(X,Y) >= 0: '),test_check_dist1(Aggr),writeln('Success'),
@@ -214,7 +217,26 @@ test_tconorm(Aggr) :- lat:bot(B),identity_element(Aggr,B,tconorm),print_connecti
 % IMPLICATION
 % Increasing in the first parameter and decreasing in the second one
 
-test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),writeln('Non-Increasing:\n'),do_test(Aggr,test_nin2),writeln('Second parameter: Success\n').
+test_imp_1(Aggr) :- lat:members(L),lat:bot(B),lat:top(T),writef('%w(%w, Y) = %w: ',[Aggr,B,T]),forall(member(Y,L),(call(lat:Aggr,B,Y,T); writef('Failure\nCounterexample:\n%w(%w, %w) =\\= %w',[Aggr,B,Y,T]),fail)),write('Success\n').
+
+test_imp_2(Aggr) :- lat:members(L),lat:top(T),writef('%w(%w, Y) = Y: ',[Aggr,T]),forall(member(Y,L),(call(lat:Aggr,T,Y,Y); writef('Failure\nCounterexample:\n%w(%w, %w) =\\= %w',[Aggr,T,Y,Y]),fail)),write('Success\n').
+
+test_imp_3(Aggr) :- writef('%w(Y, %w(X, Z)) == %w(X, %w(Y, Z)): ',[Aggr,Aggr,Aggr,Aggr]),
+					getAllTriplet(L),
+					forall(member((X,Y,Z),L), 
+						(	call(lat:Aggr,X,Z,U1),call(lat:Aggr,Y,U1,V1),
+							call(lat:Aggr,Y,Z,U2),call(lat:Aggr,X,U2,V2),V1==V2 
+							; writef('%w(%w, %w(%w, %w)) =\\= %w(%w, %w(%w, %w))',[Aggr,Y,Aggr,X,Z,Aggr,X,Aggr,Y,Z])
+						)
+					),write('Success\n').
+
+test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),writeln('Non-Increasing:\n'),do_test(Aggr,test_nin2),writeln('Second parameter: Success\n'),test_imp_1(Aggr),test_imp_2(Aggr),test_imp_3(Aggr).
+
+
+% AGGREGATOR
+% Frontier bot, top and monotony
+
+test_aggr(Aggr) :- frontier_top(Aggr),frontier_bot(Aggr),monotony(Aggr).
 
 						
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

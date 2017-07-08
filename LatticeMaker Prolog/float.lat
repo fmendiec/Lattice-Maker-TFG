@@ -18,18 +18,27 @@ top(1).
 leq(X,Y):-X =< Y.
 
 and_prod(X,Y,Z) :- pri_prod(X,Y,Z).
-and_godel(X,Y,Z) :- pri_min(X,Y,Z).
+and_godel(X,Y,Z) :- pri_inf(X,Y,Z).
 and_luka(X,Y,Z) :- pri_add(X,Y,U1), pri_sub(U1,1,U2), pri_max(U2,0,Z).
 or_prod(X,Y,Z) :- pri_prod(X,Y,U1), pri_add(X,Y,U2), pri_sub(U2,U1,Z).
 or_godel(X,Y,Z) :- pri_max(X,Y,Z).
 or_luka(X,Y,Z) :- pri_add(X,Y,U1), pri_min(U1,1,Z).
-agr_aver(X,Y,Z) :- pri_add(X,Y,U1), pri_div(U1,2,Z).
+agr_aver(X,Y,Z) :- U1 is X + Y, pri_div(U1,2,Z).
 pri_prod(X,Y,Z) :- A is X * Y, aprox(A,Z).
 pri_div(X,Y,Z) :- A is X / Y, aprox(A,Z).
 pri_sub(X,Y,Z) :- A is X-Y, aprox(A,Z).
 pri_add(X,Y,Z) :- A is X+Y, aprox(A,Z).
 pri_min(X,Y,Z) :- (X=<Y,Z=X;X>Y,Z=Y).
 pri_max(X,Y,Z) :- (X=<Y,Z=Y;X>Y,Z=X).
+
+extract([X|_],X).
+extract([_|T],X):- extract(T,X).
+is_max(X,L) :- forall(member(Y,L),leq(Y,X)). 
+max_infimum_list(L,Max) :- setof(X,(extract(L,X),is_max(X,L)),Max).  
+list_inf(X,X,[]).
+list_inf(X,Y,L) :- members(M),setof(E,(extract(M,E),leq(E,X),leq(E,Y)),L).
+pri_inf(X,Y,I) :- list_inf(X,Y,L),max_infimum_list(L,[I]). 
+
 % max(x,y)
 aprox(X,Y) :- members([A|B]), aprox2(A,B,Y,X).
 aprox2(A,[],A,_).
@@ -40,8 +49,10 @@ aprox2(A,[B|C],R,D):- Aux is A-D, abs(Aux, Abs),
 abs(X,X):- X > 0,!.
 abs(X,Y):- Y is 0-X.
 
-agr_im_godel(X,Y,1) :- leq(Y,X),!.
-agr_im_godel(X,_,X). 
+%agr_im_godel(X,Y,1) :- leq(Y,X),!.
+%agr_im_godel(X,_,X). 
+agr_im_godel(X,Y,1) :- leq(X,Y),!.
+agr_im_godel(_,Y,Y).
 agr_im_luka(X,Y,Z) :- pri_add(X,Y,V),pri_sub(1,V,Z),leq(Z,1),!.
 agr_im_luka(_,_,1).
 agr_im_kleene(X,Y,Z) :- pri_sub(1,X,Z),leq(Y,Z),!.
