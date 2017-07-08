@@ -230,7 +230,7 @@ test_imp_3(Aggr) :- writef('%w(Y, %w(X, Z)) == %w(X, %w(Y, Z)): ',[Aggr,Aggr,Agg
 						)
 					),write('Success\n').
 
-test_imp(Aggr) :- writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde1),writeln('First parameter: Success\n'),writeln('Non-Increasing:\n'),do_test(Aggr,test_nin2),writeln('Second parameter: Success\n'),test_imp_1(Aggr),test_imp_2(Aggr),test_imp_3(Aggr).
+test_imp(Aggr) :- writeln('Non-Increasing:\n'),do_test(Aggr,test_nin1),writeln('First parameter: Success\n'),writeln('Non-Decreasing:\n'),do_test(Aggr,test_nde2),writeln('Second parameter: Success\n'),test_imp_1(Aggr),test_imp_2(Aggr),test_imp_3(Aggr).
 
 
 % AGGREGATOR
