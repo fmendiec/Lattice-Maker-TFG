@@ -19,7 +19,7 @@ leq(X,Y):-X =< Y.
 
 and_prod(X,Y,Z) :- pri_prod(X,Y,Z).
 and_godel(X,Y,Z) :- pri_inf(X,Y,Z).
-and_luka(X,Y,Z) :- pri_add(X,Y,U1), pri_sub(U1,1,U2), pri_max(U2,0,Z).
+and_luka(X,Y,Z) :- U1 is X+Y, pri_sub(U1,1,U2), pri_max(U2,0,Z).
 or_prod(X,Y,Z) :- pri_prod(X,Y,U1), pri_add(X,Y,U2), pri_sub(U2,U1,Z).
 or_godel(X,Y,Z) :- pri_max(X,Y,Z).
 or_luka(X,Y,Z) :- pri_add(X,Y,U1), pri_min(U1,1,Z).
@@ -61,7 +61,7 @@ agr_t_zadeh(X,Y,X) :- leq(X,Y),!.
 agr_t_zadeh(_,Y,Y).
 agr_s_zadeh(X,Y,X) :- leq(Y,X),!.
 agr_s_zadeh(_,Y,Y).
-agr_t_luka(X,Y,Z) :- pri_add(X,Y,V),pri_sub(V,1,Z),leq(0,Z),!.
+agr_t_luka(X,Y,Z) :- V is X+Y,pri_sub(V,1,Z),leq(0,Z),!.
 agr_t_luka(_,_,0).
 agr_s_luka(X,Y,Z) :- pri_add(X,Y,Z),leq(Z,1),!.
 agr_s_luka(_,_,1).
