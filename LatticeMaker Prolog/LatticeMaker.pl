@@ -193,6 +193,7 @@ fill_menu(MB) :-
 	send(MB, append, new(E, popup(edit))),
 	send(MB, append, new(G, popup(graphic))),
 	send(MB, append, new(A, popup(connective))),
+	send(MB, append, new(D, popup(distance))),
 	send(MB, append, new(H, popup(help))),
 
 	send(F, append, menu_item(new_lattice, message(FrameMB, new))),
@@ -227,9 +228,6 @@ fill_menu(MB) :-
 
     send(E, append, menu_item(restore_leq, message(FrameMB, restore_view_leq),
 									condition := message(FrameMB, lattice_noempty))),
-                                    
-    send(E, append, menu_item(restore_distance, message(FrameMB, restore_view_distance),
-									condition := message(FrameMB, lattice_noempty))),
     
 	send(G, append, menu_item(clear_graph_editor, message(FrameMB, clear_graph),
 									condition := message(FrameMB, graph_noempty, P),
@@ -248,7 +246,12 @@ fill_menu(MB) :-
 									condition := message(FrameMB, lattice_noempty))),
 	send(A, append, menu_item(test_connective, message(FrameMB, test_selected_connective),
 									condition := message(FrameMB, lattice_noempty))),
-    send(A, append, menu_item(distance, message(FrameMB, eval_distance),
+									
+	send(D, append, menu_item(evaluate, message(FrameMB, eval_distance),
+									condition := message(FrameMB, lattice_noempty))),
+    send(D, append, menu_item(test, message(FrameMB, check_distance),
+									condition := message(FrameMB, lattice_noempty))),
+	send(D, append, menu_item(generate, message(FrameMB, restore_view_distance),
 									condition := message(FrameMB, lattice_noempty))),
     
 	send_list(H, append, [ menu_item(user_manual, message(@helper, give_help, latticehelp, 'latticehelp')),
@@ -970,7 +973,8 @@ lattice(F) :->
 	),
     get(F, member, view, V),
 	send(V, clear),
-	send(V, text_buffer, B).
+	send(V, text_buffer, B),
+	send(F,lattice_to_graph).
 
 compose_buffer(F, B) :->
 	%% "What I have in lat_graph module"
@@ -1443,8 +1447,8 @@ eval_distance(F) :->
     get_combo_term(D,1,E1),
     get_combo_term(D,2,E2),
     
-    lat_graph:distance(E1,E2,Z),
-    writef('The distance between %w and %w is %w',[E1,E2,Z]),
+    lat_graph:distance(E1,E2,Z),round(Z,R),
+    writef('The distance between %w and %w is %w',[E1,E2,R]),
     
     close(Fd),
 	set_output(Old),
@@ -1609,13 +1613,15 @@ restore_view_leq(F) :->
         get(F, member, view, V),
         get(V, text_buffer, B),
         ( delete_all_pred(F,'leq',Index) ;  get(B,length,Length),Index = Length),
-        write_in_buffer_index(B,'leq(X, Y):- arc(X, Z), leq(Z, Y).\n',Index),write_in_buffer_index(B, 'leq(X, X).\n' ,Index).    
+        write_in_buffer_index(B,'leq(X, Y):- arc(X, Z), leq(Z, Y).\n',Index),write_in_buffer_index(B, 'leq(X, X).\n' ,Index),
+		send(F,lattice_to_graph).    
 
 restore_view_distance(F) :-> 
         get(F, member, view, V),
         get(V, text_buffer, B),
         ( delete_all_pred(F,'distance',Index) ; get(B,length,Length),Index = Length),
-        write_in_buffer_index(B, 'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n' ,Index).
+        write_in_buffer_index(B, 'distance(X,Y,Z):-level(X,L1), level(Y,L2), Z is abs(L1 - L2).\n' ,Index),
+		send(F,lattice_to_graph).
 
 % Delete all the occurrences of the predicate in the view and return the index for insert the new predicate
 delete_all_pred(F,Pred,Index) :-

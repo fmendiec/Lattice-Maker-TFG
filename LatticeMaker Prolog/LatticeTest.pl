@@ -71,6 +71,9 @@ getXltY(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(
 % Get all the pairs of three elements
 getAllTriplet(L) :- findall((X,Y,Z),(lat:members(L),extract(L,X),extract(L,Y),extract(L,Z)),L).
 
+% Round a float 
+round(X,Y) :- Y is round(X*10^6)/10^6.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %					BASICS				 	   %
@@ -117,7 +120,7 @@ test_in2(X,Y,Z,Aggr) :-
 % If X < Y => $(X,Z) =< $(Y,Z)
 test_nde1(X,Y,Z,Aggr) :- 
                             (call(lat:Aggr,X,Z,V1),call(lat:Aggr,Y,Z,V2),lat:leq(V1,V2)) 
-                            ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Y,Aggr,Y,Z]),fail).
+                            ; (writef('First parameter: Failure\nCounterexample:\n%w(%w, %w) > %w(%w,%w)\n\n', [Aggr,X,Z,Aggr,Y,Z]),fail).
 
 % Non-Decreasing on the second parameter
 % If X < Y => $(Z,X) =< $(Z,Y)
@@ -339,22 +342,22 @@ test_check_dist1(Aggr) :- lat:members(M),
 						  forall(member(X,M), 
 										(greater(X,L),
 										 forall(member(Y,L),
-													(call(lat:Aggr,X,Y,V),D is V * 1.0,D >= 0 ; fail_dist(Aggr,X,Y))
+													(call(lat:Aggr,X,Y,V),round(V,D), R is D * 1.0,R >= 0 ; fail_dist(Aggr,X,Y))
 											    )
 									    )
 								).
 
 % d(X,X) == 0
-test_check_dist2(Aggr) :- lat:members(M),forall(member(X,M),(call(lat:Aggr,X,X,V),D is V*1.0, D == 0.0 ; fail_dist(Aggr,X))).
+test_check_dist2(Aggr) :- lat:members(M),forall(member(X,M),(call(lat:Aggr,X,X,V),round(V,D),R is D*1.0, R == 0.0 ; fail_dist(Aggr,X))).
 
 %d(X,Y) == d(Y,X)
 test_check_dist3(Aggr) :- findall((X,Y),(lat:members(L),extract(L,X),extract(L,Y)),L),
-						  forall(member((X,Y),L),(call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,X,V2),V1==V2
+						  forall(member((X,Y),L),(call(lat:Aggr,X,Y,V1),call(lat:Aggr,Y,X,V2),round(V1,R1), round(V2,R2), R1 =< R2
 						  ;  fail_dist3(Aggr,X,Y))
 						  ).
 
 % d(X,Z) <= d(X,Y) + d(Y,Z)
-test_check_dist4(Aggr) :- triplet(L),forall(member((X,Y,Z),L),((call(lat:Aggr,X,Z,V1),sum(Aggr,X,Y,Z,V2),lat:leq(V1,V2)) ; fail_dist(Aggr,X,Y,Z) )).
+test_check_dist4(Aggr) :- triplet(L),forall(member((X,Y,Z),L),((call(lat:Aggr,X,Z,V1),sum(Aggr,X,Y,Z,V2),round(V1,R1), round(V2,R2), R1 =< R2) ; fail_dist(Aggr,X,Y,Z) )).
 
 % Get all the triplet (X,Y,Z) where X is the initial element, Z is the final element, and Y is the intermediate element
 triplet(L) :- findall((X,Y,Z),(lat:members(LX),extract(LX,X),greater(X,LZ),extract(LZ,Z),inter(X,Z,LY),extract(LY,Y)),L).
